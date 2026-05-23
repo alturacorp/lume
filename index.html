@@ -1919,6 +1919,13 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
       <span style="width:5px;height:5px;border-radius:50%;background:#3a6644;flex-shrink:0;animation:spulse 3s ease-in-out infinite;display:inline-block"></span>
       <span style="font-family:'Lora',serif;font-style:italic;font-size:11px;color:#2e2c2a">Here with you</span>
     </div>
+    <div id="search-connection-badge" style="margin-top:10px;display:none">
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:rgba(157,219,94,.07);border:1px solid rgba(157,219,94,.15);">
+        <span style="font-size:10px">🔍</span>
+        <span id="search-connection-label" style="font-family:'Geist',sans-serif;font-size:9.5px;color:#4a6644;letter-spacing:.01em;line-height:1.4;flex:1"></span>
+        <span style="width:5px;height:5px;border-radius:50%;background:#9ddb5e;flex-shrink:0;opacity:.7"></span>
+      </div>
+    </div>
   </div>
 
   <!-- Scrollable content -->
@@ -2440,35 +2447,38 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
           <div class="settings-row-title">Search history</div>
           <div class="settings-row-desc">Your recent Altura Search queries</div>
         </div>
-        <div class="tog on" id="tog-search" onclick="this.classList.toggle('on')"></div>
+        <div class="tog on" id="tog-search" onclick="togglePrivPref('search',this)"></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Vault awareness</div>
           <div class="settings-row-desc">File names and types you have recently opened</div>
         </div>
-        <div class="tog on" id="tog-vault" onclick="this.classList.toggle('on')"></div>
+        <div class="tog on" id="tog-vault" onclick="togglePrivPref('vault',this)"></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Loom reading patterns</div>
           <div class="settings-row-desc">Topics and sources you engage with</div>
         </div>
-        <div class="tog on" id="tog-loom" onclick="this.classList.toggle('on')"></div>
+        <div class="tog on" id="tog-loom" onclick="togglePrivPref('loom',this)"></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Conversation memory</div>
           <div class="settings-row-desc">Lume remembers what was said in previous conversations</div>
         </div>
-        <div class="tog on" id="tog-memory" onclick="this.classList.toggle('on')"></div>
+        <div class="tog on" id="tog-memory" onclick="togglePrivPref('memory',this)"></div>
+      </div>
+      <div id="tog-memory-note" style="display:none;padding:6px 14px 10px;font-size:10px;color:#8a8680;font-family:'Geist',sans-serif;line-height:1.5">
+        Existing memories are kept but Lume will not read or act on them while this is off.
       </div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Proactive surfacing</div>
           <div class="settings-row-desc">Lume brings things up without being asked</div>
         </div>
-        <div class="tog on" id="tog-proactive" onclick="this.classList.toggle('on')"></div>
+        <div class="tog on" id="tog-proactive" onclick="togglePrivPref('proactive',this)"></div>
       </div>
     </div>
 
@@ -2630,6 +2640,92 @@ function startGhost(){
 function stopGhost(){clearInterval(ghostTimer);ghostTimer=null;if(ghostEl){ghostEl.classList.remove('show');ghostEl.textContent='';}}
 
 // ── init ──
+
+// ══════════════════════════════════════════════════════════
+// PRIVACY PREFS — persisted, gate the AI data pipeline
+// ══════════════════════════════════════════════════════════
+var LUME_PRIV_KEY = 'lume_privacy_prefs';
+
+// Defaults: everything on
+var PRIV_DEFAULTS = { search: true, vault: true, loom: true, memory: true, proactive: true };
+
+function loadPrivPrefs(){
+  try {
+    var raw = localStorage.getItem(LUME_PRIV_KEY);
+    if(!raw) return Object.assign({}, PRIV_DEFAULTS);
+    return Object.assign({}, PRIV_DEFAULTS, JSON.parse(raw));
+  } catch(e){ return Object.assign({}, PRIV_DEFAULTS); }
+}
+
+function savePrivPrefs(prefs){
+  try { localStorage.setItem(LUME_PRIV_KEY, JSON.stringify(prefs)); } catch(e){}
+}
+
+function getPrivPref(key){
+  return loadPrivPrefs()[key] !== false; // default true
+}
+
+function togglePrivPref(key, el){
+  var prefs = loadPrivPrefs();
+  prefs[key] = !prefs[key];
+  savePrivPrefs(prefs);
+  // Update toggle UI
+  if(el) el.classList.toggle('on', prefs[key]);
+  // Update connection badge (search toggle affects it)
+  updateSearchConnectionBadge();
+  // If memory was just disabled, note it for the user
+  if(key === 'memory' && !prefs[key]){
+    // Don't wipe stored memories, just stop reading them
+    var note = document.getElementById('tog-memory-note');
+    if(note) note.style.display = 'block';
+  } else if(key === 'memory'){
+    var note = document.getElementById('tog-memory-note');
+    if(note) note.style.display = 'none';
+  }
+}
+
+function applyPrivPrefToggles(){
+  var prefs = loadPrivPrefs();
+  var keys = ['search','vault','loom','memory','proactive'];
+  keys.forEach(function(k){
+    var el = document.getElementById('tog-' + k);
+    if(el) el.classList.toggle('on', prefs[k] !== false);
+  });
+}
+// ══════════════════════════════════════════════════════════
+
+function updateSearchConnectionBadge(){
+  var badge = document.getElementById('search-connection-badge');
+  var label = document.getElementById('search-connection-label');
+  var dot   = badge ? badge.querySelector('span:last-child') : null;
+  if(!badge || !label) return;
+  var d = readAlturaSearchData();
+  var histCount = d.history.length;
+  var searchOn = getPrivPref('search');
+  if(histCount === 0 && searchOn){ badge.style.display='none'; return; }
+  if(!searchOn){
+    // Show badge in disabled state
+    label.textContent = 'Altura Search connected · history access off';
+    label.style.color = '#8a8680';
+    if(dot){ dot.style.background='#8a8680'; }
+    badge.querySelector('div').style.background = 'rgba(138,134,128,.07)';
+    badge.querySelector('div').style.borderColor = 'rgba(138,134,128,.18)';
+    badge.style.display = 'block';
+    return;
+  }
+  // Reset styles in case they were set in disabled state
+  label.style.color = '#4a6644';
+  if(dot){ dot.style.background='#9ddb5e'; }
+  var inner = badge.querySelector('div');
+  if(inner){ inner.style.background='rgba(157,219,94,.07)'; inner.style.borderColor='rgba(157,219,94,.15)'; }
+  var parts = [histCount + ' search' + (histCount !== 1 ? 'es' : '') + ' read'];
+  if(d.streakDays >= 2) parts.push(d.streakDays + 'd streak');
+  if(getPrivPref('vault') && d.savedSearches.length > 0) parts.push(d.savedSearches.length + ' saved');
+  if(getPrivPref('vault') && d.notes.length > 0) parts.push(d.notes.length + ' note' + (d.notes.length !== 1 ? 's' : ''));
+  label.textContent = 'Connected to Altura Search · ' + parts.join(' · ');
+  badge.style.display = 'block';
+}
+
 function init(){
   applyTimeShimmer();
   var h=new Date().getHours();
@@ -2639,6 +2735,8 @@ function init(){
   document.getElementById('uav').textContent=uinit;
   startPlaceholder();
   renderSavedConvos();
+  updateSearchConnectionBadge();
+  applyPrivPrefToggles();
 }
 init();
 
@@ -2966,17 +3064,108 @@ function pulseStar(){
 // Companion reads this passively on load and on each send, never writes.
 var searchHistory = [];
 
+// ── ALTURA SEARCH INTEGRATION ──────────────────────────────────
+// Reads all data that Altura Search writes to localStorage.
+// Keys verified against Altura Search source (altura_search_history, etc.)
+
+function _readJSON(key, fallback){
+  try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
+  catch(e){ return fallback; }
+}
+
 function readSearchHistory(){
   try {
-    var raw = localStorage.getItem('as_history');
+    // Primary key: altura_search_history (written by Altura Search)
+    // Fallback: as_history (legacy companion key)
+    var raw = localStorage.getItem('altura_search_history') || localStorage.getItem('as_history');
     if(!raw) return [];
     var parsed = JSON.parse(raw);
     if(!Array.isArray(parsed)) return [];
-    // Accept either {q, ts} objects or plain strings (legacy)
-    return parsed.slice(0,30).map(function(item){
+    return parsed.slice(0,40).map(function(item){
       return typeof item === 'string' ? item : (item.q || '');
     }).filter(Boolean);
   } catch(e){ return []; }
+}
+
+function readAlturaSearchData(){
+  // Returns a structured snapshot of everything Altura Search has stored.
+  var data = {};
+
+  // Search history (plain strings, most recent first)
+  data.history = readSearchHistory();
+
+  // Streak
+  var streak = _readJSON('altura_streak', {});
+  data.streakDays = streak.count || 0;
+  data.streakLast  = streak.last  || null;
+
+  // Saved searches
+  var saves = _readJSON('altura_saved_searches', []);
+  data.savedSearches = saves.slice(0,10).map(function(s){ return s.query || s.title || ''; }).filter(Boolean);
+
+  // Quick notes
+  var notes = _readJSON('altura_notes', []);
+  data.notes = notes.slice(0,5).map(function(n){ return (n.text||'').slice(0,120); }).filter(Boolean);
+
+  // Game scores
+  var scores = _readJSON('altura_game_scores', {});
+  data.gameScores = scores; // { snake: 420, wordle: 90, ... }
+
+  // Pet
+  var pet = _readJSON('altura_pet', {});
+  data.petXP      = pet.xp      || 0;
+  data.petEnabled = pet.enabled !== false;
+
+  // Search activity (how many searches today / this week)
+  var dates = _readJSON('altura_search_dates', {});
+  var today = new Date().toISOString().slice(0,10);
+  data.searchesToday = dates[today] || 0;
+  var weekTotal = 0;
+  for(var i=0; i<7; i++){
+    var d = new Date(); d.setDate(d.getDate()-i);
+    weekTotal += dates[d.toISOString().slice(0,10)] || 0;
+  }
+  data.searchesThisWeek = weekTotal;
+
+  // Ghost mode active
+  data.ghostMode = _readJSON('altura_ghost_mode', false);
+
+  // Auth / account name
+  var auth = _readJSON('altura_auth', null);
+  data.accountName  = auth ? (auth.name || auth.email || null) : null;
+  data.accountEmail = auth ? (auth.email || null) : null;
+
+  // Daily challenge completions
+  var dcHistory = _readJSON('altura_dc_history', {});
+  data.dailyChallengesCompleted = Object.values(dcHistory).filter(function(d){ return d.completed; }).length;
+
+  // Badges
+  var badges = _readJSON('altura_badges', []);
+  data.badgesUnlocked = badges.length;
+
+  // Collections
+  var colls = _readJSON('altura_collections', []);
+  data.collectionsCount = colls.length;
+
+  // Blocked sites count (privacy signal)
+  var blocked = _readJSON('altura_blocked_sites', []);
+  data.blockedSitesCount = blocked.length;
+
+  // History timestamps — derive top search hours
+  var histTs = _readJSON('altura_history_ts', []);
+  if(histTs.length > 0){
+    var hourBuckets = {};
+    histTs.slice(0,100).forEach(function(e){
+      var h = new Date(e.ts).getHours();
+      hourBuckets[h] = (hourBuckets[h]||0)+1;
+    });
+    var peakHour = Object.keys(hourBuckets).sort(function(a,b){
+      return hourBuckets[b]-hourBuckets[a];
+    })[0];
+    data.peakSearchHour = peakHour !== undefined ? parseInt(peakHour) : null;
+  }
+
+  return data;
 }
 
 function refreshSearchHistory(){
@@ -2987,37 +3176,100 @@ function refreshSearchHistory(){
 
 // ── AI call helpers ──
 function buildSearchContext(){
-  if(searchHistory.length === 0) return { block: '', patternLine: '' };
-  // Cluster by shared significant words
-  var wordCount = {};
-  searchHistory.slice(0,20).forEach(function(q){
-    q.toLowerCase().split(/\s+/).forEach(function(w){
-      if(w.length > 3 && !['what','when','where','that','this','with','from','have','does','about','which','their','there','would','could','should','been','will','your','more','some','into','then','than','them'].includes(w)){
-        wordCount[w] = (wordCount[w]||0) + 1;
-      }
-    });
-  });
-  var topWords = Object.keys(wordCount).filter(function(w){ return wordCount[w] >= 2; }).sort(function(a,b){ return wordCount[b]-wordCount[a]; }).slice(0,4);
+  // Respect privacy prefs — if search is disabled, return nothing
+  if(!getPrivPref('search')) return { block: '', patternLine: '' };
 
-  // Infer a topic label from top words
-  var topicLine = '';
-  if(topWords.length >= 2){
-    topicLine = 'The searches cluster around: ' + topWords.join(', ') + '. This is probably what is actually on their mind — not the surface queries, but what is underneath them. Surface it if the moment is right, without naming the searches directly.';
+  // Read the full Altura Search data snapshot
+  var d = readAlturaSearchData();
+  var lines = [];
+  var patternLine = '';
+
+  // ── SEARCH HISTORY ──
+  if(d.history.length > 0){
+    // Topic clustering
+    var wordCount = {};
+    var stopWords = new Set(['what','when','where','that','this','with','from','have','does','about','which','their','there','would','could','should','been','will','your','more','some','into','then','than','them','just','like','also','only','even','well','back']);
+    d.history.slice(0,20).forEach(function(q){
+      q.toLowerCase().split(/\s+/).forEach(function(w){
+        if(w.length > 3 && !stopWords.has(w)){
+          wordCount[w] = (wordCount[w]||0) + 1;
+        }
+      });
+    });
+    var topWords = Object.keys(wordCount)
+      .filter(function(w){ return wordCount[w] >= 2; })
+      .sort(function(a,b){ return wordCount[b]-wordCount[a]; })
+      .slice(0,4);
+
+    if(topWords.length >= 2 && getPrivPref('proactive')){
+      patternLine = 'The searches cluster around: ' + topWords.join(', ') + '. This is probably what is actually on their mind — not the surface queries, but what is underneath them. Surface it if the moment is right, without naming the searches directly.';
+    }
+
+    lines.push('');
+    lines.push('ALTURA SEARCH — what this person has been looking up (real data, most recent first):');
+    d.history.slice(0,10).forEach(function(q){ lines.push('– ' + q); });
+    lines.push('');
+    lines.push('These are not data points to recite. They are evidence of a person\'s attention.');
+    lines.push('Read them the way you would read someone\'s desk — what is out, what is open, what keeps coming back.');
+    lines.push('If something connects to what they are saying now, name the connection naturally. If nothing connects, say nothing about the searches at all.');
   }
 
-  var recents = searchHistory.slice(0,8);
-  var block = [
-    '',
-    'WHAT THE USER HAS BEEN SEARCHING (real data, most recent first):',
-    recents.map(function(q){ return '– ' + q; }).join('\n'),
-    '',
-    'These are not data points to recite. They are evidence of a person\'s attention.',
-    'Read them the way you would read someone\'s desk — what is out, what is open, what keeps coming back.',
-    'If something connects to what they are saying now, name the connection naturally.',
-    'If nothing connects, say nothing about the searches at all.',
-  ].join('\n');
+  // ── STREAK ──
+  if(d.streakDays >= 2){
+    lines.push('');
+    lines.push('Search streak: ' + d.streakDays + ' days in a row. They have been actively looking things up.');
+  }
 
-  return { block: block, patternLine: topicLine };
+  // ── SEARCHES TODAY ──
+  if(d.searchesToday > 0){
+    lines.push('Searches today: ' + d.searchesToday + (d.searchesToday > 10 ? ' — a lot of activity.' : '.'));
+  }
+
+  // ── SAVED SEARCHES (gated by vault pref) ──
+  if(d.savedSearches.length > 0 && getPrivPref('vault')){
+    lines.push('');
+    lines.push('Things they have saved / bookmarked in Altura Search (what they wanted to return to):');
+    d.savedSearches.slice(0,5).forEach(function(s){ lines.push('– ' + s); });
+  }
+
+  // ── NOTES (gated by vault pref) ──
+  if(d.notes.length > 0 && getPrivPref('vault')){
+    lines.push('');
+    lines.push('Quick notes they have written in Altura Search:');
+    d.notes.forEach(function(n){ if(n.trim()) lines.push('– ' + n.replace(/\n/g,' ')); });
+  }
+
+  // ── PEAK HOUR (gated by loom pref) ──
+  if(d.peakSearchHour !== null && d.peakSearchHour !== undefined && getPrivPref('loom')){
+    var h = d.peakSearchHour;
+    var period = h < 6 ? 'very late at night' : h < 12 ? 'in the morning' : h < 17 ? 'in the afternoon' : h < 21 ? 'in the evening' : 'late at night';
+    lines.push('They tend to search most actively ' + period + ' (peak hour: ' + h + ':00).');
+  }
+
+  // ── GAME SCORES (gated by loom pref — behavioural data) ──
+  var gameKeys = Object.keys(d.gameScores || {});
+  if(gameKeys.length > 0 && getPrivPref('loom')){
+    var topGame = gameKeys.sort(function(a,b){ return (d.gameScores[b]||0)-(d.gameScores[a]||0); })[0];
+    lines.push('Top arcade game: ' + topGame + ' (score: ' + d.gameScores[topGame] + ').');
+  }
+
+  // ── DAILY CHALLENGES (gated by loom pref) ──
+  if(d.dailyChallengesCompleted > 0 && getPrivPref('loom')){
+    lines.push('Daily challenges completed: ' + d.dailyChallengesCompleted + '.');
+  }
+
+  // ── GHOST MODE ──
+  if(d.ghostMode){
+    lines.push('Ghost mode is currently active in Altura Search — they are browsing without logging history.');
+  }
+
+  // ── ACCOUNT ──
+  if(d.accountName && d.accountName !== (window.uname || '')){
+    lines.push('Altura Search account name: ' + d.accountName + '.');
+  }
+
+  var block = lines.length > 0 ? lines.join('\n') : '';
+  return { block: block, patternLine: patternLine };
 }
 
 function lumeSystemPrompt(){
@@ -3337,7 +3589,7 @@ function doRecall(){
   scrollRecall();
 
   refreshSearchHistory();
-  var recallHistoryNote = searchHistory.length > 0 ?
+  var recallHistoryNote = (searchHistory.length > 0 && getPrivPref('search')) ?
     '\nSearch history (real, most recent first):\n' +
     searchHistory.slice(0,15).map(function(q){ return '– '+q; }).join('\n') +
     '\nIf anything connects to what they described, name it plainly. If nothing does, say nothing about it.'
@@ -3464,7 +3716,7 @@ function doCorrespondent(){
 
   refreshSearchHistory();
   var corrSearchNote = '';
-  if(searchHistory.length > 0){
+  if(searchHistory.length > 0 && getPrivPref('search')){
     var aboutLower = about.toLowerCase();
     var relevant = searchHistory.filter(function(q){ return q.toLowerCase().split(' ').some(function(w){ return w.length>3 && aboutLower.includes(w); }); });
     if(relevant.length > 0){
@@ -3868,6 +4120,7 @@ function refreshDataPanel(){
 
 // ── settings ──
 function openSettings(){
+  applyPrivPrefToggles();
   closeSidebar();
   refreshSearchHistory();
   // populate data
@@ -6129,6 +6382,9 @@ function similarity(a, b){
 
 // Build memory block for system prompt
 function buildMemoryBlock(){
+  // Respect privacy prefs — if memory is disabled, return nothing
+  if(!getPrivPref('memory')) return '';
+
   var memories = loadMemory().filter(function(m){ return !m.forgotten; });
   if(!memories.length) return '';
 
