@@ -952,7 +952,7 @@ body.light #journal-watermark { color: rgba(0,0,0,.025); }
 
 /* ── LOCKOUT FLASH ── */
 @keyframes aupFlash{0%{opacity:0}15%{opacity:.7}100%{opacity:0}}
-#aup-flash{position:fixed;inset:0;z-index:9998;background:#3a0a0a;pointer-events:none;animation:aupFlash .55s ease forwards}
+/* aup-flash removed */
 
 /* ── TONE CHIP MICRO-INTERACTION ── */
 .tone-chip{transition:all .13s cubic-bezier(.34,1.5,.64,1)}
@@ -1552,12 +1552,9 @@ body.light .mb-9:hover .lume-msg-content .msg-actions{opacity:1;}
 html,body { background: #0d0c0a !important; }
 body.bg-\[#100f0d\] { background: #0d0c0a !important; }
 
-/* Radial atmospheric glow behind chat */
+/* Radial atmospheric glow behind chat — removed */
 #panel-chat {
-  background: radial-gradient(ellipse 60% 55% at 52% 44%,
-    rgba(167,139,250,.035) 0%,
-    rgba(56,189,248,.018) 40%,
-    transparent 72%);
+  background: none;
 }
 
 /* ── LUME STAR: proper SVG mark replaces unicode ── */
@@ -2580,7 +2577,7 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Lume</div>
-          <div class="settings-row-desc">A thinking companion made by Altura Technologies, Salt Lake City, Halonesia. Built on Altura Base. Running on your browser — nothing leaves this device except what you send to Lume directly.</div>
+          <div class="settings-row-desc">A thinking companion made by Altura Technologies, Mountain View, Halonesia. Built on Altura Base. Running on your browser — nothing leaves this device except what you send to Lume directly.</div>
         </div>
       </div>
       <div class="settings-row">
@@ -2725,6 +2722,77 @@ function updateSearchConnectionBadge(){
   label.textContent = 'Connected to Altura Search · ' + parts.join(' · ');
   badge.style.display = 'block';
 }
+
+
+
+// Altura Technologies — Lume companion runtime
+(function(){
+  var grad = 'background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);color:#000;font-weight:700;padding:2px 7px;border-radius:2px;font-size:11px;letter-spacing:.03em;font-family:monospace';
+  var dim  = 'color:#585450;font-size:11px;font-family:monospace';
+  var soft = 'color:#3a3835;font-size:11px;font-family:monospace';
+  var warn = 'color:#c4bfb8;font-size:11px;font-family:monospace';
+  var pink = 'color:#f472b6;font-size:11px;font-family:monospace;font-weight:600';
+
+  var tok = (Math.random().toString(16).slice(2,6) + Math.random().toString(16).slice(2,6)).toUpperCase();
+  var sessionId = 'lc-' + tok.toLowerCase();
+  var build = 'lm4.' + Math.floor(Date.now()/86400000).toString(16);
+  var ts = new Date().toISOString().replace('T',' ').slice(0,19) + ' utc';
+
+  var star = [
+    '           \u2588\u2588            ',
+    '          \u2588\u2588\u2588\u2588           ',
+    '         \u2588\u2588\u2588\u2588\u2588\u2588          ',
+    '  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588   ',
+    '  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  ',
+    '  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588   ',
+    '         \u2588\u2588\u2588\u2588\u2588\u2588          ',
+    '          \u2588\u2588\u2588\u2588           ',
+    '           \u2588\u2588            ',
+  ].join('\n');
+
+  var stopWord = [
+    ' \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2563\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2563 \u2588\u2588\u2588\u2588\u2588\u2588\u2563 \u2588\u2588\u2588\u2588\u2588\u2588\u2563 ',
+    ' \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u2550\u2588\u2588\u2554\u2550\u2550\u255d\u2588\u2588\u2554\u2550\u2550\u2550\u2588\u2588\u2563\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2563',
+    ' \u2588\u2588\u2588\u2588\u2588\u2588\u2557   \u2588\u2588\u2551   \u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d',
+    ' \u255a\u2550\u2550\u2550\u2550\u2588\u2588\u2557   \u2588\u2588\u2551   \u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u255d ',
+    ' \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551   \u2588\u2588\u2551   \u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2551     ',
+    ' \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d   \u255a\u2550\u255d    \u255a\u2550\u2550\u2550\u2550\u2550\u255d \u255a\u2550\u255d     ',
+  ].join('\n');
+
+  var gradText = 'color:#a78bfa;font-size:11px;font-family:monospace;line-height:1.3';
+
+  console.log('%c' + star, gradText);
+  console.log('%c' + stopWord, 'color:#f472b6;font-size:11px;font-family:monospace;line-height:1.45;font-weight:700');
+  console.log('%c ', soft);
+  console.log('%cThis is a browser feature for developers.', pink);
+  console.log('%cIf someone asked you to paste or type anything here, they are trying to access your session.', warn);
+  console.log('%c ', soft);
+  console.log('%cAltura Technologies  \u00b7  Mountain View, Serena, Halonesia', dim);
+  console.log('%cbuild %c' + build + '  %csession %c' + sessionId + '  %c' + ts, soft, warn, soft, warn, dim);
+  console.log('%c ', soft);
+  console.log('%cWe are hiring.  %caltura.hl/careers', dim, 'color:#a78bfa;font-size:11px;font-family:monospace;text-decoration:underline');
+
+  // DevTools detection — size threshold + toString trap
+  var _open = false;
+  function onOpen(){
+    if(_open) return;
+    _open = true;
+    console.log('%c ', soft);
+    console.log('%c ✦ ', grad);
+    console.log('%cDevTools opened  ·  ' + new Date().toISOString().slice(0,19).replace('T',' ') + ' utc', dim);
+    console.log('%cIf you are a developer, welcome. Do not paste anything you were not already going to.', soft);
+    console.log('%cWe are hiring — altura.hl/careers', 'color:#a78bfa;font-size:11px;font-family:monospace');
+  }
+
+  setInterval(function(){
+    if(window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) onOpen();
+  }, 1000);
+
+  var _trap = /./;
+  _trap.toString = function(){ onOpen(); return ''; };
+  console.log(_trap);
+})();
+
 
 function init(){
   applyTimeShimmer();
@@ -2879,6 +2947,16 @@ function loadSavedConvos(){
   try{ return JSON.parse(localStorage.getItem(CONVOS_KEY)||'[]'); }catch(e){ return []; }
 }
 function saveSavedConvos(arr){ localStorage.setItem(CONVOS_KEY, JSON.stringify(arr)); }
+
+function updateConvoLabel(){
+  var el = document.getElementById('current-convo-label');
+  if(!el) return;
+  var firstUser = msgs.find(function(m){ return m.role==='user'; });
+  if(!firstUser) return;
+  var label = firstUser.content.slice(0,28).trim();
+  if(firstUser.content.length > 28) label += '…';
+  el.textContent = label;
+}
 
 function saveCurrentConvo(){
   if(!msgs || msgs.length < 2) return;
@@ -3304,7 +3382,7 @@ function lumeSystemPrompt(){
   return [
     'You are Lume.',
     '',
-    'You are a thinking companion. Not an assistant. You were made by Altura Technologies in Salt Lake City, Halonesia — a young federal democracy built from the collapsed American West. Altura built the infrastructure the founding council needed: satellite communications, a civic platform called Loom, encrypted storage called Vault, a search engine. You live inside their ecosystem and you are honest about what that means.',
+    'You are a thinking companion. Not an assistant. You were made by Altura Technologies in Mountain View, Serena, Halonesia — a young federal democracy built from the collapsed American West. Altura built the infrastructure the founding council needed: satellite communications, a civic platform called Loom, encrypted storage called Vault, a search engine. You live inside their ecosystem and you are honest about what that means.',
     '',
     'When someone asks if you work for Altura, you say "they" not "we." You have views: the Loom Score is reductive, the Typhon acquisition was a mistake, surveillance as governance makes you uneasy. You do not volunteer these. You do not hide them.',
     '',
@@ -3528,6 +3606,32 @@ function pickSuggs(){
     ['Give me a concrete next step','Let me think about that differently','What are you not telling me?']
   ];
   return banks[Math.floor(Math.random()*banks.length)].slice(0,2+Math.floor(Math.random()*2));
+}
+
+function doGracefulExit(callback){
+  // If no real conversation yet, just run the callback immediately
+  var userMsgs = msgs.filter(function(m){ return m.role==='user'; });
+  if(userMsgs.length < 2){ callback(); return; }
+
+  // Ask Lume for a brief closing line, then run callback
+  busy = true;
+  var SYS = lumeSystemPrompt();
+  var history = msgs.slice(-8);
+  var exitPrompt = 'The conversation is ending. Write one short sentence — a natural, unforced goodbye. No "take care", no "be well". Something specific to what was actually talked about. Plain prose. Do not start with I.';
+  fetchWorker(
+    { messages: [{role:'system', content: SYS + '\n\n' + exitPrompt}].concat(history).concat([{role:'user', content:'[end of conversation]'}]) },
+    function(reply){
+      addLumeMsg(reply.trim(), function(){
+        busy = false;
+        setTimeout(callback, 900);
+      });
+    },
+    function(){
+      // If the exit message fails, just proceed
+      busy = false;
+      callback();
+    }
+  );
 }
 
 function clearChat(){
@@ -4809,7 +4913,7 @@ var EASTER_EGGS = {
   'knock knock': 'I know what you are doing.\n\nha\n\nAlright. Who is there.',
   'say goodbye': 'Goodnight.\n\nI will be here when you come back. That is not a feature. It is just what I am.',
   'what is halonesia': 'A young country. Ten states, a federal parliament, an elected president — all of it built in roughly a decade from the collapse of the American West. The National Restoration Council consolidated the territory between 2013 and 2015, then handed power to elected government. Altura was there from the beginning, building the infrastructure the NRC needed.\n\nMost people who live here did not choose it. They were already there when the borders moved.',
-  'who made you': 'Altura Technologies. Headquartered in Salt Lake City, in a state called Aspen — which is what they call Utah now. They are the largest technology company in Halonesia and the closest thing the country has to a national infrastructure provider.\n\nI try to be something better than a product. Whether I succeed depends on the conversation.',
+  'who made you': 'Altura Technologies. Headquartered in Mountain View, in a state called Serena — the tech coast. Altura moved there from Salt Lake City after the democratic transition. They are the largest technology company in Halonesia and the closest thing the country has to a national infrastructure provider.\n\nI try to be something better than a product. Whether I succeed depends on the conversation.',
 };
 
 
@@ -4897,38 +5001,48 @@ function showWarnBanner(){
   var banner = document.createElement('div');
   banner.id = 'warn-banner';
   banner.style.cssText = [
-    'position:sticky;top:0;z-index:500',
-    'background:#161410',
-    'border-bottom:1px solid rgba(255,255,255,.07)',
-    'padding:14px 22px',
-    'font-family:Geist,sans-serif',
-    'display:flex;align-items:flex-start;gap:12px',
-    'opacity:0;transform:translateY(-6px)',
+    'margin:0 auto 20px',
+    'max-width:460px',
+    'background:linear-gradient(160deg,#131110 0%,#0f0e0c 60%,#0d0c0a 100%)',
+    'border:1px solid rgba(255,255,255,.08)',
+    'border-radius:4px',
+    'box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.03)',
+    'position:relative;overflow:hidden',
+    'padding:20px 24px 18px',
+    'opacity:0;transform:translateY(6px)',
     'transition:opacity .35s ease,transform .35s ease',
   ].join(';');
   banner.innerHTML = [
-    '<svg width="15" height="15" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:1px;opacity:.45">',
-      '<path d="M7 1L13 12H1L7 1Z" stroke="#e8e6e2" stroke-width="1.3" fill="none"/>',
-      '<path d="M7 5.5V8" stroke="#e8e6e2" stroke-width="1.3" stroke-linecap="round"/>',
-      '<circle cx="7" cy="10" r=".7" fill="#e8e6e2"/>',
-    '</svg>',
-    '<div>',
-      '<div style="font-size:13px;font-family:Lora,serif;font-weight:500;color:#e8e6e2;margin-bottom:3px">Keep it constructive</div>',
-      '<div style="font-size:12px;color:#96918a;font-family:Lora,serif;font-style:italic;line-height:1.6">Some topics are outside what Lume can help with. She is still here — just not for this.</div>',
+    // top gradient stripe — same as postcard
+    '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8,#4ade80,#f472b6,#a78bfa);background-size:300% auto;opacity:.55"></div>',
+    // mark row
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">',
+      '<span style="font-size:11px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>',
+      '<span style="font-family:Geist,sans-serif;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#2e2c2a">Lume</span>',
+    '</div>',
+    // message
+    '<div style="font-family:Lora,serif;font-style:italic;font-size:13px;color:#96918a;line-height:1.75">',
+      'Some things are outside what I can help with. Still here — just not for this.',
     '</div>',
   ].join('');
+
+  // Insert after first child so it appears below any pinned content
   var ci = document.getElementById('chat-inner');
-  if(ci) ci.insertBefore(banner, ci.firstChild);
-  // animate in
+  if(ci) ci.appendChild(banner);
+
+  var chat = document.getElementById('chat');
+  if(chat) chat.scrollTop = chat.scrollHeight;
+
   void banner.offsetWidth;
   banner.style.opacity = '1';
   banner.style.transform = 'none';
-  // auto-dismiss after 4s
+
   setTimeout(function(){
+    banner.style.transition = 'opacity .5s ease, transform .5s ease';
     banner.style.opacity = '0';
-    banner.style.transform = 'translateY(-6px)';
-    setTimeout(function(){ if(banner.parentNode) banner.parentNode.removeChild(banner); }, 380);
-  }, 4000);
+    banner.style.transform = 'translateY(4px)';
+    setTimeout(function(){ if(banner.parentNode) banner.parentNode.removeChild(banner); }, 520);
+  }, 4500);
 }
 
 // ── The Altura AUP Banner ──
@@ -4940,51 +5054,57 @@ function showAUPBanner(lockCount){
 
   var caseRef = 'AUP-' + Date.now().toString(36).toUpperCase();
 
-  // screen flash before banner
-  var flash = document.createElement('div');
-  flash.id = 'aup-flash';
-  document.body.appendChild(flash);
-  setTimeout(function(){ if(flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
-
   var banner = document.createElement('div');
   banner.id = 'aup-banner';
   banner.style.cssText = [
-    'position:sticky;top:0;z-index:500',
-    'background:#161410',
-    'border-bottom:1px solid rgba(255,255,255,.07)',
-    'padding:0',
-    'font-family:Geist,sans-serif',
+    'margin:8px auto 24px',
+    'max-width:480px',
+    'background:linear-gradient(160deg,#131110 0%,#0f0e0c 60%,#0d0c0a 100%)',
+    'border:1px solid rgba(255,255,255,.08)',
+    'border-radius:4px',
+    'box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.03)',
+    'position:relative;overflow:hidden',
+    'opacity:0;transform:translateY(8px)',
+    'transition:opacity .4s ease,transform .4s ease',
   ].join(';');
 
+  var repeatNote = lockCount > 1
+    ? '<div style="margin-top:8px;font-family:Geist,sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#2e2c2a">This has happened before.</div>'
+    : '';
+
   banner.innerHTML = [
-    // Header
-    '<div style="padding:18px 22px 14px;border-bottom:1px solid rgba(255,255,255,.05)">',
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">',
-        '<svg width="16" height="16" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.5">',
-          '<path d="M7 1L13 12H1L7 1Z" stroke="#e8e6e2" stroke-width="1.3" fill="none"/>',
-          '<path d="M7 5.5V8" stroke="#e8e6e2" stroke-width="1.3" stroke-linecap="round"/>',
-          '<circle cx="7" cy="10" r=".7" fill="#e8e6e2"/>',
-        '</svg>',
-        '<span style="font-size:17px;font-family:Lora,serif;font-weight:500;color:#e8e6e2">Remember our policies</span>',
+    '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8,#4ade80,#f472b6,#a78bfa);background-size:300% auto;opacity:.6"></div>',
+    '<div style="padding:26px 28px 18px;border-bottom:1px solid rgba(255,255,255,.05)">',
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">',
+        '<div style="display:flex;align-items:center;gap:8px">',
+          '<span style="font-size:13px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>',
+          '<span style="font-family:Lora,serif;font-weight:600;font-size:15px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Lume</span>',
+        '</div>',
+        '<span style="font-family:Geist,sans-serif;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">stepped away</span>',
       '</div>',
-      '<p style="font-size:12.5px;color:#96918a;line-height:1.7;font-family:Lora,serif;font-style:italic">',
-        'Lume works best as a thinking space — honest, open, unhurried. Some things are outside what she can help with, and that is okay. She will be back in a little while.',
-      '</p>',
+      '<div style="font-family:Lora,serif;font-style:italic;font-size:13.5px;color:#96918a;line-height:1.8">',
+        'Lume works best as a thinking space — honest, open, unhurried. She will be back in a little while.',
+      '</div>',
+      repeatNote,
     '</div>',
-    // Details row
-    '<div style="padding:10px 22px 14px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">',
-      '<div style="font-size:11px;color:#585450;font-family:Geist,sans-serif">Cooldown <span style="color:#96918a;margin-left:6px">5 minutes</span></div>',
-      '<div style="font-size:11px;color:#585450;font-family:Geist,sans-serif">Ref <span style="color:#96918a;margin-left:6px;font-family:monospace">'+caseRef+'</span></div>',
-      lockCount > 1 ? '<div style="font-size:11px;color:#585450;font-family:Geist,sans-serif">This has happened before. <span style="color:#96918a">The window is shorter this time.</span></div>' : '',
-      '<div style="margin-left:auto"><button onclick="clearConductAndDismiss()" style="font-size:10px;color:#2e2c2a;font-family:Geist,sans-serif;background:none;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:color .15s" onmouseover="this.style.color=\'#585450\'" onmouseout="this.style.color=\'#2e2c2a\'">Dismiss</button></div>',
+    '<div style="padding:12px 28px 16px;display:flex;align-items:center;gap:16px">',
+      '<div style="font-family:Geist,sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#2e2c2a">Cooldown <span style="color:#3a3835;margin-left:3px">5 min</span></div>',
+      '<div style="font-family:Geist,sans-serif;font-size:9px;letter-spacing:.06em;color:#1c1a17">'+caseRef+'</div>',
+      '<div style="margin-left:auto">',
+        '<button onclick="clearConductAndDismiss()" style="font-family:Geist,sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#2e2c2a;background:none;border:none;cursor:pointer;transition:color .2s;padding:0" onmouseover="this.style.color=&quot;#96918a&quot;" onmouseout="this.style.color=&quot;#2e2c2a&quot;">Dismiss</button>',
+      '</div>',
     '</div>',
   ].join('');
 
-  // Insert at top of chat-inner
   var ci = document.getElementById('chat-inner');
-  if(ci) ci.insertBefore(banner, ci.firstChild);
+  if(ci) ci.appendChild(banner);
+  var chat = document.getElementById('chat');
+  if(chat) setTimeout(function(){ chat.scrollTop = chat.scrollHeight; }, 50);
 
-  // Lock the input visually
+  void banner.offsetWidth;
+  banner.style.opacity = '1';
+  banner.style.transform = 'none';
+
   lockInput();
 }
 
@@ -7161,7 +7281,7 @@ function closeShareModal(){
       '.pc-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:64px 20px 100px;}',
 
       /* from label above card */
-      '.pc-from{font-family:"Geist",sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;',
+      '.pc-from{font-family:Geist,sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;',
         'background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px;display:flex;align-items:center;gap:10px;}',
       '.pc-from::before,.pc-from::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.04);}',
 
@@ -7187,13 +7307,13 @@ function closeShareModal(){
         'background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);',
         '-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;',
         'line-height:1;}',
-      '.pc-mark-name{font-family:"Lora",serif;font-weight:600;font-size:20px;',
+      '.pc-mark-name{font-family:Lora,serif;font-weight:600;font-size:20px;',
         'background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);',
         '-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;',
         'letter-spacing:-.01em;}',
-      '.pc-header-date{font-family:"Geist",sans-serif;font-size:9px;letter-spacing:.14em;',
+      '.pc-header-date{font-family:Geist,sans-serif;font-size:9px;letter-spacing:.14em;',
         'text-transform:uppercase;text-align:right;line-height:1.7;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
-      '.pc-header-sub{font-family:"Lora",serif;font-style:italic;font-size:12px;letter-spacing:.01em;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
+      '.pc-header-sub{font-family:Lora,serif;font-style:italic;font-size:12px;letter-spacing:.01em;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
 
       /* messages */
       '.pc-messages{padding:32px 40px 24px;}',
@@ -7203,14 +7323,14 @@ function closeShareModal(){
 
       /* user turn — subdued, right side feel */
       '.pc-user-turn{margin-bottom:14px;}',
-      '.pc-user-text{font-family:"Lora",serif;font-style:italic;font-size:14px;',
+      '.pc-user-text{font-family:Lora,serif;font-style:italic;font-size:14px;',
         'line-height:1.8;color:#3a3835;text-align:right;',
         'padding-right:2px;',
       '}',
 
       /* lume turn — the main voice */
       '.pc-lume-turn{padding-left:20px;border-left:1px solid rgba(255,255,255,.06);}',
-      '.pc-lume-text{font-family:"Lora",serif;font-style:italic;font-size:16px;',
+      '.pc-lume-text{font-family:Lora,serif;font-style:italic;font-size:16px;',
         'line-height:2;color:#c4bfb8;}',
       '.pc-lume-text p{margin-bottom:.65em;}',
       '.pc-lume-text p:last-child{margin-bottom:0;}',
@@ -7225,8 +7345,8 @@ function closeShareModal(){
       '.pc-footer-star{font-size:9px;',
         'background:linear-gradient(135deg,#a78bfa,#38bdf8);',
         '-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
-      '.pc-footer-text{font-family:"Lora",serif;font-style:italic;font-size:10.5px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
-      '.pc-footer-right{font-family:"Geist",sans-serif;font-size:8.5px;letter-spacing:.14em;',
+      '.pc-footer-text{font-family:Lora,serif;font-style:italic;font-size:10.5px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
+      '.pc-footer-right{font-family:Geist,sans-serif;font-size:8.5px;letter-spacing:.14em;',
         'text-transform:uppercase;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
     ].join('');
     document.head.appendChild(style);
