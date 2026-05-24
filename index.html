@@ -3826,6 +3826,7 @@ function syncConvoToServer(convo){
 // ── SUPPORT AGENT INTEGRATION ─────────────────────────────────
 var _supportActive    = false;
 var _supportAgentName = '';
+var _lumeDisabled     = false;
 
 
 
@@ -4031,6 +4032,27 @@ function handleForceReload(data){
   card.style.transform = 'none';
 }
 
+
+function handleLumeDisabled(disabled){
+  _lumeDisabled = !!disabled;
+  // Show/hide a subtle indicator in the topbar
+  var ind = document.getElementById('lume-disabled-ind');
+  if(disabled){
+    if(!ind){
+      var tb = document.getElementById('tb-title');
+      if(tb && tb.parentNode){
+        ind = document.createElement('span');
+        ind.id = 'lume-disabled-ind';
+        ind.style.cssText = 'font-family:Geist,sans-serif;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-left:10px;opacity:.7';
+        ind.textContent = 'support mode';
+        tb.parentNode.insertBefore(ind, tb.nextSibling);
+      }
+    }
+  } else {
+    if(ind) ind.remove();
+  }
+}
+
 function handleSupportConnect(support){
   if(!support || !support.active) return;
   if(_supportActive && _supportAgentName === support.agentName) return; // already shown
@@ -4043,6 +4065,7 @@ function handleSupportDisconnect(disc){
   if(!disc) return;
   _supportActive    = false;
   _supportAgentName = disc.agentName || _supportAgentName || 'Support';
+  if(_lumeDisabled) handleLumeDisabled(false);
   renderSupportCard(true);
 }
 
@@ -4214,6 +4237,7 @@ function checkAccountStatus(){
     if(d.maintenance)          handleMaintenance(d.maintenance);
     if(d.adminCard)            handleAdminCard(d.adminCard);
     if(d.forceReload)          handleForceReload(d.forceReload);
+    if(typeof d.lumeDisabled !== 'undefined') handleLumeDisabled(d.lumeDisabled);
     if(d.support && d.support.active) handleSupportConnect(d.support);
     else if(_supportActive)  { handleSupportDisconnect({ agentName: _supportAgentName }); _supportActive = false; }
     if(d.supportDisconnected)  handleSupportDisconnect(d.supportDisconnected);
@@ -5025,6 +5049,16 @@ function maybeAddFollowUp(reply){
 }
 
 function callLume(){
+  // If Lume responses disabled by support agent, show holding message
+  if(_lumeDisabled){
+    showTyping(false); stopGhost();
+    var holdMsg = 'A support agent is handling this conversation.';
+    addLumeMsg(holdMsg, function(){
+      msgs.push({ role:'assistant', content: holdMsg });
+      busy = false; setStarActive(false);
+    });
+    return;
+  }
   // limit check
   if(!checkLimit()){ showLimitBanner(); busy=false; setStarActive(false); showTyping(false); return; }
   incrementLimit();
