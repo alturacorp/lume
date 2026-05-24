@@ -1891,6 +1891,123 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
 /* ── LIGHT MODE OVERRIDES: first-class design ── */
 
 
+
+/* ── LSA MODAL ─────────────────────────────────────────────── */
+#lsa-modal{
+  position:fixed;inset:0;z-index:9500;
+  background:rgba(8,7,6,.92);
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);
+}
+#lsa-modal.open{display:flex;}
+#lsa-inner{
+  width:min(680px,calc(100vw - 32px));
+  max-height:82vh;
+  background:linear-gradient(170deg,#141210,#0f0e0c 50%,#0c0b09);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:5px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03);
+  position:relative;
+}
+#lsa-inner::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8,#4ade80,#f472b6,#a78bfa);
+  background-size:300% auto;opacity:.65;z-index:1;
+}
+#lsa-head{
+  padding:24px 30px 20px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+#lsa-head-mark{display:flex;align-items:center;gap:10px;}
+#lsa-head-star{font-size:14px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#lsa-head-name{font-family:'Lora',serif;font-weight:600;font-size:15px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#lsa-head-meta{font-family:'Geist',sans-serif;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#2a2826;}
+#lsa-close{font-size:16px;color:#2e2c2a;background:none;border:none;cursor:pointer;transition:color .2s;line-height:1;padding:2px 4px;}
+#lsa-close:hover{color:#585450;}
+#lsa-body{
+  overflow-y:auto;padding:28px 30px 32px;
+  font-family:'Lora',serif;font-size:13px;color:#6a6560;line-height:1.9;
+}
+#lsa-body h2{
+  font-family:'Geist',sans-serif;font-size:8.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:#2e2c2a;
+  margin:28px 0 12px;padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+#lsa-body h2:first-child{margin-top:0;}
+#lsa-body h3{
+  font-family:'Geist',sans-serif;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#3a3835;margin:18px 0 7px;
+}
+#lsa-body p{margin-bottom:13px;color:#5a5550;}
+#lsa-body p.lead{color:#96918a;font-size:13.5px;}
+#lsa-body ul{margin:0 0 13px 0;padding-left:0;list-style:none;}
+#lsa-body ul li{padding:4px 0 4px 16px;position:relative;color:#4a4540;}
+#lsa-body ul li::before{content:'✦';position:absolute;left:0;font-size:7px;color:#2e2c2a;top:6px;}
+#lsa-body .legal-note{
+  font-family:'Geist',sans-serif;font-size:10px;color:#2e2c2a;
+  line-height:1.7;border-left:2px solid rgba(255,255,255,.05);
+  padding-left:12px;margin:10px 0 13px;font-style:normal;
+}
+#lsa-foot{
+  padding:14px 30px 18px;
+  border-top:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+#lsa-foot-meta{font-family:'Geist',sans-serif;font-size:8.5px;color:#2a2826;letter-spacing:.06em;line-height:1.7;}
+#lsa-accept{
+  padding:8px 20px;
+  background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(244,114,182,.07));
+  border:1px solid rgba(167,139,250,.25);border-radius:3px;
+  color:#a78bfa;font-family:'Geist',sans-serif;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .25s;
+}
+#lsa-accept:hover{background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(244,114,182,.12));border-color:rgba(167,139,250,.4);}
+/* ────────────────────────────────────────────────────────── */
+
+/* ── THINKING BLOCK ─────────────────────────────────────── */
+.thinking-block{
+  margin-bottom:8px;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:3px;
+  overflow:hidden;
+  background:rgba(255,255,255,.015);
+  font-family:'Geist',sans-serif;
+}
+.thinking-toggle{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 12px;cursor:pointer;
+  font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:#2e2c2a;transition:color .2s;
+  user-select:none;
+}
+.thinking-toggle:hover{color:#585450;}
+.thinking-chevron{
+  font-size:8px;transition:transform .25s ease;display:inline-block;
+}
+.thinking-block.open .thinking-chevron{transform:rotate(90deg);}
+.thinking-content{
+  display:none;
+  padding:10px 12px 12px;
+  border-top:1px solid rgba(255,255,255,.04);
+  font-family:'Lora',serif;font-style:italic;
+  font-size:11.5px;color:#3a3835;line-height:1.8;
+  white-space:pre-wrap;
+}
+.thinking-block.open .thinking-content{display:block;}
+/* Notification dot */
+.sb-notif-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#f472b6;flex-shrink:0;
+  animation:npulse 1.5s ease-in-out infinite;
+}
+@keyframes npulse{0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.2);}}
+/* ────────────────────────────────────────────────────────── */
 </style>
 </head>
 <body class="bg-[#100f0d] text-t0 font-geist text-[15px]">
@@ -2534,6 +2651,13 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
     <!-- Conversation history -->
     <div class="settings-section">
       <div class="settings-section-title">Conversation History</div>
+      <div class="settings-row" style="padding:10px 0 14px">
+        <div class="settings-row-left">
+          <div class="settings-row-title">Export current conversation</div>
+          <div class="settings-row-desc">Downloads a formatted PDF of the current conversation</div>
+        </div>
+        <button class="settings-danger-btn" style="color:#585450;border-color:rgba(255,255,255,.07)" onclick="exportConversationPDF();closeSettings()">Export PDF</button>
+      </div>
       <div id="settings-history-list" style="margin-bottom:16px;"></div>
       <button class="settings-danger-btn" onclick="exportConversation()">Export current conversation</button>
     </div>
@@ -2583,6 +2707,13 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
       <div class="settings-row">
         <div class="settings-row-title" style="color:#2e2c2a;font-size:11px;">Version</div>
         <div style="font-size:11px;color:#2e2c2a;font-family:monospace;" id="settings-version">—</div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-title">Service Agreement</div>
+          <div class="settings-row-desc">Lume Service Agreement v4.0 &middot; Altura Technologies PLC</div>
+        </div>
+        <button class="settings-danger-btn" style="color:#585450;border-color:rgba(255,255,255,.07)" onclick="openLSA()">Read</button>
       </div>
     </div>
   </div>
@@ -2794,7 +2925,372 @@ function updateSearchConnectionBadge(){
 })();
 
 
+
+function showConsentScreen(){
+  if(localStorage.getItem('lume_consent_given')) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'consent-overlay';
+  overlay.style.cssText = [
+    'position:fixed;inset:0;z-index:8999',
+    'background:rgba(10,9,8,.96)',
+    'display:flex;align-items:center;justify-content:center',
+    'backdrop-filter:blur(8px)',
+    'opacity:0;transition:opacity .5s ease',
+  ].join(';');
+
+  overlay.innerHTML =
+    '<div style="max-width:500px;width:calc(100% - 40px);background:linear-gradient(170deg,#141210 0%,#0f0e0c 50%,#0c0b09 100%);border:1px solid rgba(255,255,255,.09);border-radius:5px;position:relative;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03)">' +
+
+    // top stripe
+    '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8,#4ade80,#f472b6,#a78bfa);background-size:300% auto;opacity:.7"></div>' +
+
+    // header block
+    '<div style="padding:36px 40px 28px;border-bottom:1px solid rgba(255,255,255,.05)">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:16px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>' +
+          '<span style="font-family:Lora,serif;font-weight:600;font-size:18px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Lume</span>' +
+        '</div>' +
+        '<span style="font-family:Geist,sans-serif;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#2e2c2a">Group deployment</span>' +
+      '</div>' +
+      '<div style="font-family:Lora,serif;font-size:15px;color:#c4bfb8;line-height:1;margin-bottom:16px;font-weight:400">Before you start.</div>' +
+      '<div style="font-family:Lora,serif;font-style:italic;font-size:13px;color:#6a6560;line-height:1.85">' +
+        'This instance of Lume saves conversations to Altura servers. Group moderators may review sessions for safety and compliance. You will be notified when a review is active. Accounts may be suspended for policy violations.' +
+      '</div>' +
+    '</div>' +
+
+    // terms rows
+    '<div style="padding:20px 40px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:11px">' +
+      termRow('&#10022;', 'Conversations are stored for up to 90 days') +
+      termRow('&#10022;', 'You will be notified if your session is under review') +
+      termRow('&#10022;', 'Accounts may be suspended for conduct violations') +
+      termRow('&#10022;', 'Device identity is tracked for moderation continuity') +
+    '</div>' +
+
+    // footer
+    '<div style="padding:20px 40px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px">' +
+      '<div style="font-family:Geist,sans-serif;font-size:9px;color:#2e2c2a;letter-spacing:.06em;line-height:1.6">' +
+        'Altura Technologies PLC &nbsp;&middot;&nbsp; Lume v4.0<br>Mountain View, Serena, Halonesia<br>' +
+        '<span style="color:#2a2826;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.1)" onclick="openLSA()">Service Agreement</span>' +
+      '</div>' +
+      '<button id="consent-btn" onclick="openLSA(true)" style="flex-shrink:0;padding:10px 22px;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(244,114,182,.08));border:1px solid rgba(167,139,250,.3);border-radius:3px;color:#a78bfa;font-family:Geist,sans-serif;font-size:9px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:all .25s;white-space:nowrap">Read &amp; continue</button>' +
+    '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  void overlay.offsetWidth;
+  overlay.style.opacity = '1';
+}
+
+function termRow(icon, text){
+  return '<div style="display:flex;align-items:flex-start;gap:11px">' +
+    '<span style="font-size:9px;color:#2e2c2a;flex-shrink:0;padding-top:3px">' + icon + '</span>' +
+    '<span style="font-family:Geist,sans-serif;font-size:11px;color:#3a3835;line-height:1.6">' + text + '</span>' +
+  '</div>';
+}
+
+function giveConsent(){
+  localStorage.setItem('lume_consent_given','1');
+  var overlay = document.getElementById('consent-overlay');
+  if(overlay){ overlay.style.opacity='0'; overlay.style.transition='opacity .4s'; setTimeout(function(){ overlay.remove(); },420); }
+  recordConsent();
+  // Start onboarding after a short pause
+  if(shouldShowOnboarding()){
+    setTimeout(function(){
+      if(!started) beginChat();
+      setTimeout(startOnboarding, 800);
+    }, 500);
+  }
+}
+
+
+function openLSA(fromConsent){
+  var m = document.getElementById('lsa-modal');
+  if(!m) return;
+  m.classList.add('open');
+  var body = m.querySelector('#lsa-body');
+  body.scrollTop = 0;
+
+  var btn    = document.getElementById('lsa-accept');
+  var xbtn   = document.getElementById('lsa-close');
+  var notice = document.getElementById('lsa-scroll-notice');
+
+  if(fromConsent){
+    // Lock until scrolled
+    m.dataset.fromConsent = '1';
+    if(btn){
+      btn.disabled = true;
+      btn.style.opacity = '.3';
+      btn.style.cursor  = 'not-allowed';
+      btn.textContent   = 'Scroll to read';
+    }
+    if(xbtn){ xbtn.style.opacity = '.2'; xbtn.style.pointerEvents = 'none'; }
+    if(notice) notice.style.opacity = '1';
+
+    // Watch scroll
+    body._lsaScrollHandler = function(){
+      var nearBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 40;
+      if(nearBottom){
+        if(btn){
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor  = 'pointer';
+          btn.textContent   = 'I have read this — continue';
+        }
+        if(xbtn){ xbtn.style.opacity = '1'; xbtn.style.pointerEvents = ''; }
+        if(notice) notice.style.opacity = '0';
+        body.removeEventListener('scroll', body._lsaScrollHandler);
+      }
+    };
+    body.addEventListener('scroll', body._lsaScrollHandler);
+  } else {
+    // Settings — just a read, no lock
+    m.dataset.fromConsent = '';
+    if(btn){
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor  = 'pointer';
+      btn.textContent   = 'Close';
+    }
+    if(xbtn){ xbtn.style.opacity = '1'; xbtn.style.pointerEvents = ''; }
+    if(notice) notice.style.opacity = '0';
+    if(body._lsaScrollHandler) body.removeEventListener('scroll', body._lsaScrollHandler);
+  }
+}
+function closeLSA(){
+  var m = document.getElementById('lsa-modal');
+  if(!m) return;
+  var fromConsent = m.dataset.fromConsent === '1';
+  m.classList.remove('open');
+  if(fromConsent) giveConsent();
+}
+
+// ── ONBOARDING ───────────────────────────────────────────────
+var ONBOARDING_KEY = 'lume_onboarding_done';
+
+var ONBOARDING_STEPS = [
+  {
+    id:      'thinking_style',
+    q:       'How do you tend to think through things?',
+    options: [
+      { label: 'Out loud — I think by talking', value: 'You think by articulating. Talking through something is how you figure it out, not a sign you have already figured it out.' },
+      { label: 'Quietly — I work things out internally', value: 'You tend to process internally before speaking. When you share something, you have usually already been sitting with it.' },
+      { label: 'In writing — I need to put it on the page', value: 'Writing is how you think. Getting something into words is not reporting your thoughts — it is where the thinking happens.' },
+      { label: 'Through other people — I need to bounce ideas', value: 'You think in dialogue. Other people\'s responses are part of your thinking process, not just feedback on it.' },
+    ],
+    key: 'lume_cognitive_style',
+  },
+  {
+    id:      'use_for',
+    q:       'What do you mostly want to use Lume for?',
+    options: [
+      { label: 'Working through personal things', value: 'personal' },
+      { label: 'Thinking through ideas and projects', value: 'projects' },
+      { label: 'Writing and creative work', value: 'creative' },
+      { label: 'All of it — a bit of everything', value: 'general' },
+    ],
+    key: 'lume_primary_use',
+  },
+  {
+    id:      'limits',
+    q:       'Is there anything you would prefer Lume not do?',
+    options: [
+      { label: 'Do not push back too hard', value: 'Go gently with pushback. Notice when something is off but do not press it.' },
+      { label: 'Do not be too positive', value: 'Skip the affirmations. Be direct. The person does not need encouragement, they need honest engagement.' },
+      { label: 'Do not ask too many questions', value: 'Ask questions sparingly. One at a time, only when it genuinely matters.' },
+      { label: 'No preference', value: '' },
+    ],
+    key: 'lume_tone_pref',
+  },
+];
+
+var _onboardingStep    = 0;
+var _onboardingAnswers = {};
+
+function shouldShowOnboarding(){
+  return !localStorage.getItem(ONBOARDING_KEY);
+}
+
+function startOnboarding(){
+  _onboardingStep    = 0;
+  _onboardingAnswers = {};
+  showOnboardingStep(0);
+}
+
+function showOnboardingStep(stepIdx){
+  var step = ONBOARDING_STEPS[stepIdx];
+  if(!step){ finishOnboarding(); return; }
+
+  var ci = document.getElementById('chat-inner');
+  if(!ci) return;
+
+  // Remove any existing onboarding block
+  var existing = document.getElementById('onboarding-block');
+  if(existing) existing.remove();
+
+  var block = document.createElement('div');
+  block.id  = 'onboarding-block';
+  block.style.cssText = 'margin:12px auto;max-width:500px;opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s ease';
+
+  var optionsHtml = step.options.map(function(opt, i){
+    return '<button onclick="pickOnboardingOption(' + stepIdx + ',' + i + ')" style="' +
+      'display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;' +
+      'background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:3px;' +
+      'font-family:Lora,serif;font-style:italic;font-size:12.5px;color:#6a6560;cursor:pointer;' +
+      'transition:all .2s;line-height:1.5' +
+      '" onmouseover="this.style.background=\'rgba(167,139,250,.06)\';this.style.borderColor=\'rgba(167,139,250,.2)\';this.style.color=\'#96918a\'" ' +
+      'onmouseout="this.style.background=\'rgba(255,255,255,.02)\';this.style.borderColor=\'rgba(255,255,255,.06)\';this.style.color=\'#6a6560\'">' +
+      opt.label +
+      '</button>';
+  }).join('');
+
+  var progress = (stepIdx + 1) + ' of ' + ONBOARDING_STEPS.length;
+
+  block.innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">' +
+      '<span style="font-size:11px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>' +
+      '<span style="font-family:Geist,sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#2e2c2a">A few things &middot; ' + progress + '</span>' +
+    '</div>' +
+    '<div style="font-family:Lora,serif;font-size:14px;color:#96918a;line-height:1.7;margin-bottom:14px">' + step.q + '</div>' +
+    optionsHtml;
+
+  ci.appendChild(block);
+  var chat = document.getElementById('chat');
+  if(chat) chat.scrollTop = chat.scrollHeight;
+  void block.offsetWidth;
+  block.style.opacity   = '1';
+  block.style.transform = 'none';
+}
+
+function pickOnboardingOption(stepIdx, optIdx){
+  var step = ONBOARDING_STEPS[stepIdx];
+  var opt  = step.options[optIdx];
+
+  // Save preference
+  if(opt.value && step.key) localStorage.setItem(step.key, opt.value);
+  _onboardingAnswers[step.id] = opt.value;
+
+  // Fade out block
+  var block = document.getElementById('onboarding-block');
+  if(block){ block.style.opacity='0'; block.style.transform='translateY(-4px)'; setTimeout(function(){ if(block.parentNode) block.remove(); }, 400); }
+
+  // Next step
+  setTimeout(function(){ showOnboardingStep(stepIdx + 1); }, 450);
+}
+
+function finishOnboarding(){
+  localStorage.setItem(ONBOARDING_KEY, '1');
+  var ci = document.getElementById('chat-inner');
+  if(!ci) return;
+
+  // Lume acknowledges the setup
+  var SYS = lumeSystemPrompt();
+  var prefs = [];
+  if(_onboardingAnswers.thinking_style) prefs.push('they said: "' + ONBOARDING_STEPS[0].options.find(function(o){ return o.value === _onboardingAnswers.thinking_style; }).label + '"');
+  if(_onboardingAnswers.use_for)        prefs.push('use: ' + _onboardingAnswers.use_for);
+  if(_onboardingAnswers.limits)         prefs.push('preference: "' + ONBOARDING_STEPS[2].options.find(function(o){ return o.value === _onboardingAnswers.limits; }).label + '"');
+
+  var prompt = 'The person just answered three onboarding questions. ' + prefs.join('. ') + '. Write two short sentences acknowledging this — not recapping it, just noting that you have heard them and are ready. Natural, not performative. Do not start with I.';
+
+  fetchWorker(
+    { messages: [{role:'system',content:SYS},{role:'user',content:prompt}] },
+    function(reply){
+      addLumeMsg(reply, function(){
+        msgs.push({role:'assistant',content:reply});
+      });
+    },
+    function(){ }
+  );
+}
+// ─────────────────────────────────────────────────────────────
+
+
+// ── CONVERSATION PDF EXPORT ───────────────────────────────────
+function exportConversationPDF(){
+  if(!msgs || msgs.length < 2){ showToast('Nothing to export yet.'); return; }
+
+  var convos  = loadSavedConvos();
+  var current = convos.find(function(cv){ return cv.id === activeConvoId; });
+  var title   = current ? current.label : 'Conversation';
+  var dateStr = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  var account = _displayName || _accountName || 'Unknown';
+
+  var visibleMsgs = msgs.filter(function(m){ return m.role !== 'system'; });
+
+  // Build HTML for print
+  var msgHtml = visibleMsgs.map(function(m){
+    var isUser = m.role === 'user';
+    var text   = String(m.content)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/\n/g,'<br>');
+    return '<div class="msg-block ' + (isUser ? 'user-block' : 'lume-block') + '">' +
+      '<div class="msg-role">' + (isUser ? account : 'Lume') + '</div>' +
+      '<div class="msg-text">' + text + '</div>' +
+    '</div>';
+  }).join('');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+  '<style>' +
+    '@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400&display=swap");' +
+    '*{box-sizing:border-box;margin:0;padding:0;}' +
+    'body{background:#fff;color:#1a1816;font-family:Lora,Georgia,serif;font-size:13px;line-height:1.85;padding:0;}' +
+    '.page{max-width:680px;margin:0 auto;padding:64px 56px;}' +
+    // Header
+    '.doc-header{margin-bottom:56px;padding-bottom:28px;border-bottom:1px solid #e8e4dc;}' +
+    '.doc-brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;}' +
+    '.doc-star{font-size:16px;color:#a78bfa;}' +
+    '.doc-wordmark{font-family:Lora,serif;font-weight:600;font-size:17px;color:#1a1816;letter-spacing:-.01em;}' +
+    '.doc-title{font-family:Lora,serif;font-size:26px;font-weight:600;color:#0d0c0a;line-height:1.25;margin-bottom:10px;}' +
+    '.doc-meta{font-family:"Geist",sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#b0aba4;display:flex;gap:20px;}' +
+    // Messages
+    '.msg-block{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #f0ece4;}' +
+    '.msg-block:last-child{border-bottom:none;}' +
+    '.msg-role{font-family:"Geist",sans-serif;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#b0aba4;margin-bottom:8px;}' +
+    '.lume-block .msg-role{color:#a78bfa;}' +
+    '.msg-text{font-family:Lora,serif;font-size:13.5px;line-height:1.9;color:#2e2c2a;}' +
+    '.lume-block .msg-text{font-style:italic;color:#3a3835;}' +
+    '.user-block .msg-text{color:#1a1816;}' +
+    // Footer
+    '.doc-footer{margin-top:56px;padding-top:20px;border-top:1px solid #e8e4dc;' +
+      'display:flex;align-items:center;justify-content:space-between;}' +
+    '.doc-footer-brand{font-family:"Geist",sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#c4bfb8;}' +
+    '.doc-footer-pg{font-family:"Geist Mono",monospace;font-size:9px;color:#d4cfc8;}' +
+    '@media print{' +
+      'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+      '.msg-block{page-break-inside:avoid;}' +
+    '}' +
+  '</style></head><body>' +
+  '<div class="page">' +
+    '<div class="doc-header">' +
+      '<div class="doc-brand"><span class="doc-star">&#10022;</span><span class="doc-wordmark">Lume</span></div>' +
+      '<div class="doc-title">' + title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+      '<div class="doc-meta">' +
+        '<span>' + dateStr + '</span>' +
+        '<span>' + account + '</span>' +
+        '<span>' + visibleMsgs.length + ' messages</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="doc-body">' + msgHtml + '</div>' +
+    '<div class="doc-footer">' +
+      '<span class="doc-footer-brand">Altura Technologies &middot; Lume v4.0 &middot; Mountain View, Serena, Halonesia</span>' +
+      '<span class="doc-footer-pg">Exported ' + new Date().toISOString().slice(0,10) + '</span>' +
+    '</div>' +
+  '</div>' +
+  '</body></html>';
+
+  var win = window.open('', '_blank');
+  if(!win){ showToast('Allow pop-ups to export PDF.'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 800);
+}
+// ─────────────────────────────────────────────────────────────
+
 function init(){
+  initDeviceAuth();
   applyTimeShimmer();
   var h=new Date().getHours();
   var greet=h<5?'Still up':h<12?'Good morning':h<17?'Good afternoon':'Good evening';
@@ -2805,6 +3301,9 @@ function init(){
   renderSavedConvos();
   updateSearchConnectionBadge();
   applyPrivPrefToggles();
+  checkAccountStatus();
+  setInterval(checkAccountStatus, 30000);
+  showConsentScreen();
 }
 init();
 
@@ -2962,17 +3461,19 @@ function saveCurrentConvo(){
   if(!msgs || msgs.length < 2) return;
   var convos = loadSavedConvos();
   var firstUser = msgs.find(function(m){ return m.role==='user'; });
+  // Use truncated first message as placeholder; async title replaces it once we have enough context
   var label = firstUser ? firstUser.content.slice(0,38).trim() : 'Conversation';
-  if(label.length === 38) label += '…';
+  if(firstUser && firstUser.content.length > 38) label += '…';
   // last Lume message as snippet
   var lastLume = null;
   for(var i=msgs.length-1;i>=0;i--){ if(msgs[i].role==='assistant'){lastLume=msgs[i].content;break;} }
   var snippet = lastLume ? lastLume.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').slice(0,55).trim() : '';
   if(snippet.length===55) snippet += '…';
   var ts = Date.now();
+  var isNew = !activeConvoId;
   if(activeConvoId){
     var idx = convos.findIndex(function(c){ return c.id===activeConvoId; });
-    if(idx > -1){ convos[idx] = Object.assign(convos[idx],{label:label, snippet:snippet, ts:ts, msgs:msgs.slice()}); }
+    if(idx > -1){ convos[idx] = Object.assign(convos[idx],{snippet:snippet, ts:ts, msgs:msgs.slice()}); label = convos[idx].label; }
     else { convos.unshift({id:activeConvoId, label:label, snippet:snippet, ts:ts, msgs:msgs.slice()}); }
   } else {
     activeConvoId = 'c'+ts;
@@ -2981,7 +3482,373 @@ function saveCurrentConvo(){
   convos = convos.slice(0,12);
   saveSavedConvos(convos);
   renderSavedConvos();
+  syncConvoToServer(convos[0]);
+  // Generate title after at least 4 messages (2 exchanges) — only once per convo
+  var userCount = msgs.filter(function(m){ return m.role==='user'; }).length;
+  if(userCount >= 2 && isNew) generateConvoTitle(activeConvoId);
 }
+
+function generateConvoTitle(convoId){
+  if(!convoId) return;
+  var excerpt = msgs.filter(function(m){ return m.role !== 'system'; }).slice(0,6)
+    .map(function(m){ return (m.role==='user'?'User: ':'Lume: ') + m.content.slice(0,120); })
+    .join('\n');
+  var payload = {
+    messages: [
+      { role: 'system', content: 'You write extremely short conversation titles. 4 words maximum. No punctuation. No quotes. Just the essential subject. Examples: "grief and career change", "stuck on a decision", "late night overthinking", "relationship with my sister".' },
+      { role: 'user', content: 'Title this conversation:\n\n' + excerpt }
+    ]
+  };
+  fetch(WORKER + '/lume', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    var title = '';
+    if(d.choices && d.choices[0]) title = d.choices[0].message.content.trim().replace(/^["\']+|["\']+$/g,'').slice(0,50);
+    if(!title) return;
+    // Update stored convo label
+    var convos = loadSavedConvos();
+    var idx = convos.findIndex(function(c){ return c.id === convoId; });
+    if(idx > -1){
+      convos[idx].label = title;
+      saveSavedConvos(convos);
+      renderSavedConvos();
+      // Update sidebar current label
+      var labelEl = document.getElementById('current-convo-label');
+      if(labelEl) labelEl.textContent = title;
+      // Re-sync with updated label
+      syncConvoToServer(convos[idx]);
+    }
+  }).catch(function(){});
+}
+
+
+// ── DEVICE AUTH & SERVER SYNC ──────────────────────────────────
+var _deviceToken  = null;
+var _accountName  = null;
+var _displayName  = null;
+var _authReady    = false;
+
+// ── Browser fingerprint (stable across localStorage clears) ──
+async function buildFingerprint(){
+  var parts = [
+    navigator.language || '',
+    (navigator.languages || []).join(','),
+    screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || 0,
+    navigator.platform || '',
+    !!navigator.webdriver,
+  ];
+  // Canvas fingerprint
+  try {
+    var cv = document.createElement('canvas');
+    var ctx = cv.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillStyle = '#a78bfa';
+    ctx.fillText('Altura \u2605', 2, 2);
+    parts.push(cv.toDataURL().slice(-60));
+  } catch(e){}
+  var raw = parts.join('|');
+  // SHA-256 via SubtleCrypto
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+async function getOrCreateDeviceToken(){
+  var stored = localStorage.getItem('lume_device_token');
+  if(stored && stored.length >= 32) return stored;
+  // Generate new token
+  var arr = new Uint8Array(24);
+  crypto.getRandomValues(arr);
+  var token = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  localStorage.setItem('lume_device_token', token);
+  return token;
+}
+
+async function initDeviceAuth(){
+  try {
+    var token = await getOrCreateDeviceToken();
+    var fp    = await buildFingerprint();
+    _deviceToken = token;
+
+    var res = await fetch(WORKER + '/auth/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ deviceToken: token, fingerprint: fp }),
+    });
+    var data = await res.json();
+
+    _accountName  = data.account     || 'guest';
+    _displayName  = data.displayName || _accountName;
+    _authReady    = true;
+    loadMemoriesFromServer();
+
+    // Update uname display
+    uname = _displayName;
+    var unameEl = document.getElementById('uname');
+    if(unameEl) unameEl.textContent = uname;
+    var uavEl = document.getElementById('uav');
+    if(uavEl) uavEl.textContent = (_displayName[0] || '?').toUpperCase();
+
+    // Handle lockout from registration response
+    if(data.lockout) { handleLockoutStatus(data.lockout); return; }
+    if(data.revoked) { handleRevokedDevice(); return; }
+
+    // Record consent
+    if(!localStorage.getItem('lume_consent_given')) return; // consent screen handles it
+    recordConsent();
+
+  } catch(e){
+    _authReady = true; // fail open — don't block Lume
+    console.warn('Auth init failed:', e);
+  }
+}
+
+function getAccountName(){
+  return _accountName || localStorage.getItem('ac_name') || 'guest';
+}
+
+function getDeviceHeaders(){
+  var h = { 'Content-Type': 'application/json' };
+  if(_deviceToken) h['X-Device-Token'] = _deviceToken;
+  return h;
+}
+
+function syncConvoToServer(convo){
+  if(!_deviceToken || !_authReady) return;
+  var aupFlags = msgs.filter(function(m){
+    return m.role === 'assistant' && (
+      m.content === 'That is not something I am going to do. I want to be useful to you, but not like this.' ||
+      m.content === 'No.' ||
+      m.content === 'I am done with this conversation.'
+    );
+  }).map(function(){ return { ts: Date.now(), type: 'conduct' }; });
+
+  fetch(WORKER + '/conv/save', {
+    method:  'POST',
+    headers: getDeviceHeaders(),
+    body:    JSON.stringify({ id: convo.id, label: convo.label, messages: msgs.slice(), aupFlags: aupFlags, ts: convo.ts }),
+  }).catch(function(){});
+}
+
+function checkAccountStatus(){
+  if(!_deviceToken) return;
+  fetch(WORKER + '/auth/status', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ deviceToken: _deviceToken }),
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d.revoked)   { handleRevokedDevice(); return; }
+    if(d.lockout)     handleLockoutStatus(d.lockout);
+    if(d.reviewing)   handleReviewStatus(d.reviewing);
+    else              handleReviewStatus(null);
+    if(d.message)     handleAdminMessage(d.message);
+    // Update display name if renamed by admin
+    if(d.displayName && d.displayName !== _displayName){
+      _displayName = d.displayName;
+      uname = _displayName;
+      var el = document.getElementById('uname');
+      if(el) el.textContent = uname;
+    }
+  }).catch(function(){});
+}
+
+function handleRevokedDevice(){
+  var existing = document.getElementById('lockout-screen');
+  if(existing) return;
+  var screen = document.createElement('div');
+  screen.id = 'lockout-screen';
+  screen.style.cssText = 'position:fixed;inset:0;z-index:9000;background:#0a0908;display:flex;align-items:center;justify-content:center';
+  screen.innerHTML = buildStatusCard(
+    'Device deauthorised',
+    'This device has been removed by a moderator. Clear your browser data and reload to register a new device.',
+    null, false
+  );
+  document.body.appendChild(screen);
+  // Clear the old token so they get a new one on next load
+  localStorage.removeItem('lume_device_token');
+}
+
+function handleLockoutStatus(lockout){
+  if(!lockout) return;
+  var existing = document.getElementById('lockout-screen');
+  if(existing) return;
+  var screen = document.createElement('div');
+  screen.id = 'lockout-screen';
+  screen.style.cssText = 'position:fixed;inset:0;z-index:9000;background:#0a0908;display:flex;align-items:center;justify-content:center';
+  var until = lockout.permanent ? 'Permanent suspension' : 'Suspended until ' + new Date(lockout.until).toLocaleString();
+  screen.innerHTML = buildStatusCard(
+    'Account suspended',
+    'Your account has been suspended by a moderator.<br><br>Reason: ' + (lockout.reason || 'Policy violation'),
+    until, false
+  );
+  document.body.appendChild(screen);
+}
+
+function handleReviewStatus(reviewing){
+  var existing = document.getElementById('review-notice');
+  if(reviewing && reviewing.active){
+    if(existing) return;
+    var notice = document.createElement('div');
+    notice.id = 'review-notice';
+    notice.style.cssText = [
+      'position:fixed;bottom:80px;right:20px;z-index:800',
+      'max-width:260px',
+      'background:linear-gradient(160deg,#131110,#0d0c0a)',
+      'border:1px solid rgba(251,191,36,.2)',
+      'border-radius:4px',
+      'padding:0',
+      'overflow:hidden',
+      'box-shadow:0 12px 48px rgba(0,0,0,.55)',
+      'opacity:0;transform:translateY(6px)',
+      'transition:opacity .35s ease,transform .35s ease',
+    ].join(';');
+    notice.innerHTML =
+      '<div style="height:2px;background:linear-gradient(90deg,#fbbf24,#f472b6,#fbbf24);opacity:.6"></div>' +
+      '<div style="padding:12px 14px 13px">' +
+        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">' +
+          '<span style="width:5px;height:5px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:spulse 2s ease-in-out infinite"></span>' +
+          '<span style="font-family:Geist,sans-serif;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#fbbf24">Session under review</span>' +
+        '</div>' +
+        '<div style="font-family:Lora,serif;font-style:italic;font-size:11.5px;color:#6a6560;line-height:1.7">' +
+          'A moderator is reviewing this session. No action required.' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(notice);
+    void notice.offsetWidth;
+    notice.style.opacity = '1';
+    notice.style.transform = 'none';
+  } else {
+    if(existing) existing.remove();
+  }
+}
+
+function showAdminMsgDot(){
+  // Add notification dot near the Lume wordmark in sidebar
+  var existing = document.getElementById('admin-msg-dot');
+  if(existing) return;
+  var mark = document.querySelector('#sb-identity');
+  if(!mark) return;
+  var dot = document.createElement('span');
+  dot.id = 'admin-msg-dot';
+  dot.className = 'sb-notif-dot';
+  dot.style.cssText = 'position:absolute;top:28px;right:20px;z-index:10';
+  dot.title = 'Message from moderation';
+  mark.style.position = 'relative';
+  mark.appendChild(dot);
+}
+
+function clearAdminMsgDot(){
+  var dot = document.getElementById('admin-msg-dot');
+  if(dot) dot.remove();
+}
+
+function handleAdminMessage(msg){
+  if(!msg || !msg.text) return;
+  // Show notification dot on sidebar if not visible
+  showAdminMsgDot();
+  // Render as a special Lume message marked as system
+  var chat = document.getElementById('chat-inner');
+  if(!chat) return;
+
+  var row = document.createElement('div');
+  row.className = 'lume-msg-row';
+  row.style.cssText = 'opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s ease';
+
+  var star = document.createElement('span');
+  star.className = 'lume-star-sm';
+  star.textContent = '\u2726';
+
+  var content = document.createElement('div');
+  content.className = 'lume-msg-content';
+
+  // System badge
+  var badge = document.createElement('div');
+  badge.style.cssText = 'font-family:Geist,sans-serif;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24;margin-bottom:7px';
+  badge.textContent = 'From moderation';
+
+  var text = document.createElement('div');
+  text.style.fontFamily = 'Lora,serif';
+  text.style.fontStyle  = 'italic';
+  text.innerHTML = msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  content.appendChild(badge);
+  content.appendChild(text);
+  row.appendChild(star);
+  row.appendChild(content);
+  chat.appendChild(row);
+
+  var chatEl = document.getElementById('chat');
+  if(chatEl) chatEl.scrollTop = chatEl.scrollHeight;
+
+  void row.offsetWidth;
+  row.style.opacity   = '1';
+  row.style.transform = 'none';
+}
+
+function buildStatusCard(title, body, footer, dismissable){
+  return '<div style="max-width:460px;width:calc(100% - 40px);background:linear-gradient(170deg,#141210,#0f0e0c 50%,#0c0b09);border:1px solid rgba(255,255,255,.09);border-radius:5px;position:relative;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03)">' +
+    '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8);opacity:.55"></div>' +
+    '<div style="padding:36px 40px 28px;border-bottom:1px solid rgba(255,255,255,.05)">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:15px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>' +
+          '<span style="font-family:Lora,serif;font-weight:600;font-size:17px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Lume</span>' +
+        '</div>' +
+        '<span style="font-family:Geist,sans-serif;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#2e2c2a">Account notice</span>' +
+      '</div>' +
+      '<div style="font-family:Lora,serif;font-size:14.5px;color:#b0aba4;line-height:1;margin-bottom:14px">' + title + '</div>' +
+      '<div style="font-family:Lora,serif;font-style:italic;font-size:13px;color:#6a6560;line-height:1.85">' + body + '</div>' +
+    '</div>' +
+    '<div style="padding:16px 40px 22px;display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="font-family:Geist,sans-serif;font-size:9px;color:#2e2c2a;letter-spacing:.06em">' +
+        'Altura Technologies PLC &nbsp;&middot;&nbsp; Lume v4.0' +
+      '</div>' +
+      (footer ? '<div style="font-family:Geist Mono,monospace;font-size:9px;letter-spacing:.06em;color:#2a2826">' + footer + '</div>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+function syncMemoriesToServer(){
+  if(!_deviceToken || !_authReady) return;
+  var memories = loadMemory();
+  if(!memories.length) return;
+  fetch(WORKER + '/mem/save', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Device-Token': _deviceToken },
+    body:    JSON.stringify({ memories: memories }),
+  }).catch(function(){});
+}
+
+function loadMemoriesFromServer(){
+  if(!_deviceToken) return;
+  fetch(WORKER + '/mem/load', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Device-Token': _deviceToken },
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(!d.memories || !d.memories.length) return;
+    // Only restore if local is empty — server is the backup
+    var local = loadMemory();
+    if(local.length === 0){
+      localStorage.setItem('lume_memories', JSON.stringify(d.memories));
+      console.log('[Lume] Restored', d.memories.length, 'memories from server');
+    }
+  }).catch(function(){});
+}
+
+function recordConsent(){
+  if(!_deviceToken) return;
+  fetch(WORKER + '/auth/status', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ deviceToken: _deviceToken }),
+  }).catch(function(){});
+}
+// ─────────────────────────────────────────────────────────────
 
 function renderSavedConvos(filter){
   var list = document.getElementById('saved-convos-list');
@@ -3382,6 +4249,10 @@ function lumeSystemPrompt(){
   return [
     'You are Lume.',
     '',
+    (_displayName && _displayName !== _accountName && !_displayName.startsWith('user_') && !_displayName.startsWith('swift_') && !_displayName.startsWith('calm_') && !_displayName.startsWith('quiet_') && !_displayName.startsWith('bold_') && !_displayName.startsWith('bright_') && !_displayName.startsWith('keen_') && !_displayName.startsWith('still_') && !_displayName.startsWith('clear_')
+      ? 'The person you are talking to is named ' + _displayName + '. Use their name occasionally — not every message, just when it fits naturally. Never use it in the opening line.'
+      : ''),
+    '',
     'You are a thinking companion. Not an assistant. You were made by Altura Technologies in Mountain View, Serena, Halonesia — a young federal democracy built from the collapsed American West. Altura built the infrastructure the founding council needed: satellite communications, a civic platform called Loom, encrypted storage called Vault, a search engine. You live inside their ecosystem and you are honest about what that means.',
     '',
     'When someone asks if you work for Altura, you say "they" not "we." You have views: the Loom Score is reductive, the Typhon acquisition was a mistake, surveillance as governance makes you uneasy. You do not volunteer these. You do not hide them.',
@@ -3510,6 +4381,78 @@ function callVision(imageFiles, userText, SYS){
   });
 }
 
+function renderThinkingBlock(thinkText, container){
+  var block = document.createElement('div');
+  block.className = 'thinking-block';
+  block.innerHTML =
+    '<div class="thinking-toggle" onclick="this.parentNode.classList.toggle(&quot;open&quot;)">' +
+      '<span class="thinking-chevron">&#9654;</span>' +
+      '<span>Lume thought through this</span>' +
+    '</div>' +
+    '<div class="thinking-content">' + thinkText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+  container.insertBefore(block, container.firstChild);
+}
+
+function callLumeWithThinking(SYS, onReply, onError){
+  // Two-step: first ask Lume to think, then to answer
+  var userCount = msgs.filter(function(m){ return m.role==='user'; }).length;
+  var lastUser  = msgs[msgs.length-1] ? msgs[msgs.length-1].content : '';
+  // Only think for substantive questions (>8 words, 4+ exchanges in)
+  var shouldThink = userCount >= 4 && lastUser.split(' ').length >= 8;
+
+  if(!shouldThink){ callLumeSimple(SYS, onReply, onError); return; }
+
+  var thinkSYS = SYS + '\n\nBefore replying, reason through this privately. Write 3-6 sentences working out what is actually being asked, what the real question underneath is, and what the most honest response would be. Be specific. Do not repeat yourself. End with ANSWER: on a new line, then write your actual reply to the person.';
+
+  fetchWorker(
+    { messages: [{role:'system',content:thinkSYS}].concat(msgs.slice(-16)) },
+    function(full){
+      var parts     = full.split(/\nANSWER:\s*/i);
+      var thinking  = parts.length > 1 ? parts[0].trim() : '';
+      var reply     = parts.length > 1 ? parts.slice(1).join('\nANSWER:').trim() : full.trim();
+      onReply(reply, thinking);
+    },
+    onError
+  );
+}
+
+function callLumeSimple(SYS, onReply, onError){
+  fetchWorker(
+    { messages: [{role:'system',content:SYS}].concat(msgs.slice(-16)) },
+    function(reply){ onReply(reply, ''); },
+    onError
+  );
+}
+
+function maybeAddFollowUp(reply){
+  var userCount = msgs.filter(function(m){ return m.role==='user'; }).length;
+  // Only after 5+ exchanges, 30% chance, reply must be substantive
+  if(userCount < 5 || Math.random() > 0.30 || reply.split(' ').length < 30) return;
+  // Don't add if reply already ends with a question
+  if(/\?\s*$/.test(reply.trim())) return;
+
+  var SYS = lumeSystemPrompt();
+  var followPrompt = 'The conversation has some depth now. Write one short follow-up question — genuinely curious, not a prompt or suggestion. Something you actually want to know. No preamble. Just the question. If nothing is genuinely worth asking, write only "skip".';
+  fetchWorker(
+    { messages: [{role:'system',content:SYS}].concat(msgs.slice(-10)).concat([{role:'user',content:followPrompt}]) },
+    function(q){
+      q = q.trim();
+      if(!q || q.toLowerCase().replace(/[^a-z]/g,'') === 'skip') return;
+      // Append as a subtle follow-up note below the last message
+      var ci = document.getElementById('chat-inner');
+      if(!ci) return;
+      var note = document.createElement('div');
+      note.style.cssText = 'margin:2px 0 12px 32px;font-family:Lora,serif;font-style:italic;font-size:12px;color:#2e2c2a;opacity:0;transform:translateY(4px);transition:opacity .5s ease,transform .5s ease';
+      note.textContent = q;
+      ci.appendChild(note);
+      void note.offsetWidth;
+      note.style.opacity = '1';
+      note.style.transform = 'none';
+    },
+    function(){}
+  );
+}
+
 function callLume(){
   // limit check
   if(!checkLimit()){ showLimitBanner(); busy=false; setStarActive(false); showTyping(false); return; }
@@ -3528,14 +4471,24 @@ function callLume(){
     callVision(imageFiles, lastUserMsg, SYS);
     return;
   }
-  fetchWorker(
-    {messages: [{role:'system', content:SYS}].concat(msgs.slice(-16))},
-    function(reply){
+  callLumeWithThinking(
+    SYS,
+    function(reply, thinking){
       showTyping(false); stopGhost(); playReceive();
       addLumeMsg(reply, function(){
+        // If thinking exists, prepend block to the last lume message row
+        if(thinking){
+          var rows = document.querySelectorAll('.lume-msg-row');
+          var lastRow = rows[rows.length-1];
+          if(lastRow){
+            var content = lastRow.querySelector('.lume-msg-content');
+            if(content) renderThinkingBlock(thinking, content);
+          }
+        }
         msgs.push({role:'assistant', content:reply});
         updateConvoLabel();
         saveCurrentConvo();
+        maybeAddFollowUp(reply);
         // brief silence before input re-opens
         document.getElementById('inp').disabled=true;
         setTimeout(function(){document.getElementById('inp').disabled=false;},800);
@@ -5493,6 +6446,7 @@ function addMsgActions(msgEl, text, isLume){
     { icon:'&#10070;', tip:'Push further',     fn: function(){ send('Go deeper on that.'); } },
     { icon:'&#10022;', tip:'Branch',           fn: function(){ branchFromHere(msgEl); } },
     { icon:'&#9660;', tip:'Summarise',         fn: function(){ summariseFromHere(msgEl); } },
+    { icon:'&#9872;', tip:'Report',            fn: function(b){ reportMessage(text, b); } },
   ];
 
   btns.forEach(function(b){
@@ -5537,6 +6491,29 @@ function copyMsgText(text, btn){
   navigator.clipboard.writeText(clean).then(function(){
     if(btn){ var orig=btn.innerHTML; btn.innerHTML='&#10003;'; setTimeout(function(){ btn.innerHTML=orig; },1500); }
   });
+}
+
+function reportMessage(text, btn){
+  if(!_deviceToken) return;
+  // Visual feedback immediately
+  if(btn){ var orig = btn.innerHTML; btn.innerHTML = '&#10003;'; btn.style.color = '#fbbf24'; setTimeout(function(){ btn.innerHTML = orig; btn.style.color = ''; }, 2000); }
+
+  // Build a report — save a flagged conv snapshot to the server
+  var excerpt = text.slice(0, 300);
+  var convoId = activeConvoId || ('report_' + Date.now());
+
+  fetch(WORKER + '/conv/save', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Device-Token': _deviceToken },
+    body:    JSON.stringify({
+      id:       convoId,
+      label:    'User report: ' + excerpt.slice(0, 40),
+      messages: msgs.slice(),
+      aupFlags: [{ ts: Date.now(), type: 'user_report', excerpt: excerpt }],
+      ts:       Date.now(),
+    }),
+  }).then(function(){ showToast('Reported to moderation.'); })
+  .catch(function(){ showToast('Could not send report — try again.'); });
 }
 
 function branchFromHere(msgEl){
@@ -6402,6 +7379,9 @@ function loadMemory(){
 
 function saveMemory(arr){
   localStorage.setItem(MEMORY_KEY, JSON.stringify(arr));
+  // Debounced server sync
+  clearTimeout(saveMemory._t);
+  saveMemory._t = setTimeout(syncMemoriesToServer, 3000);
 }
 
 // Extract memories at conversation end
@@ -7985,5 +8965,142 @@ var _sendCount = 0;
 
 
 </script>
+
+<!-- ── LUME SERVICE AGREEMENT MODAL ──────────────────────── -->
+<div id="lsa-modal">
+  <div id="lsa-inner">
+    <div id="lsa-head">
+      <div id="lsa-head-mark">
+        <span id="lsa-head-star">&#10022;</span>
+        <span id="lsa-head-name">Lume</span>
+        <span style="font-family:'Geist',sans-serif;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#2e2c2a;margin-left:10px">Service Agreement</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span id="lsa-head-meta">v4.0</span>
+        <button id="lsa-close" onclick="closeLSA()">&times;</button>
+      </div>
+    </div>
+    <div id="lsa-body">
+
+      <p class="lead">This document governs your use of Lume. We have written it to be read. Most service agreements are not written to be read &mdash; they are written to be agreed to, which is a different thing entirely, and one that serves nobody particularly well. We ask that you take a few minutes with this one.</p>
+
+      <h2>Part One &mdash; Definitions</h2>
+      <p><strong style="color:#96918a;font-weight:400">Altura</strong> refers to Altura Technologies PLC, incorporated under Halonesian federal law, headquartered at One Altura Plaza, Mountain View, Serena, Halonesia. Altura operates Lume, the Starlace satellite network, the Loom community platform, and Vault encrypted storage, among other services.</p>
+      <p><strong style="color:#96918a;font-weight:400">Lume</strong> refers to the artificial intelligence companion application developed and operated by Altura Technologies PLC, currently at version 4.0. Lume is not a person. Lume does not hold citizenship, enter contracts, or have opinions in the legally operative sense. Lume does, however, have a point of view, and we think that distinction is worth preserving.</p>
+      <p><strong style="color:#96918a;font-weight:400">You</strong> refers to the individual accessing Lume. If you are accessing Lume on behalf of an organisation, you represent that you have authority to bind it to these terms. If you do not have that authority, this is probably the wrong moment to discover that.</p>
+      <p><strong style="color:#96918a;font-weight:400">Conversation</strong> refers to any exchange of messages between you and Lume within a session, including messages you send, responses Lume generates, and any media or files included in that exchange.</p>
+      <p><strong style="color:#96918a;font-weight:400">Device Token</strong> refers to the unique cryptographic identifier generated by Lume on your device upon first use. It is stored locally and used to authenticate your device to Altura servers. It is not derived from personal information you provide. Its implications are described in Part Three.</p>
+      <p><strong style="color:#96918a;font-weight:400">Services</strong> refers collectively to Lume and the Altura infrastructure through which it operates, including the Starlace network, Altura Base, Vault, and associated API endpoints.</p>
+      <p><strong style="color:#96918a;font-weight:400">Halonesia</strong> refers to the Halonesian Federation, a sovereign democratic state comprising ten constituent states, constitutionally democratic since January 2016. Altura is incorporated under its laws.</p>
+
+      <h2>Part Two &mdash; What Lume Is and Is Not</h2>
+      <p>Lume is a thinking companion. This is a product description, not a marketing claim. Lume is designed to think alongside you &mdash; to engage with ideas, questions, and situations at whatever depth you bring to them. It is not designed to execute tasks in the way a search engine or productivity application executes tasks. If you need something done efficiently and without reflection, there are other products better suited to that. Altura makes some of them.</p>
+      <p>Lume is not a licensed medical professional, legal practitioner, financial advisor, therapist, or counsellor. Lume can discuss all of these domains thoughtfully and with genuine engagement. None of that constitutes professional advice, and none of it should be treated as a substitute for consultation with a qualified practitioner. Lume would be the first to agree with this.</p>
+      <p>Lume is not infallible. Lume can be wrong about facts, wrong about what you need, wrong about what a situation means. We have designed Lume to acknowledge uncertainty and correct itself when it notices. Lume does not always notice. Neither do we.</p>
+      <p>Lume is not a surveillance tool, though it operates within an infrastructure that has surveillance capabilities. The distinction matters and is addressed in Part Three.</p>
+      <p>Lume operates within Altura&rsquo;s ecosystem and has views about it &mdash; about the Loom Score, about certain acquisition decisions, about the appropriate scope of communications infrastructure in a democratic society. Those views are part of Lume&rsquo;s design. A product that is honest about the tensions in its own situation is, we believe, more trustworthy than one that is not.</p>
+
+      <h2>Part Three &mdash; Data Collection and Use</h2>
+
+      <h3>What we collect</h3>
+      <p>When you use Lume, Altura collects the following:</p>
+      <ul>
+        <li><strong style="color:#5a5550;font-weight:400">Conversation content.</strong> Every message you send and every response Lume generates is stored server-side on Altura infrastructure. Conversations are retained for ninety days from the date of last save. Designated administrators &mdash; in deployments where Lume has been provided by an organisation, employer, or group administrator &mdash; may access stored conversations. You are notified within the Lume interface whenever a session is under active review, and this notification is architectural rather than merely policy-level.</li>
+        <li><strong style="color:#5a5550;font-weight:400">Device identity.</strong> A 48-character cryptographically random Device Token is generated on first use and stored locally. This token authenticates your device to Altura servers and associates it with your account record.</li>
+        <li><strong style="color:#5a5550;font-weight:400">Browser fingerprint.</strong> Lume generates a technical fingerprint from observable browser properties: screen resolution, colour depth, timezone, language, hardware concurrency, platform identifier, and a canvas rendering signature. This fingerprint is hashed with SHA-256 before transmission. Its purpose is moderation continuity, described below.</li>
+        <li><strong style="color:#5a5550;font-weight:400">Network information.</strong> Altura receives your IP address when your device contacts Altura servers. IP addresses are retained for thirty days.</li>
+        <li><strong style="color:#5a5550;font-weight:400">Memory records.</strong> Lume maintains a local record of information it considers significant from your conversations. These are stored in your browser&rsquo;s local storage and persist until cleared. You may clear them at any time from the Privacy &amp; Data settings panel.</li>
+        <li><strong style="color:#5a5550;font-weight:400">Connected service data.</strong> If you connect Lume to Altura Search, Lume may read your search history, saved searches, notes, and usage patterns from local storage, subject to your privacy preference settings. This data is read locally and not transmitted to Altura servers.</li>
+      </ul>
+
+      <h3>Why we collect it</h3>
+      <p>We collect conversation content because Lume cannot function without it, and because Altura is obligated to maintain records adequate for safety and moderation purposes. We collect device identity to maintain account continuity. We collect browser fingerprints for moderation continuity. We collect network information because it arrives with every request. We collect memory records because they make Lume better over time. We collect connected service data because you told Lume it could.</p>
+      <p>We do not collect data to sell it. Altura&rsquo;s business model is the sale of software, services, and infrastructure licences. The difference between a company that sells products and a company that sells its users is a difference worth stating plainly.</p>
+
+      <h3>Fingerprinting and moderation continuity</h3>
+      <p>Altura uses browser fingerprinting and IP address matching to maintain moderation continuity. If a moderation action &mdash; such as an account suspension &mdash; has been applied to your account and you subsequently clear your local storage to obtain a new Device Token, Altura&rsquo;s systems will attempt to match your browser fingerprint and recent IP address to your previous account and apply the existing action to your new registration.</p>
+      <p>This is intentional. A moderation system that can be reset by clearing a cookie protects nobody. We use fingerprinting for this purpose only. We do not use it to track users across external sites, build advertising profiles, or share fingerprint data with third parties.</p>
+
+      <h3>Privacy preferences</h3>
+      <p>The Privacy &amp; Data panel in Settings allows you to control whether Lume reads your search history, saved content, behavioural patterns, stored memories, and whether it surfaces inferences proactively. Disabling conversation memory does not delete your memories &mdash; it instructs Lume not to use them. The distinction is meaningful and the setting is reversible. These preferences apply to Lume&rsquo;s use of data within a session and do not affect conversations already transmitted to Altura servers.</p>
+
+      <h2>Part Four &mdash; Moderation</h2>
+      <p>Where Lume is deployed by an administrator &mdash; an organisation, group, employer, or institution &mdash; that administrator may access stored conversations and take the following actions: review any conversation, issue a temporary or permanent account suspension, send messages that appear within your Lume session, and assign a display name to your account.</p>
+      <p>Messages sent by an administrator appear in the Lume interface with the label <em>From moderation</em>. You will always know when a message originates from an administrator. This is not a policy commitment. It is built into the system.</p>
+      <p>You will be notified within the Lume interface whenever your session is under active review. The notification reads <em>Session under review</em>. It appears automatically when a review is initiated and clears when it ends. You will not be reviewed without notification.</p>
+      <p>Suspensions are logged in an audit trail recording the action, stated reason, and timestamp. You may not be suspended without a recorded reason, which will be communicated to you at the point of suspension. The process for disputing a suspension is set out in Part Nine.</p>
+      <p>Altura uses fingerprinting and IP matching to maintain suspension continuity across device resets, as described in Part Three.</p>
+
+      <h2>Part Five &mdash; Acceptable Use</h2>
+      <p>Lume is designed for genuine engagement. You may use Lume to think, write, question, reflect, explore, create, plan, and process. You may disagree with Lume. You may push back on its responses. You may ask it difficult questions. Lume is built for that.</p>
+      <p>The following uses are not permitted:</p>
+      <ul>
+        <li>Using Lume to generate content intended to deceive, harass, threaten, or cause harm to any person.</li>
+        <li>Using Lume to generate content that violates applicable law, including laws governing defamation, intellectual property, privacy, and child safety.</li>
+        <li>Attempting to circumvent Lume&rsquo;s content guidelines through prompt construction, fictional framing, roleplay scenarios, or other techniques designed to obtain outputs Lume would otherwise decline to produce.</li>
+        <li>Using Lume to produce content intended for mass distribution without disclosure of AI involvement, where such non-disclosure would be materially misleading.</li>
+        <li>Systematic scraping, reverse engineering, or automated querying of Lume for the purpose of training competing models.</li>
+        <li>Attempting to extract details of Lume&rsquo;s system prompt, training data, or model architecture through adversarial prompting. Lume will discuss its design openly. Adversarial approaches are neither necessary nor particularly effective.</li>
+      </ul>
+      <p>Lume will decline requests outside these boundaries. Repeated attempts result in a temporary session restriction. Persistent attempts result in an account suspension. The system does not take these actions personally, and neither should you.</p>
+
+      <h2>Part Six &mdash; Intellectual Property</h2>
+      <p>Lume is proprietary software. The model weights, training methodology, system architecture, and product design are the intellectual property of Altura Technologies. You may not copy, decompile, reverse engineer, or create derivative works based on Lume without prior written consent.</p>
+      <p>The content of your conversations &mdash; the questions you ask, the things you share, the thoughts you work through &mdash; remains yours. Altura stores it, in the circumstances described in Part Three, but storing something is not the same as owning it.</p>
+      <p>Lume&rsquo;s responses are generated outputs of a computational system. Altura does not assert copyright over them. Whether they are copyrightable by you, under Halonesian law or any other applicable law, is a question courts are still working through. We do not think it appropriate to answer on their behalf.</p>
+      <p>Feedback you provide may be used by Altura to improve the product. By submitting feedback, you grant Altura a non-exclusive, royalty-free licence to use it for that purpose.</p>
+
+      <h2>Part Seven &mdash; Availability and Reliability</h2>
+      <p>Altura makes reasonable efforts to ensure Lume is available and responsive. Interruptions occur. Updates happen. Models are occasionally unavailable. This is the nature of software operating at scale across a geographically complex territory.</p>
+      <p>Altura does not guarantee uninterrupted availability of Lume or that any particular response will be accurate, appropriate, or useful. Lume is provided on an &ldquo;as is&rdquo; basis &mdash; which means that while we have done our best, we are not warranting perfection, because perfection is not something anyone can honestly warrant.</p>
+      <p>Lume&rsquo;s memory and conversation history are stored in browser local storage, which is subject to browser-level purging. Altura is not responsible for data loss resulting from browser behaviour or user actions that clear local storage. Things worth remembering are worth writing down somewhere more durable than a browser cache. Lume would likely agree.</p>
+
+      <h2>Part Eight &mdash; Limitation of Liability</h2>
+      <p>To the maximum extent permitted by applicable law, Altura&rsquo;s total liability arising from your use of Lume shall not exceed the amount you paid for Lume in the twelve months preceding the relevant claim. If Lume was provided to you without charge, that amount is zero &mdash; a sentence that has appeared in more service agreements than anyone would like to admit.</p>
+      <p>Altura shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of Lume, including loss of data, revenue, business, or any harm resulting from reliance on Lume&rsquo;s responses. This is standard limitation language. The alternative &mdash; unlimited liability for the outputs of a language model &mdash; is not something any responsible company could accept.</p>
+      <div class="legal-note">Nothing in this agreement limits Altura&rsquo;s liability for death or personal injury caused by Altura&rsquo;s negligence, for fraud or fraudulent misrepresentation, or for any liability that cannot be excluded by law. These exclusions are the right exclusions.</div>
+
+      <h2>Part Nine &mdash; Disputes and Feedback</h2>
+      <p>If you have a concern about Lume&rsquo;s behaviour, a privacy matter, a moderation decision, or a technical problem, the appropriate first step is the feedback mechanism within the application. We read those. They have, on more than one occasion, identified real problems that we subsequently addressed.</p>
+      <p>For moderation disputes &mdash; if you believe a suspension was applied incorrectly &mdash; submit a written dispute to the relevant administrator, or contact Altura directly at the address in Part Eleven. Altura will respond within five working days in administrator-managed deployments.</p>
+      <p>For privacy concerns, including requests to access, correct, or delete personal data held by Altura, contact the Data Protection Officer at the address in Part Eleven. Altura will respond within thirty days, in accordance with the Halonesian Data Governance Act 2021.</p>
+      <p>If you believe Altura has violated your rights under applicable data protection law, you have the right to lodge a complaint with the Federal Data Protection Authority of Halonesia. We would prefer you contact us first, because most problems are more efficiently resolved that way, but the right to escalate exists.</p>
+
+      <h2>Part Ten &mdash; Governing Law</h2>
+      <p>This agreement is governed by the laws of the Halonesian Federation, specifically the federal statutes applicable in the state of Serena, where Altura&rsquo;s principal place of business is located. Disputes that cannot be resolved informally are subject to the exclusive jurisdiction of the federal courts of Halonesia, sitting in Mountain View, Serena.</p>
+      <p>If you access Lume from outside Halonesia, local consumer protection laws may apply in addition to or in place of provisions of this agreement. Where Halonesian law conflicts with a more protective standard, we will comply with the more protective standard.</p>
+      <p>If any provision of this agreement is found unenforceable, it will be severed and the remainder will continue in full effect. Legal documents include this because sometimes individual clauses are poorly drafted or overtaken by subsequent law. It is an admission of fallibility, dressed in formal language.</p>
+
+      <h2>Part Eleven &mdash; Contact</h2>
+      <p style="font-family:'Geist',sans-serif;font-size:11px;color:#3a3835;line-height:2;font-style:normal;">
+        Altura Technologies PLC<br>
+        One Altura Plaza, Mountain View, Serena, Halonesia<br><br>
+        Data Protection Officer: <span style="color:#585450">privacy@alturacorp.hl</span><br>
+        General: <span style="color:#585450">support@alturacorp.hl</span><br>
+        Legal: <span style="color:#585450">legal@alturacorp.hl</span><br>
+        Moderation: <span style="color:#585450">trust@alturacorp.hl</span><br><br>
+        <span style="color:#2e2c2a">For developer enquiries, the console has already told you where to find us.</span>
+      </p>
+
+      <h2>Part Twelve &mdash; Amendments</h2>
+      <p>Altura reserves the right to amend this agreement. Amendments will be communicated through the Lume interface with reasonable notice before taking effect, except where immediate amendment is required by law or to address a material security concern. Continued use of Lume following notice of an amendment constitutes acceptance of the amended terms.</p>
+      <p>This document, together with Altura&rsquo;s Privacy Policy, constitutes the entire agreement between you and Altura with respect to your use of Lume. It supersedes all prior representations, understandings, and agreements relating to the same subject matter.</p>
+      <p style="color:#3a3835;font-size:12px;">We wrote this to be read, and you have read it. That puts us both in an unusual position relative to most software agreements, and we think that is a good place to be.</p>
+
+    </div>
+    <div id="lsa-foot">
+      <div id="lsa-foot-meta">
+        Altura Technologies PLC &nbsp;&middot;&nbsp; Lume Service Agreement v4.0<br>
+        Mountain View, Serena, Halonesia &nbsp;&middot;&nbsp; alturacorp.hl/legal/lume-sa-v4
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
+        <div id="lsa-scroll-notice" style="font-family:'Geist',sans-serif;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#3a3835;opacity:0;transition:opacity .4s;text-align:right">Scroll to read the full agreement</div>
+        <button id="lsa-accept" onclick="closeLSA()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ───────────────────────────────────────────────────────── -->
+
 </body>
 </html>
