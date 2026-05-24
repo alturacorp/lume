@@ -3466,7 +3466,6 @@ function init(){
   });
   showConsentScreen();
   initTypingReporter();
-  restorePersistedCards();
 }
 init();
 
@@ -3550,7 +3549,8 @@ function beginChat(){
     var ma=document.getElementById('main-area');ma.style.display='block';
     // activate chat panel
     var cp=document.getElementById('panel-chat');cp.style.display='flex';void cp.offsetWidth;cp.classList.add('active');
-    started=true;localStorage.setItem('ac_ret','1');
+    started=true;
+  setTimeout(restorePersistedCards, 500); // restore after DOM readylocalStorage.setItem('ac_ret','1');
     addDateDiv('Today');
     setTimeout(function(){
       showTyping(true);
@@ -3910,8 +3910,17 @@ function restorePersistedCards(){
   try {
     var stored = JSON.parse(localStorage.getItem('lume_persistent_cards') || '[]');
     var cutoff = Date.now() - 2 * 60 * 60 * 1000;
-    stored.filter(function(c){ return (c.sentAt || 0) > cutoff; })
-          .forEach(function(card){ handleAdminCard(card, true); });
+    stored.filter(function(card){ return (card.sentAt || 0) > cutoff; })
+          .forEach(function(card){
+            if(card._type === 'support_connect' || card._type === 'support_disconnect'){
+              // Restore support connect/disconnect cards
+              var wasDisconnected = card._type === 'support_disconnect';
+              _supportAgentName = card.agentName || 'Support';
+              renderSupportCard(wasDisconnected, true);
+            } else if(card.text) {
+              handleAdminCard(card, true);
+            }
+          });
   } catch(e){}
 }
 
@@ -4069,12 +4078,12 @@ function handleSupportDisconnect(disc){
   renderSupportCard(true);
 }
 
-function renderSupportCard(disconnected){
+function renderSupportCard(disconnected, fromStorage){
   var ci = document.getElementById('chat-inner');
   if(!ci) return;
 
-  // Save to persistent storage so it survives reload
-  saveCardToStorage({
+  // Save to persistent storage so it survives reload (skip if restoring)
+  if(!fromStorage) saveCardToStorage({
     _type:       disconnected ? 'support_disconnect' : 'support_connect',
     agentName:   _supportAgentName,
     disconnected: disconnected,
@@ -4902,12 +4911,28 @@ function lumeSystemPrompt(){
 }
 
 function fetchWorker(payload, onSuccess, onError){
+  var headers = {'Content-Type': 'application/json'};
+  if(_deviceToken) headers['X-Device-Token'] = _deviceToken;
   fetch(WORKER + '/lume', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: headers,
     body: JSON.stringify(payload)
   })
-  .then(function(r){ return r.json(); })
+  .then(function(r){
+    // If Lume is server-side disabled, treat as holding state not an error
+    if(r.status === 403){
+      return r.json().then(function(d){
+        if(d.error === 'lume_disabled'){
+          _lumeDisabled = true;
+          handleLumeDisabled(true);
+          onSuccess('A support agent is handling this conversation.');
+          throw new Error('__handled__');
+        }
+        throw new Error('HTTP 403');
+      });
+    }
+    return r.json();
+  })
   .then(function(data){
     var reply = '';
     if(data.choices && data.choices[0] && data.choices[0].message) reply = data.choices[0].message.content || '';
@@ -4916,7 +4941,10 @@ function fetchWorker(payload, onSuccess, onError){
     if(!reply) throw new Error('empty');
     onSuccess(reply);
   })
-  .catch(function(e){ onError(e); });
+  .catch(function(e){
+    if(e && e.message === '__handled__') return;
+    onError(e);
+  });
 }
 
 // ── VISION via Pollinations ──
