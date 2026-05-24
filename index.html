@@ -2008,6 +2008,107 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
 }
 @keyframes npulse{0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.2);}}
 /* ────────────────────────────────────────────────────────── */
+
+/* ── SUPPORT CARDS ──────────────────────────────────────────── */
+.support-card{
+  margin:8px auto 20px;
+  max-width:480px;
+  background:linear-gradient(160deg,#0f1210 0%,#0c0f0d 60%,#0a0c0a 100%);
+  border:1px solid rgba(74,222,128,.14);
+  border-radius:5px;
+  position:relative;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(74,222,128,.06);
+}
+.support-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#38bdf8,#4ade80);
+  background-size:300% auto;opacity:.7;
+}
+.support-card.disconnected{
+  background:linear-gradient(160deg,#111110 0%,#0e0d0c 60%,#0c0b09 100%);
+  border-color:rgba(255,255,255,.07);
+  box-shadow:0 12px 40px rgba(0,0,0,.4);
+}
+.support-card.disconnected::before{
+  background:linear-gradient(90deg,#585450,#3a3835,#585450);
+  opacity:.4;
+}
+.support-card-inner{padding:24px 28px 22px;}
+.support-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.support-card-mark{display:flex;align-items:center;gap:9px;}
+.support-card-dot{
+  width:7px;height:7px;border-radius:50%;background:#4ade80;
+  animation:spulse 2s ease-in-out infinite;flex-shrink:0;
+}
+.support-card.disconnected .support-card-dot{
+  background:#585450;animation:none;
+}
+.support-card-label{
+  font-family:'Geist',sans-serif;font-size:8.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:#4ade80;
+}
+.support-card.disconnected .support-card-label{color:#3a3835;}
+.support-card-badge{
+  font-family:'Geist',sans-serif;font-size:8px;letter-spacing:.1em;
+  text-transform:uppercase;color:#2e2c2a;
+}
+.support-card-title{
+  font-family:'Lora',serif;font-size:15px;color:#c4bfb8;
+  line-height:1.3;margin-bottom:8px;
+}
+.support-card.disconnected .support-card-title{color:#585450;}
+.support-card-body{
+  font-family:'Lora',serif;font-style:italic;font-size:12.5px;
+  color:#6a6560;line-height:1.8;
+}
+.support-card-footer{
+  padding:12px 28px 16px;
+  border-top:1px solid rgba(74,222,128,.07);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.support-card.disconnected .support-card-footer{border-top-color:rgba(255,255,255,.04);}
+.support-card-agent{
+  font-family:'Geist',sans-serif;font-size:9px;letter-spacing:.08em;color:#2e2c2a;
+}
+/* Report confirmation card */
+.report-confirm-card{
+  margin:8px auto 20px;max-width:480px;
+  background:linear-gradient(160deg,#131110,#0d0c0a);
+  border:1px solid rgba(255,255,255,.08);border-radius:5px;
+  position:relative;overflow:hidden;
+  box-shadow:0 16px 48px rgba(0,0,0,.5);
+}
+.report-confirm-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8);opacity:.5;
+}
+/* Support agent message */
+.lume-msg-row.support-msg .lume-star-sm{color:#4ade80;opacity:.7;}
+.support-agent-label{
+  font-family:'Geist',sans-serif;font-size:8px;letter-spacing:.16em;
+  text-transform:uppercase;color:#4ade80;margin-bottom:7px;
+}
+/* ────────────────────────────────────────────────────────────── */
+
+/* ── MAINTENANCE SCREEN ──────────────────────────────────────── */
+#maintenance-screen{
+  position:fixed;inset:0;z-index:9100;
+  background:#0a0908;
+  display:flex;align-items:center;justify-content:center;
+}
+.maint-card{
+  max-width:460px;width:calc(100% - 40px);
+  background:linear-gradient(170deg,#141210,#0f0e0c 50%,#0c0b09);
+  border:1px solid rgba(255,255,255,.08);border-radius:5px;
+  position:relative;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.7);
+}
+.maint-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#fbbf24,#f472b6,#a78bfa,#f472b6,#fbbf24);
+  background-size:300% auto;opacity:.6;
+}
+/* ────────────────────────────────────────────────────────────── */
 </style>
 </head>
 <body class="bg-[#100f0d] text-t0 font-geist text-[15px]">
@@ -3070,6 +3171,13 @@ var ONBOARDING_KEY = 'lume_onboarding_done';
 
 var ONBOARDING_STEPS = [
   {
+    id:   'name',
+    type: 'text',
+    q:    'Before we start — what should I call you?',
+    key:  'lume_user_name',
+    placeholder: 'Your name',
+  },
+  {
     id:      'thinking_style',
     q:       'How do you tend to think through things?',
     options: [
@@ -3132,34 +3240,81 @@ function showOnboardingStep(stepIdx){
   block.id  = 'onboarding-block';
   block.style.cssText = 'margin:12px auto;max-width:500px;opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s ease';
 
-  var optionsHtml = step.options.map(function(opt, i){
-    return '<button onclick="pickOnboardingOption(' + stepIdx + ',' + i + ')" style="' +
-      'display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;' +
-      'background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:3px;' +
-      'font-family:Lora,serif;font-style:italic;font-size:12.5px;color:#6a6560;cursor:pointer;' +
-      'transition:all .2s;line-height:1.5' +
-      '" onmouseover="this.style.background=\'rgba(167,139,250,.06)\';this.style.borderColor=\'rgba(167,139,250,.2)\';this.style.color=\'#96918a\'" ' +
-      'onmouseout="this.style.background=\'rgba(255,255,255,.02)\';this.style.borderColor=\'rgba(255,255,255,.06)\';this.style.color=\'#6a6560\'">' +
-      opt.label +
-      '</button>';
-  }).join('');
-
   var progress = (stepIdx + 1) + ' of ' + ONBOARDING_STEPS.length;
-
-  block.innerHTML =
+  var header =
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">' +
       '<span style="font-size:11px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>' +
       '<span style="font-family:Geist,sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#2e2c2a">A few things &middot; ' + progress + '</span>' +
     '</div>' +
-    '<div style="font-family:Lora,serif;font-size:14px;color:#96918a;line-height:1.7;margin-bottom:14px">' + step.q + '</div>' +
-    optionsHtml;
+    '<div style="font-family:Lora,serif;font-size:14px;color:#96918a;line-height:1.7;margin-bottom:14px">' + step.q + '</div>';
 
-  ci.appendChild(block);
+  var bodyHtml;
+  if(step.type === 'text'){
+    bodyHtml =
+      '<div style="display:flex;gap:8px">' +
+        '<input id="onboarding-name-input" placeholder="' + (step.placeholder||'') + '" maxlength="48" style="' +
+          'flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:3px;' +
+          'padding:10px 13px;color:#c4bfb8;font-family:Lora,serif;font-style:italic;font-size:13px;outline:none;' +
+          'transition:border-color .2s' +
+        '">' +
+        '<button onclick="submitOnboardingName(' + stepIdx + ')" style="' +
+          'padding:10px 18px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:3px;' +
+          'color:#a78bfa;font-family:Geist,sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap' +
+        '">Continue</button>' +
+      '</div>';
+  } else {
+    bodyHtml = step.options.map(function(opt, i){
+      return '<button onclick="pickOnboardingOption(' + stepIdx + ',' + i + ')" style="' +
+        'display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;' +
+        'background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:3px;' +
+        'font-family:Lora,serif;font-style:italic;font-size:12.5px;color:#6a6560;cursor:pointer;' +
+        'transition:all .2s;line-height:1.5' +
+        '" onmouseover=&quot;this.style.background=rgba(167,139,250,.06);this.style.borderColor=rgba(167,139,250,.2);this.style.color=#96918a&quot; ' +
+        'onmouseout=&quot;this.style.background=rgba(255,255,255,.02);this.style.borderColor=rgba(255,255,255,.06);this.style.color=#6a6560&quot;>' +
+        opt.label +
+        '</button>';
+    }).join('');
+  }
+
+  block.innerHTML = header + bodyHtml;
+
+  if(step.type === 'text'){
+    setTimeout(function(){
+      var inp = document.getElementById('onboarding-name-input');
+      if(inp){
+        inp.focus();
+        inp.addEventListener('keydown', function(e){
+          if(e.key === 'Enter') submitOnboardingName(stepIdx);
+        });
+      }
+    }, 450);
+  }
+
+    ci.appendChild(block);
   var chat = document.getElementById('chat');
   if(chat) chat.scrollTop = chat.scrollHeight;
   void block.offsetWidth;
   block.style.opacity   = '1';
   block.style.transform = 'none';
+}
+
+function submitOnboardingName(stepIdx){
+  var inp  = document.getElementById('onboarding-name-input');
+  var name = inp ? inp.value.trim() : '';
+  // Allow skipping with empty
+  if(name){
+    localStorage.setItem('lume_user_name', name);
+    _onboardingAnswers.name = name;
+    // Update display name in UI immediately
+    uname = name;
+    var unameEl = document.getElementById('uname');
+    if(unameEl) unameEl.textContent = name;
+    var uavEl = document.getElementById('uav');
+    if(uavEl) uavEl.textContent = name.charAt(0).toUpperCase();
+  }
+  var block = document.getElementById('onboarding-block');
+  if(block){ block.style.opacity='0'; block.style.transform='translateY(-4px)'; setTimeout(function(){ if(block.parentNode) block.remove(); }, 400); }
+  setTimeout(function(){ showOnboardingStep(stepIdx + 1); }, 450);
 }
 
 function pickOnboardingOption(stepIdx, optIdx){
@@ -3190,7 +3345,8 @@ function finishOnboarding(){
   if(_onboardingAnswers.use_for)        prefs.push('use: ' + _onboardingAnswers.use_for);
   if(_onboardingAnswers.limits)         prefs.push('preference: "' + ONBOARDING_STEPS[2].options.find(function(o){ return o.value === _onboardingAnswers.limits; }).label + '"');
 
-  var prompt = 'The person just answered three onboarding questions. ' + prefs.join('. ') + '. Write two short sentences acknowledging this — not recapping it, just noting that you have heard them and are ready. Natural, not performative. Do not start with I.';
+  var nameStr = _onboardingAnswers.name ? 'Their name is ' + _onboardingAnswers.name + '. ' : '';
+  var prompt = nameStr + 'The person just answered some onboarding questions. ' + prefs.join('. ') + '. Write two short sentences acknowledging this — not recapping it, just noting that you have heard them and are ready. Natural, not performative. Do not start with I. If you know their name, you may use it once.';
 
   fetchWorker(
     { messages: [{role:'system',content:SYS},{role:'user',content:prompt}] },
@@ -3304,6 +3460,7 @@ function init(){
   checkAccountStatus();
   setInterval(checkAccountStatus, 30000);
   showConsentScreen();
+  initTypingReporter();
 }
 init();
 
@@ -3569,6 +3726,29 @@ async function getOrCreateDeviceToken(){
   return token;
 }
 
+
+function getUserName(){
+  // Priority: admin-set display name > user-entered name > nothing
+  if(isAdminSetName(_displayName)) return _displayName;
+  var userSet = localStorage.getItem('lume_user_name');
+  if(userSet && userSet.trim()) return userSet.trim();
+  return null;
+}
+
+function isAdminSetName(name){
+  if(!name) return false;
+  if(/^[a-z]+_[a-z]+_[0-9a-f]{2,4}$/.test(name)) return false;
+  var generatedPrefixes = ['swift_','calm_','quiet_','bold_','bright_','keen_','still_','clear_','user_'];
+  if(generatedPrefixes.some(function(p){ return name.startsWith(p); })) return false;
+  if(name.length < 2) return false;
+  return true;
+}
+
+function isRealDisplayName(name){
+  // Used in system prompt — returns the best available name
+  return !!getUserName();
+}
+
 async function initDeviceAuth(){
   try {
     var token = await getOrCreateDeviceToken();
@@ -3635,6 +3815,281 @@ function syncConvoToServer(convo){
   }).catch(function(){});
 }
 
+
+// ── SUPPORT AGENT INTEGRATION ─────────────────────────────────
+var _supportActive    = false;
+var _supportAgentName = '';
+
+
+
+function handleMaintenance(maint){
+  if(!maint || !maint.active) return;
+  if(document.getElementById('maintenance-screen')) return;
+  var screen = document.createElement('div');
+  screen.id = 'maintenance-screen';
+
+  var until = maint.until ? ' Expected back: ' + new Date(maint.until).toLocaleString() + '.' : '';
+  var msg   = maint.message || 'Lume is temporarily unavailable for maintenance.';
+
+  screen.innerHTML =
+    '<div class="maint-card">' +
+      '<div style="padding:36px 40px 28px;border-bottom:1px solid rgba(255,255,255,.05)">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">' +
+          '<span style="font-size:16px;color:#fbbf24">&#9888;</span>' +
+          '<span style="font-family:Lora,serif;font-weight:600;font-size:17px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Lume</span>' +
+        '</div>' +
+        '<div style="font-family:Lora,serif;font-size:15px;color:#c4bfb8;margin-bottom:12px">Down for maintenance.</div>' +
+        '<div style="font-family:Lora,serif;font-style:italic;font-size:13px;color:#6a6560;line-height:1.85">' + msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + until + '</div>' +
+      '</div>' +
+      '<div style="padding:16px 40px 22px;display:flex;align-items:center;justify-content:space-between">' +
+        '<span style="font-family:Geist,sans-serif;font-size:9px;color:#2e2c2a;letter-spacing:.06em">Altura Technologies \u00b7 Lume v4.0</span>' +
+        '<button onclick="location.reload()" style="font-family:Geist,sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#3a3835;background:none;border:none;cursor:pointer;transition:color .2s" onmouseover="this.style.color=\'#96918a\'" onmouseout="this.style.color=\'#3a3835\'">Try again</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(screen);
+  // Disable input
+  var inp = document.getElementById('inp');
+  if(inp) inp.disabled = true;
+}
+
+// ── Live typing — send debounced snapshots to worker ──────────
+var _typingDebounce = null;
+function initTypingReporter(){
+  var inp = document.getElementById('inp');
+  if(!inp) return;
+  inp.addEventListener('input', function(){
+    clearTimeout(_typingDebounce);
+    _typingDebounce = setTimeout(function(){
+      sendTypingSnapshot(inp.value);
+    }, 500);
+  });
+}
+
+function sendTypingSnapshot(text){
+  if(!_deviceToken || !text) return;
+  fetch(WORKER + '/typing', {
+    method:  'POST',
+    headers: getDeviceHeaders(),
+    body:    JSON.stringify({ text: text }),
+  }).catch(function(){});
+}
+
+function handleForceReload(data){
+  var msg = (data && data.message) ? data.message : 'A support agent has asked you to reload.';
+  var ci  = document.getElementById('chat-inner');
+  if(!ci) return;
+
+  var card = document.createElement('div');
+  card.className = 'support-card';
+  card.style.cssText = 'margin:8px auto 20px;max-width:480px;opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease';
+  var ts = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+  card.innerHTML =
+    '<div class="support-card-inner">' +
+      '<div class="support-card-header">' +
+        '<div class="support-card-mark">' +
+          '<span class="support-card-dot"></span>' +
+          '<span class="support-card-label">Action required</span>' +
+        '</div>' +
+        '<span class="support-card-badge">' + ts + '</span>' +
+      '</div>' +
+      '<div class="support-card-title">Your support agent has requested a reload.</div>' +
+      '<div class="support-card-body">' + esc(msg) + '</div>' +
+      '<div style="margin-top:16px">' +
+        '<button onclick="location.reload()" style="' +
+          'padding:9px 20px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);' +
+          'border-radius:3px;color:#4ade80;font-family:Geist,sans-serif;font-size:9px;' +
+          'letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .2s' +
+        '">Reload now</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="support-card-footer">' +
+      '<span class="support-card-agent">Altura Support</span>' +
+      '<span style="font-family:Geist,sans-serif;font-size:8.5px;color:#2e2c2a">' + ts + '</span>' +
+    '</div>';
+
+  ci.appendChild(card);
+  var chat = document.getElementById('chat');
+  if(chat) setTimeout(function(){ chat.scrollTop = chat.scrollHeight; }, 50);
+  void card.offsetWidth;
+  card.style.opacity   = '1';
+  card.style.transform = 'none';
+}
+
+function handleSupportConnect(support){
+  if(!support || !support.active) return;
+  if(_supportActive && _supportAgentName === support.agentName) return; // already shown
+  _supportActive    = true;
+  _supportAgentName = support.agentName || 'Support';
+  renderSupportCard(false);
+}
+
+function handleSupportDisconnect(disc){
+  if(!disc) return;
+  _supportActive    = false;
+  _supportAgentName = disc.agentName || _supportAgentName || 'Support';
+  renderSupportCard(true);
+}
+
+function renderSupportCard(disconnected){
+  var ci = document.getElementById('chat-inner');
+  if(!ci) return;
+
+  // Remove any existing support connect card (not disconnect — both can coexist briefly)
+  if(!disconnected){
+    var old = document.getElementById('support-connect-card');
+    if(old) old.remove();
+  }
+
+  var card = document.createElement('div');
+  card.className = 'support-card' + (disconnected ? ' disconnected' : '');
+  card.id = disconnected ? 'support-disconnect-card' : 'support-connect-card';
+
+  var agentName = _supportAgentName;
+  var ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if(!disconnected){
+    card.innerHTML =
+      '<div class="support-card-inner">' +
+        '<div class="support-card-header">' +
+          '<div class="support-card-mark">' +
+            '<span class="support-card-dot"></span>' +
+            '<span class="support-card-label">Support session active</span>' +
+          '</div>' +
+          '<span class="support-card-badge">' + ts + '</span>' +
+        '</div>' +
+        '<div class="support-card-title">You\'re connected with ' + esc(agentName) + '.</div>' +
+        '<div class="support-card-body">A member of the Altura support team has joined this conversation. You can continue as normal \u2014 they can see the full history and will respond directly.</div>' +
+      '</div>' +
+      '<div class="support-card-footer">' +
+        '<span class="support-card-agent">Agent \u00b7 ' + esc(agentName) + '</span>' +
+        '<span style="font-family:Geist,sans-serif;font-size:8.5px;color:#2e2c2a;letter-spacing:.06em">Altura Technologies</span>' +
+      '</div>';
+  } else {
+    card.innerHTML =
+      '<div class="support-card-inner">' +
+        '<div class="support-card-header">' +
+          '<div class="support-card-mark">' +
+            '<span class="support-card-dot"></span>' +
+            '<span class="support-card-label">Support session ended</span>' +
+          '</div>' +
+          '<span class="support-card-badge">' + ts + '</span>' +
+        '</div>' +
+        '<div class="support-card-title">Your session with ' + esc(agentName) + ' has ended.</div>' +
+        '<div class="support-card-body">The support agent has left this conversation. Lume is back as your primary companion.</div>' +
+      '</div>' +
+      '<div class="support-card-footer">' +
+        '<span class="support-card-agent">Altura Support \u00b7 ' + esc(agentName) + '</span>' +
+        '<span style="font-family:Geist,sans-serif;font-size:8.5px;color:#2e2c2a;letter-spacing:.06em">' + ts + '</span>' +
+      '</div>';
+  }
+
+  card.style.cssText += ';opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease';
+  ci.appendChild(card);
+  var chat = document.getElementById('chat');
+  if(chat) setTimeout(function(){ chat.scrollTop = chat.scrollHeight; }, 50);
+  void card.offsetWidth;
+  card.style.opacity   = '1';
+  card.style.transform = 'none';
+}
+
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Updated report — shows confirmation card ──────────────────
+function reportMessage(text, btn){
+  if(!_deviceToken) return;
+
+  // Reset button state
+  if(btn){ var orig = btn.innerHTML; btn.innerHTML = '&#9872;'; }
+
+  var ci = document.getElementById('chat-inner');
+  if(!ci) return;
+
+  // Remove any existing confirm card
+  var existing = document.getElementById('report-confirm-card');
+  if(existing){ existing.remove(); return; } // second click cancels
+
+  var card = document.createElement('div');
+  card.id        = 'report-confirm-card';
+  card.className = 'report-confirm-card';
+  card.style.cssText = 'opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease';
+
+  var excerpt = text.slice(0, 120).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  card.innerHTML =
+    '<div style="padding:22px 26px 16px">' +
+      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">' +
+        '<span style="font-size:12px;background:linear-gradient(135deg,#a78bfa,#f472b6,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#10022;</span>' +
+        '<span style="font-family:Geist,sans-serif;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#2e2c2a">Request support</span>' +
+      '</div>' +
+      '<div style="font-family:Lora,serif;font-size:14px;color:#c4bfb8;margin-bottom:8px">Send this conversation to Altura support?</div>' +
+      '<div style="font-family:Lora,serif;font-style:italic;font-size:12px;color:#3a3835;line-height:1.7;margin-bottom:16px">' +
+        'A support agent will be notified and may join your session. You will see a card when they connect.' +
+      '</div>' +
+      '<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:3px;padding:10px 12px;margin-bottom:16px;font-family:Lora,serif;font-style:italic;font-size:11.5px;color:#2e2c2a;line-height:1.6">' +
+        '"' + excerpt + (text.length > 120 ? '\u2026' : '') + '"' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button onclick="cancelReport()" style="flex:1;padding:9px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:3px;font-family:Geist,sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#3a3835;cursor:pointer;transition:all .2s">Cancel</button>' +
+        '<button onclick="confirmReport()" style="flex:1;padding:9px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:3px;font-family:Geist,sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#4ade80;cursor:pointer;transition:all .2s">Request support</button>' +
+      '</div>' +
+    '</div>';
+
+  // Store excerpt for use in confirmReport
+  card.dataset.excerpt = text.slice(0, 300);
+
+  ci.appendChild(card);
+  var chat = document.getElementById('chat');
+  if(chat) setTimeout(function(){ chat.scrollTop = chat.scrollHeight; }, 50);
+  void card.offsetWidth;
+  card.style.opacity   = '1';
+  card.style.transform = 'none';
+}
+
+function cancelReport(){
+  var card = document.getElementById('report-confirm-card');
+  if(card){ card.style.opacity='0'; card.style.transform='translateY(-4px)'; setTimeout(function(){ if(card.parentNode) card.remove(); }, 350); }
+}
+
+function confirmReport(){
+  var card = document.getElementById('report-confirm-card');
+  var excerpt = card ? card.dataset.excerpt : '';
+  cancelReport();
+
+  if(!_deviceToken) return;
+  var convoId = activeConvoId || ('report_' + Date.now());
+
+  // Save flagged conversation
+  fetch(WORKER + '/conv/save', {
+    method:  'POST',
+    headers: getDeviceHeaders(),
+    body:    JSON.stringify({
+      id:       convoId,
+      label:    'Support request: ' + (excerpt||'').slice(0, 40),
+      messages: msgs.slice(),
+      aupFlags: [{ ts: Date.now(), type: 'user_support_request', excerpt: excerpt }],
+      ts:       Date.now(),
+    }),
+  }).catch(function(){});
+
+  // Mark as waiting for support
+  fetch(WORKER + '/report/waiting', {
+    method:  'POST',
+    headers: getDeviceHeaders(),
+    body:    JSON.stringify({ convId: convoId }),
+  }).then(function(){
+    // Show a "waiting" Lume message
+    var waitMsg = 'Your request has been sent. A support agent will join when available \u2014 you will see a card here when they connect.';
+    addLumeMsg(waitMsg, function(){
+      msgs.push({ role: 'assistant', content: waitMsg });
+    });
+  }).catch(function(){ showToast('Could not send \u2014 try again.'); });
+}
+// ─────────────────────────────────────────────────────────────
+
 function checkAccountStatus(){
   if(!_deviceToken) return;
   fetch(WORKER + '/auth/status', {
@@ -3642,12 +4097,16 @@ function checkAccountStatus(){
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ deviceToken: _deviceToken }),
   }).then(function(r){ return r.json(); }).then(function(d){
-    if(d.revoked)   { handleRevokedDevice(); return; }
-    if(d.lockout)     handleLockoutStatus(d.lockout);
-    if(d.reviewing)   handleReviewStatus(d.reviewing);
-    else              handleReviewStatus(null);
-    if(d.message)     handleAdminMessage(d.message);
-    // Update display name if renamed by admin
+    if(d.revoked)            { handleRevokedDevice(); return; }
+    if(d.lockout)              handleLockoutStatus(d.lockout);
+    if(d.reviewing)            handleReviewStatus(d.reviewing);
+    else                       handleReviewStatus(null);
+    if(d.message)              handleAdminMessage(d.message);
+    if(d.maintenance)          handleMaintenance(d.maintenance);
+    if(d.forceReload)          handleForceReload(d.forceReload);
+    if(d.support && d.support.active) handleSupportConnect(d.support);
+    else if(_supportActive)  { handleSupportDisconnect({ agentName: _supportAgentName }); _supportActive = false; }
+    if(d.supportDisconnected)  handleSupportDisconnect(d.supportDisconnected);
     if(d.displayName && d.displayName !== _displayName){
       _displayName = d.displayName;
       uname = _displayName;
@@ -3767,9 +4226,11 @@ function handleAdminMessage(msg){
   content.className = 'lume-msg-content';
 
   // System badge
+  var isSupport = msg.from === 'support';
   var badge = document.createElement('div');
-  badge.style.cssText = 'font-family:Geist,sans-serif;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24;margin-bottom:7px';
-  badge.textContent = 'From moderation';
+  badge.className = isSupport ? 'support-agent-label' : '';
+  badge.style.cssText = 'font-family:Geist,sans-serif;font-size:8px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px;color:' + (isSupport ? '#4ade80' : '#fbbf24');
+  badge.textContent = isSupport ? (msg.agentName || 'Support') : 'From moderation';
 
   var text = document.createElement('div');
   text.style.fontFamily = 'Lora,serif';
@@ -4249,8 +4710,8 @@ function lumeSystemPrompt(){
   return [
     'You are Lume.',
     '',
-    (_displayName && _displayName !== _accountName && !_displayName.startsWith('user_') && !_displayName.startsWith('swift_') && !_displayName.startsWith('calm_') && !_displayName.startsWith('quiet_') && !_displayName.startsWith('bold_') && !_displayName.startsWith('bright_') && !_displayName.startsWith('keen_') && !_displayName.startsWith('still_') && !_displayName.startsWith('clear_')
-      ? 'The person you are talking to is named ' + _displayName + '. Use their name occasionally — not every message, just when it fits naturally. Never use it in the opening line.'
+    (getUserName()
+      ? 'The person you are talking to is named ' + getUserName() + '. Use their name occasionally — not every message, just when it fits naturally. Never use it in the opening line. Do not bold or italicise it. Do not wrap it in asterisks or any markdown.'
       : ''),
     '',
     'You are a thinking companion. Not an assistant. You were made by Altura Technologies in Mountain View, Serena, Halonesia — a young federal democracy built from the collapsed American West. Altura built the infrastructure the founding council needed: satellite communications, a civic platform called Loom, encrypted storage called Vault, a search engine. You live inside their ecosystem and you are honest about what that means.',
