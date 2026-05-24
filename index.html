@@ -3466,6 +3466,7 @@ function init(){
   });
   showConsentScreen();
   initTypingReporter();
+  restorePersistedCards();
 }
 init();
 
@@ -3771,6 +3772,7 @@ async function initDeviceAuth(){
     _displayName  = data.displayName || _accountName;
     _authReady    = true;
     loadMemoriesFromServer();
+    checkReloadConfirmation();
 
     // Update uname display
     uname = _displayName;
@@ -3890,14 +3892,42 @@ var ACCENT_STYLES = {
   neutral: { stripe: 'linear-gradient(90deg,#585450,#3a3835,#585450)', border: 'rgba(255,255,255,.08)', label: '#585450' },
 };
 
-function handleAdminCard(card){
+function saveCardToStorage(card){
+  try {
+    var stored = JSON.parse(localStorage.getItem('lume_persistent_cards') || '[]');
+    // Avoid duplicates by sentAt
+    if(stored.some(function(c){ return c.sentAt === card.sentAt; })) return;
+    stored.push(card);
+    // Keep only cards from last 2 hours
+    var cutoff = Date.now() - 2 * 60 * 60 * 1000;
+    stored = stored.filter(function(c){ return (c.sentAt || 0) > cutoff; });
+    localStorage.setItem('lume_persistent_cards', JSON.stringify(stored.slice(-20)));
+  } catch(e){}
+}
+
+function restorePersistedCards(){
+  try {
+    var stored = JSON.parse(localStorage.getItem('lume_persistent_cards') || '[]');
+    var cutoff = Date.now() - 2 * 60 * 60 * 1000;
+    stored.filter(function(c){ return (c.sentAt || 0) > cutoff; })
+          .forEach(function(card){ handleAdminCard(card, true); });
+  } catch(e){}
+}
+
+function handleAdminCard(card, fromStorage){
   if(!card) return;
   var ci = document.getElementById('chat-inner');
   if(!ci) return;
 
+  // Persist unless already restoring from storage
+  if(!fromStorage) saveCardToStorage(card);
+
   var a     = ACCENT_STYLES[card.accent] || ACCENT_STYLES.purple;
   var ts    = new Date(card.sentAt || Date.now()).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
   var cardId = 'admin-card-' + (card.sentAt || Date.now());
+
+  // Don't render if already in DOM (can happen on fast polls)
+  if(document.getElementById(cardId)) return;
 
   var el = document.createElement('div');
   el.id  = cardId;
@@ -3981,7 +4011,7 @@ function handleForceReload(data){
       '<div class="support-card-title">Your support agent has requested a reload.</div>' +
       '<div class="support-card-body">' + esc(msg) + '</div>' +
       '<div style="margin-top:16px">' +
-        '<button onclick="location.reload()" style="' +
+        '<button onclick="doReload()" style="' +
           'padding:9px 20px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);' +
           'border-radius:3px;color:#4ade80;font-family:Geist,sans-serif;font-size:9px;' +
           'letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .2s' +
@@ -4019,6 +4049,15 @@ function handleSupportDisconnect(disc){
 function renderSupportCard(disconnected){
   var ci = document.getElementById('chat-inner');
   if(!ci) return;
+
+  // Save to persistent storage so it survives reload
+  saveCardToStorage({
+    _type:       disconnected ? 'support_disconnect' : 'support_connect',
+    agentName:   _supportAgentName,
+    disconnected: disconnected,
+    sentAt:      Date.now(),
+    accent:      'green',
+  });
 
   // Remove any existing support connect card (not disconnect — both can coexist briefly)
   if(!disconnected){
@@ -5091,6 +5130,36 @@ function pickSuggs(){
     ['Give me a concrete next step','Let me think about that differently','What are you not telling me?']
   ];
   return banks[Math.floor(Math.random()*banks.length)].slice(0,2+Math.floor(Math.random()*2));
+}
+
+
+function doReload(){
+  // Flag so on next load we know this was a support-requested reload
+  localStorage.setItem('lume_reload_pending', JSON.stringify({
+    account:   _accountName,
+    deviceToken: _deviceToken,
+    at:        Date.now(),
+  }));
+  location.reload();
+}
+
+function checkReloadConfirmation(){
+  // On load, check if this was a support-requested reload and notify the worker
+  try {
+    var raw = localStorage.getItem('lume_reload_pending');
+    if(!raw) return;
+    localStorage.removeItem('lume_reload_pending');
+    var data = JSON.parse(raw);
+    // Only act on it if it was recent (within 2 minutes)
+    if(Date.now() - data.at > 120000) return;
+    // Send confirmation via the typing endpoint (repurposed as a lightweight signal)
+    // Actually write a proper confirmation to the worker
+    fetch(WORKER + '/reload/confirm', {
+      method:  'POST',
+      headers: getDeviceHeaders(),
+      body:    JSON.stringify({ at: data.at }),
+    }).catch(function(){});
+  } catch(e){}
 }
 
 function doGracefulExit(callback){
