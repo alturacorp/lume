@@ -3458,7 +3458,12 @@ function init(){
   updateSearchConnectionBadge();
   applyPrivPrefToggles();
   checkAccountStatus();
-  setInterval(checkAccountStatus, 30000);
+  setInterval(checkAccountStatus, 10000);
+
+  // Poll immediately when tab becomes visible
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden) checkAccountStatus();
+  });
   showConsentScreen();
   initTypingReporter();
 }
