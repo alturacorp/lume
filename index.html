@@ -2845,6 +2845,15 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
           <div class="settings-row-desc" style="line-height:1.7">What Lume remembers about you from past conversations. Forgotten entries are kept in the record but no longer inform anything — that is the honest version of forgetting.</div>
         </div>
       </div>
+      <div id="lume-memory-consent-controls" style="padding:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.1);border-radius:9px">
+        <div style="font-size:12px;color:#b0aba4;margin-bottom:6px">AI memory extraction &amp; cloud sync</div>
+        <p style="font-size:11px;color:#96918a;line-height:1.7;margin-bottom:10px">Off by default. When enabled, Lume may suggest memories from conversations. You review suggestions before they are stored locally or synced. Turning it off deletes server memory and clears local memory and style notes.</p>
+        <div id="lume-memory-consent-status" role="status" aria-live="polite" style="font-size:11px;color:#96918a;margin-bottom:10px">Checking…</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="settings-danger-btn" onclick="lumeMemoryEnableFromSettings()">Enable memory</button>
+          <button type="button" class="settings-danger-btn" onclick="lumeMemoryDisableFromSettings()">Turn off &amp; erase memory</button>
+        </div>
+      </div>
       <div id="settings-memory-list" style="margin-bottom:16px"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="settings-danger-btn" onclick="clearForgottenMemories()">Clear forgotten</button>
@@ -3871,6 +3880,7 @@ function generateConvoTitle(convoId){
     .map(function(m){ return (m.role==='user'?'User: ':'Lume: ') + m.content.slice(0,120); })
     .join('\n');
   var payload = {
+    task: 'title',
     messages: [
       { role: 'system', content: 'You write extremely short conversation titles. 4 words maximum. No punctuation. No quotes. Just the essential subject. Examples: "grief and career change", "stuck on a decision", "late night overthinking", "relationship with my sister".' },
       { role: 'user', content: 'Title this conversation:\n\n' + excerpt }
@@ -3878,7 +3888,7 @@ function generateConvoTitle(convoId){
   };
   fetch(WORKER + '/lume', {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Device-Token': _deviceToken || '' },
     body:    JSON.stringify(payload),
   }).then(function(r){ return r.json(); })
   .then(function(d){
@@ -4631,7 +4641,49 @@ function buildStatusCard(title, body, footer, dismissable){
   '</div>';
 }
 
+async function enableLumeMemoryWithConsent(){
+  if(!_deviceToken || !_authReady) throw new Error('Device not ready');
+  if(!window.confirm('Allow Lume to extract and save personal memories from your conversations, including on the server? You can revoke this later.')) return false;
+  var res = await fetch(WORKER+'/mem/consent',{method:'POST',headers:{'Content-Type':'application/json','X-Device-Token':_deviceToken},body:JSON.stringify({enabled:true})});
+  if(!res.ok) throw new Error('Memory consent could not be saved');
+  window._lumeMemoryConsentConfirmed=true;
+  return true;
+}
+async function revokeLumeMemoryConsent(){
+  if(!_deviceToken || !_authReady) throw new Error('Device not ready');
+  var res=await fetch(WORKER+'/mem/consent',{method:'POST',headers:{'Content-Type':'application/json','X-Device-Token':_deviceToken},body:JSON.stringify({enabled:false})});
+  if(!res.ok) throw new Error('Memory revocation failed');
+  window._lumeMemoryConsentConfirmed=false;
+  localStorage.removeItem('lume_memory');
+  localStorage.removeItem('lume_memories');
+  localStorage.removeItem('lume_cognitive_style');
+  return true;
+}
+// Memory settings: server is the source of truth; never infer consent from localStorage.
+async function refreshLumeMemoryConsentStatus(){
+  var el=document.getElementById('lume-memory-consent-status');
+  if(!el)return;
+  if(!_deviceToken||!_authReady){el.textContent='Device not ready — memory is off';window._lumeMemoryConsentConfirmed=false;return;}
+  try{
+    var r=await fetch(WORKER+'/mem/consent',{headers:{'X-Device-Token':_deviceToken}});
+    if(!r.ok)throw new Error('Could not check consent');
+    var d=await r.json();window._lumeMemoryConsentConfirmed=d.memoryConsent===true;
+    el.textContent=window._lumeMemoryConsentConfirmed?'Enabled — review each proposed memory':'Off — no automatic memory extraction or sync';
+  }catch(e){window._lumeMemoryConsentConfirmed=false;el.textContent='Unavailable — memory stays off';}
+}
+async function lumeMemoryEnableFromSettings(){
+  try{if(await enableLumeMemoryWithConsent()){await refreshLumeMemoryConsentStatus();toast('Memory enabled. Suggestions require approval.');}}
+  catch(e){toast(e.message||'Could not enable memory');}
+}
+async function lumeMemoryDisableFromSettings(){
+  if(!window.confirm('Turn off AI memory and erase local and server memories? This does not erase conversation history.'))return;
+  try{await revokeLumeMemoryConsent();await refreshLumeMemoryConsentStatus();renderSettingsMemory();toast('Memory turned off and cleared.');}
+  catch(e){toast(e.message||'Could not revoke memory');}
+}
+
+
 function syncMemoriesToServer(){
+  if(!window._lumeMemoryConsentConfirmed) return;
   if(!_deviceToken || !_authReady) return;
   var memories = loadMemory();
   if(!memories.length) return;
@@ -4643,7 +4695,7 @@ function syncMemoriesToServer(){
 }
 
 function loadMemoriesFromServer(){
-  if(!_deviceToken) return;
+  if(!_deviceToken || !window._lumeMemoryConsentConfirmed) return;
   fetch(WORKER + '/mem/load', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json', 'X-Device-Token': _deviceToken },
@@ -4652,7 +4704,7 @@ function loadMemoriesFromServer(){
     // Only restore if local is empty — server is the backup
     var local = loadMemory();
     if(local.length === 0){
-      localStorage.setItem('lume_memories', JSON.stringify(d.memories));
+      localStorage.setItem('lume_memory', JSON.stringify(d.memories));
       console.log('[Lume] Restored', d.memories.length, 'memories from server');
     }
   }).catch(function(){});
@@ -5117,6 +5169,23 @@ function lumeSystemPrompt(){
 function fetchWorker(payload, onSuccess, onError){
   var headers = {'Content-Type': 'application/json'};
   if(_deviceToken) headers['X-Device-Token'] = _deviceToken;
+  // Task IDs are hints only; Worker uses its own allow-listed instructions.
+  if(payload && Array.isArray(payload.messages) && payload.messages[0] && payload.messages[0].role === 'system'){
+    var prompt = String(payload.messages[0].content || '');
+    if(/memory extractor|extract memorable things/i.test(prompt)) payload.task='memory_extract';
+    else if(/title and tag a conversation/i.test(prompt)) payload.task='title_tags';
+    else if(/exactly 3 short things the user might tap/i.test(prompt)) payload.task='suggestions';
+    else if(/one concise web search query/i.test(prompt)) payload.task='web_query';
+    else if(/safety classifier|risk=acute|self-harm risk/i.test(prompt)) payload.task='risk_check';
+    else if(/one short follow-up question/i.test(prompt)) payload.task='followup_question';
+    else if(/photo.*notes|photos into notes/i.test(prompt)) payload.task='photo_notes';
+    else if(/describe (the|this|an) image|image description|describe what you see/i.test(prompt)) payload.task='image_description';
+    else if(/journal.*reflect|reflect.*journal/i.test(prompt)) payload.task='journal_reflection';
+    else if(payload.response_format && payload.response_format.type==='json_schema') payload.task='structured_analysis';
+    else if(/summari[sz]e|short summary/i.test(prompt)) payload.task='concise_summary';
+    else if(/code|programming|debug/i.test(prompt)) payload.task='code_help';
+    else payload.task='general_utility';
+  }
   fetch(WORKER + '/lume', {
     method: 'POST',
     headers: headers,
@@ -6066,6 +6135,7 @@ function openSettings(){
   renderSettingsHistory();
   // populate memory
   renderSettingsMemory();
+  refreshLumeMemoryConsentStatus();
   document.getElementById('settings-page').classList.add('show');
 }
 
@@ -8232,6 +8302,9 @@ function saveMemory(arr){
 
 // Extract memories at conversation end
 function extractMemories(){
+  // Review build: do not silently extract or persist memories.
+  // User must explicitly approve memory storage, including server-side consent.
+  if(!window._lumeMemoryConsentConfirmed) return;
   if(msgs.length < 4) return;
   var userMsgs = msgs.filter(function(m){ return m.role==='user'; });
   if(userMsgs.length < 2) return;
@@ -8256,7 +8329,10 @@ function extractMemories(){
       try{
         var clean = reply.trim().replace(/```json|```/g,'').trim();
         var data = JSON.parse(clean);
-        if(!data.memories || !data.memories.length) return;
+        if(!window._lumeMemoryConsentConfirmed || !data.memories || !data.memories.length) return;
+        var proposed=data.memories.filter(function(m){return m && typeof m.text==='string' && m.text.trim();});
+        if(!proposed.length)return;
+        if(!window.confirm('Lume proposes saving these memories:\n\n'+proposed.map(function(m){return '• '+m.text;}).join('\n')+'\n\nSave these memories and sync them to your account?'))return;
         var existing = loadMemory();
         var now = Date.now();
         data.memories.forEach(function(m){
@@ -8280,7 +8356,7 @@ function extractMemories(){
         saveMemory(existing);
 
         // save cognitive style note
-        if(data.style && typeof data.style === 'string'){
+        if(false && data.style && typeof data.style === 'string'){
           var existing_style = localStorage.getItem('lume_cognitive_style') || '';
           if(!existing_style || data.style.length > existing_style.length){
             localStorage.setItem('lume_cognitive_style', data.style);
