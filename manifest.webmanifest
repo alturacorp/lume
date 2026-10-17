@@ -24,6 +24,14 @@
       "url": "url"
     }
   },
+  "shortcuts": [
+    {
+      "name": "Capture",
+      "short_name": "Capture",
+      "description": "Jot something down fast",
+      "url": "./?capture=1"
+    }
+  ],
   "categories": [
     "productivity",
     "lifestyle"
