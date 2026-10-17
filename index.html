@@ -2110,6 +2110,75 @@ body.bg-\[#100f0d\] { background: #0d0c0a !important; }
 }
 /* ────────────────────────────────────────────────────────────── */
 </style>
+<style id="lume-polish">
+::selection{background:rgba(168,196,212,.28);color:#fff}
+.chat-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;scroll-behavior:smooth;overscroll-behavior:contain}
+.chat-scroll::-webkit-scrollbar{width:6px}
+.chat-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:6px}
+.chat-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.18)}
+.lora-prose{text-wrap:pretty;font-kerning:normal;font-variant-ligatures:common-ligatures}
+:focus-visible{outline:1px solid rgba(168,196,212,.7);outline-offset:2px;border-radius:3px}
+textarea:focus-visible,input:focus-visible{outline:none}
+#chat-pill-inner{transition:box-shadow .4s ease}
+#chat-pill-outer:focus-within #chat-pill-inner{box-shadow:0 0 0 1px rgba(167,139,250,.3),0 0 26px -6px rgba(56,189,248,.22),0 0 38px -10px rgba(244,114,182,.18)}
+.msg-action-btn{transition:color .2s,background .2s,transform .12s}
+.msg-action-btn:active,#send-btn:active{transform:scale(.9)}
+#lume-jump{position:fixed;left:50%;bottom:116px;transform:translate(-50%,8px);z-index:40;display:flex;align-items:center;gap:7px;padding:7px 14px 7px 12px;background:rgba(22,20,16,.92);border:1px solid rgba(255,255,255,.09);border-radius:20px;color:#96918a;font:400 11px Geist,sans-serif;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s,color .2s,border-color .2s;backdrop-filter:blur(6px)}
+#lume-jump.show{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+#lume-jump:hover{color:#e8e6e2;border-color:rgba(168,196,212,.35)}
+#lume-quote{position:fixed;z-index:60;padding:6px 12px;background:#1c1a17;border:1px solid rgba(168,196,212,.3);border-radius:4px;color:#a8c4d4;font:400 11px Geist,sans-serif;cursor:pointer;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#lume-quote.show{opacity:1;pointer-events:auto;transform:none}
+body.light #lume-jump{background:rgba(250,248,244,.95);color:#585450;border-color:rgba(0,0,0,.1)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+<style id="lume-cards">
+.lc{--lc:#a8c4d4;margin:8px auto 22px;max-width:480px;position:relative;overflow:hidden;background:linear-gradient(160deg,#131110,#0d0c0a);border:1px solid color-mix(in srgb,var(--lc) 22%,transparent);border-radius:5px;padding:22px 26px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5);opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
+.lc.in{opacity:1;transform:none}
+.lc-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--lc);opacity:.6}
+.lc-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.lc-star{font-size:12px;color:var(--lc)}
+.lc-label{font:400 8.5px Geist,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--lc)}
+.lc-title{font:400 15px/1.3 Lora,serif;color:#c4bfb8;margin-bottom:10px}
+.lc-text{font:italic 13px/1.85 Lora,serif;color:#8a857e}
+.lc-quote{font:italic 15px/1.8 Lora,serif;color:#c4bfb8;border-left:2px solid var(--lc);padding-left:14px}
+.lc button{font-family:Geist,sans-serif;cursor:pointer;transition:all .2s}
+.lc-row{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:none;border:none;padding:7px 0;color:#c4bfb8;font-size:13px;line-height:1.5}
+.lc-box{flex:none;width:14px;height:14px;margin-top:3px;border:1px solid #585450;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent}
+.lc-row.done{color:#585450;text-decoration:line-through}
+.lc-row.done .lc-box{background:var(--lc);border-color:var(--lc);color:#100f0d}
+.lc-count{margin-top:10px;font:400 10px Geist,sans-serif;color:#585450}
+.lc-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lc-opt{text-align:left;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:14px;color:#96918a}
+.lc-opt:hover:not(:disabled){border-color:var(--lc);background:color-mix(in srgb,var(--lc) 8%,transparent)}
+.lc-opt b{display:block;font:500 14px Lora,serif;color:#e8e6e2;margin-bottom:6px}
+.lc-opt span{font-size:12px;line-height:1.6}
+.lc-opt.picked{border-color:var(--lc)}.lc-opt:disabled:not(.picked){opacity:.4}
+.lc-scale{display:flex;gap:8px;margin:4px 0 10px}
+.lc-n{width:36px;height:36px;border-radius:50%;background:none;border:1px solid rgba(255,255,255,.12);color:#96918a;font-size:13px}
+.lc-n:hover:not(:disabled){border-color:var(--lc);color:#fff}.lc-n.picked{background:var(--lc);border-color:var(--lc);color:#100f0d}
+.lc-ends{display:flex;justify-content:space-between;font:400 10px Geist,sans-serif;color:#585450}
+.lc-orb{width:84px;height:84px;margin:6px auto 14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--lc) 70%,#fff),color-mix(in srgb,var(--lc) 15%,transparent));opacity:.7;transform:scale(.62);animation:lcb 10s ease-in-out infinite paused}
+.lc.on .lc-orb{animation-play-state:running}
+@keyframes lcb{0%,100%{transform:scale(.62)}40%{transform:scale(1)}}
+.lc-cue{text-align:center;font:italic 14px Lora,serif;color:#c4bfb8;min-height:22px;margin-bottom:12px}
+.lc-go{display:block;margin:0 auto;padding:8px 20px;background:none;border:1px solid color-mix(in srgb,var(--lc) 40%,transparent);border-radius:3px;color:var(--lc);font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.lc-go:hover{background:color-mix(in srgb,var(--lc) 10%,transparent)}
+.lc-keepbar{margin-top:14px}
+</style>
+<style id="lume-result-cards">
+.lume-image.lcx,.lume-player.lcx{--lc:#38bdf8;position:relative;overflow:hidden;max-width:440px;background:linear-gradient(160deg,#131110,#0d0c0a);border:1px solid color-mix(in srgb,var(--lc) 22%,transparent);border-radius:5px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.lume-player.lcx{padding:0 20px 18px}
+.lcx .lc-head{padding:16px 0 12px;margin:0}
+.lume-image.lcx .lc-head{padding:14px 16px 12px}
+.lume-image.lcx img{display:block;width:100%}
+.lc-acts{display:flex;gap:8px;padding:10px 0 0}
+.lume-image.lcx .lc-acts{padding:10px 12px 12px}
+.lc-act{padding:6px 12px;background:none;border:1px solid rgba(255,255,255,.1);border-radius:3px;color:#96918a;font:400 10px Geist,sans-serif;cursor:pointer;transition:all .2s}
+.lc-act:hover{border-color:var(--lc);color:#e8e6e2}
+.lc-q{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid rgba(255,255,255,.05);padding:9px 0;color:#c4bfb8;font:400 13px Geist,sans-serif;cursor:pointer;transition:color .2s}
+.lc-q:last-of-type{border-bottom:none}.lc-q:hover{color:#fff}
+.lc-q::before{content:'\2315';margin-right:10px;color:var(--lc);opacity:.7}
+</style>
 </head>
 <body class="bg-[#100f0d] text-t0 font-geist text-[15px]">
 
@@ -9744,5 +9813,199 @@ var _sendCount = 0;
 </div>
 <!-- ───────────────────────────────────────────────────────── -->
 
+<script id="lume-extras">
+(function(){
+  var chat=document.getElementById('chat'), inp=document.getElementById('inp');
+  if(!chat||!inp) return;
+  function fire(){ inp.dispatchEvent(new Event('input',{bubbles:true})); if(typeof onInp==='function'){ try{onInp(inp);}catch(e){} } }
+
+  var jump=document.createElement('button'); jump.id='lume-jump'; jump.type='button';
+  jump.innerHTML='<span>&#9660;</span><span>Latest</span>';
+  document.body.appendChild(jump);
+  function checkJump(){ jump.classList.toggle('show', chat.scrollHeight-chat.scrollTop-chat.clientHeight>240); }
+  chat.addEventListener('scroll',checkJump,{passive:true});
+  setInterval(checkJump,800);
+  jump.onclick=function(){ chat.scrollTo({top:chat.scrollHeight,behavior:'smooth'}); };
+
+  var DK='lume_draft', t;
+  function sync(){ try{ inp.value.trim() ? localStorage.setItem(DK,inp.value) : localStorage.removeItem(DK); }catch(e){} }
+  inp.addEventListener('input',function(){ clearTimeout(t); t=setTimeout(sync,300); });
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') setTimeout(sync,120); });
+  var sb=document.getElementById('send-btn'); if(sb) sb.addEventListener('click',function(){ setTimeout(sync,120); });
+  try{ var d=localStorage.getItem(DK); if(d&&!inp.value){ inp.value=d; setTimeout(fire,400); } }catch(e){}
+
+  var chip=document.createElement('button'); chip.id='lume-quote'; chip.type='button'; chip.textContent='Quote';
+  document.body.appendChild(chip);
+  var quoted='';
+  function hideChip(){ chip.classList.remove('show'); }
+  function checkSel(){
+    var s=window.getSelection(); if(!s||s.isCollapsed||!s.rangeCount) return hideChip();
+    var n=s.anchorNode&&(s.anchorNode.nodeType===1?s.anchorNode:s.anchorNode.parentElement);
+    if(!n||!n.closest||!n.closest('.lume-msg-block')) return hideChip();
+    quoted=s.toString().trim().slice(0,400); if(!quoted) return hideChip();
+    var r=s.getRangeAt(0).getBoundingClientRect();
+    chip.style.left=Math.max(8,Math.min(innerWidth-80,r.left+r.width/2-30))+'px';
+    chip.style.top=Math.max(8,r.top-38)+'px';
+    chip.classList.add('show');
+  }
+  document.addEventListener('mouseup',function(){ setTimeout(checkSel,10); });
+  document.addEventListener('touchend',function(){ setTimeout(checkSel,250); });
+  document.addEventListener('mousedown',function(e){ if(e.target!==chip) hideChip(); });
+  chip.addEventListener('mousedown',function(e){ e.preventDefault(); });
+  chip.onclick=function(){
+    inp.value='> '+quoted.replace(/\n+/g,' ')+'\n\n'+inp.value;
+    hideChip(); window.getSelection().removeAllRanges(); fire(); inp.focus();
+    inp.setSelectionRange(inp.value.length,inp.value.length);
+  };
+
+  document.addEventListener('keydown',function(e){
+    var tg=e.target, typing=tg&&(/^(INPUT|TEXTAREA)$/.test(tg.tagName)||tg.isContentEditable);
+    if(e.key==='/'&&!typing&&!e.metaKey&&!e.ctrlKey){ e.preventDefault(); inp.focus(); }
+    else if(e.altKey&&e.code==='KeyN'&&typeof startNewConversation==='function'){ e.preventDefault(); startNewConversation(); }
+    else if(e.key==='Escape'){
+      var s=document.getElementById('sidebar');
+      if(s&&s.classList.contains('open')&&typeof toggleSidebar==='function') toggleSidebar();
+    }
+  });
+})();
+</script>
+<script id="lume-cards-js">
+(function(){
+  if(typeof addLumeMsg!=='function') return;
+  var RX=/\[\[card:(\{[\s\S]*?\})\]\]/g;
+  function h(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  function say(t){ if(typeof send==='function') send(t); }
+  function shell(o,label,col){
+    var c=h('div','lc');c.style.setProperty('--lc',col);c.appendChild(h('div','lc-bar'));
+    var hd=h('div','lc-head');hd.appendChild(h('span','lc-star','\u2726'));hd.appendChild(h('span','lc-label',label));c.appendChild(hd);
+    if(o.title)c.appendChild(h('div','lc-title',String(o.title)));return c;
+  }
+  var T={
+    reflect:function(o){var c=shell(o,'Noticing','#a8c4d4');c.appendChild(h('div','lc-text',String(o.text||'')));return c;},
+    keep:function(o){var c=shell(o,'Worth keeping','#f472b6');var t=String(o.text||'');c.appendChild(h('div','lc-quote',t));
+      if(typeof pinMessage==='function'){var d=h('div','lc-keepbar'),b=h('button','lc-go','Pin this');
+        b.onclick=function(){pinMessage(t);b.textContent='Pinned';b.disabled=true;};d.appendChild(b);c.appendChild(d);}return c;},
+    steps:function(o){var c=shell(o,'Next steps','#4ade80');var items=(o.items||[]).slice(0,7),n=0;
+      var ct=h('div','lc-count','0 of '+items.length);
+      items.forEach(function(x){var r=h('button','lc-row');r.appendChild(h('span','lc-box','\u2713'));r.appendChild(h('span','',String(x)));
+        r.onclick=function(){r.classList.toggle('done');n=c.querySelectorAll('.lc-row.done').length;ct.textContent=n+' of '+items.length;};c.appendChild(r);});
+      c.appendChild(ct);return c;},
+    choice:function(o){var c=shell(o,'Two paths','#a78bfa');var g=h('div','lc-opts'),bs=[];
+      ['a','b'].forEach(function(k){var v=o[k]||{};var b=h('button','lc-opt');b.appendChild(h('b','',String(v.h||k)));b.appendChild(h('span','',String(v.t||'')));
+        b.onclick=function(){bs.forEach(function(x){x.disabled=true;});b.classList.add('picked');say("I'm leaning toward: "+(v.h||k));};bs.push(b);g.appendChild(b);});
+      c.appendChild(g);return c;},
+    checkin:function(o){var c=shell(o,'Check-in','#fbbf24');c.appendChild(h('div','lc-text',String(o.q||'How does this feel right now?')));
+      var sc=h('div','lc-scale'),bs=[];
+      for(var i=1;i<=5;i++)(function(n){var b=h('button','lc-n',String(n));b.onclick=function(){bs.forEach(function(x){x.disabled=true;});b.classList.add('picked');say("It's a "+n+" out of 5.");};bs.push(b);sc.appendChild(b);})(i);
+      c.appendChild(sc);var e=h('div','lc-ends');e.appendChild(h('span','',String(o.lo||'Not at all')));e.appendChild(h('span','',String(o.hi||'Completely')));c.appendChild(e);return c;},
+    breathe:function(o){var c=shell(o,'Slow down','#38bdf8');if(o.text)c.appendChild(h('div','lc-text',String(o.text)));
+      c.appendChild(h('div','lc-orb'));var cue=h('div','lc-cue','Ready when you are.');c.appendChild(cue);
+      var go=h('button','lc-go','Begin'),iv=null;
+      function stop(){clearInterval(iv);iv=null;c.classList.remove('on');go.textContent='Begin';cue.textContent='Ready when you are.';}
+      go.onclick=function(){if(iv){stop();return;}c.classList.add('on');go.textContent='Stop';var tick=0;
+        function step(){var p=tick%10;cue.textContent=p<4?'In\u2026':'Out, slowly\u2026';tick++;}
+        step();iv=setInterval(step,1000);};
+      c.appendChild(go);return c;}
+  };
+  function render(o){
+    var f=T[o&&o.t],ci=document.getElementById('chat-inner');if(!f||!ci) return;
+    var c=f(o);ci.appendChild(c);
+    var ch=document.getElementById('chat');if(ch) setTimeout(function(){ch.scrollTop=ch.scrollHeight;},50);
+    requestAnimationFrame(function(){c.classList.add('in');});
+  }
+  function parse(text){
+    var cards=[];
+    var clean=String(text).replace(RX,function(m,j){try{var o=JSON.parse(j);if(o&&o.t)cards.push(o);}catch(e){}return '';}).replace(/\n{3,}/g,'\n\n').trim();
+    return {text:clean,cards:cards.slice(0,2)};
+  }
+  var oAdd=addLumeMsg;
+  window.addLumeMsg=function(text,cb){
+    var p=parse(text);
+    function after(){p.cards.forEach(render);if(cb)cb();}
+    if(!p.text){after();return;}
+    oAdd(p.text,p.cards.length?after:cb);
+  };
+  if(typeof addLumeMsgInstant==='function'){
+    var oInst=addLumeMsgInstant;
+    window.addLumeMsgInstant=function(text){var p=parse(text);if(p.text)oInst(p.text);p.cards.forEach(render);};
+  }
+  var EXTRA="\n\nCards. Rarely, a card says something better than a paragraph can. To send one, end your reply with a tag on its own line: [[card:{json}]]. Always write a sentence or two of normal reply as well, and use at most one card per reply. Most replies need no card; skip them for ordinary conversation. Types:\n"
+   +'- reflect: a pattern you notice in what they said. {"t":"reflect","title":"...","text":"..."}\n'
+   +'- steps: 2 to 6 concrete next actions. {"t":"steps","title":"...","items":["..."]}\n'
+   +'- choice: when they are torn between two options. {"t":"choice","title":"...","a":{"h":"...","t":"..."},"b":{"h":"...","t":"..."}}\n'
+   +'- checkin: to gauge how something feels, 1 to 5. {"t":"checkin","q":"...","lo":"...","hi":"..."}\n'
+   +'- breathe: only if they seem overwhelmed or wound up. {"t":"breathe","text":"..."}\n'
+   +'- keep: a line from the conversation worth holding onto. {"t":"keep","text":"..."}\n'
+   +'Valid JSON, straight quotes, no line breaks inside the tag.';
+  if(typeof lumeSystemPrompt==='function'){var oSys=lumeSystemPrompt;window.lumeSystemPrompt=function(){return oSys()+EXTRA;};}
+  window.lumeCards={T:T,shell:shell,h:h,say:say,render:render};
+  window.lumeCardDemo=function(){[
+    {t:'reflect',title:'Third time you\u2019ve said "almost"',text:'You keep describing the move as something you almost did. That word is doing a lot of work.'},
+    {t:'steps',title:'This week',items:['Draft the message','Send it before Friday','Decide what "no" would mean']},
+    {t:'choice',title:'Where you\u2019re split',a:{h:'Stay',t:'Known, steady, slowly closing in.'},b:{h:'Go',t:'Unknown, costly, yours.'}},
+    {t:'checkin',q:'How heavy does this feel right now?',lo:'Light',hi:'Crushing'},
+    {t:'breathe',text:'Just for a minute. Nothing needs solving yet.'},
+    {t:'keep',text:'You don\u2019t need permission to change your mind.'}
+  ].forEach(render);};
+})();
+</script>
+<script id="lume-result-cards-js">
+(function(){
+  var L=window.lumeCards; if(!L) return;
+  var h=L.h, say=L.say;
+  // searches card: real Altura Search history, never invented
+  L.T.searches=function(o){
+    var c=L.shell(o,'From your searches','#a8c4d4');
+    if(o.text) c.appendChild(h('div','lc-text',String(o.text)));
+    var box=h('div'); box.style.marginTop=o.text?'10px':'0'; c.appendChild(box);
+    if(typeof getPrivPref==='function'&&!getPrivPref('search')){box.appendChild(h('div','lc-count','Search access is off in your privacy settings.'));return c;}
+    var d=(typeof readAlturaSearchData==='function')?readAlturaSearchData():{history:[]};
+    var q=o.q?String(o.q).toLowerCase():'';
+    var hs=(d.history||[]).filter(function(x){return !q||x.toLowerCase().indexOf(q)>-1;}).slice(0,5);
+    if(!hs.length) box.appendChild(h('div','lc-count',q?'Nothing in your searches matches "'+o.q+'".':'No Altura Search history yet.'));
+    hs.forEach(function(x){var b=h('button','lc-q',x);b.onclick=function(){say('Let\u2019s talk about "'+x+'".');};box.appendChild(b);});
+    var st=[];if(d.searchesToday>0)st.push(d.searchesToday+' today');if(d.streakDays>=2)st.push(d.streakDays+'-day streak');
+    if(st.length) c.appendChild(h('div','lc-count',st.join('  \u00b7  ')));
+    return c;
+  };
+  // let Lume know the card exists, and what it can't do
+  if(typeof lumeSystemPrompt==='function'){var o2=lumeSystemPrompt;window.lumeSystemPrompt=function(){return o2()+'\n- searches: shows their real recent Altura Search history (optional "q" filters by keyword, optional "text" is your note). Use it when what they searched is relevant to what they are saying. You cannot search the web yourself, so never present invented results. {"t":"searches","q":"...","text":"..."}';};}
+  var od=window.lumeCardDemo; window.lumeCardDemo=function(){if(od)od();L.render({t:'searches',text:'This is what has been sitting open lately.'});};
+
+  // frame image and music results as cards
+  function frame(el,label,col){
+    if(el.dataset.lcx) return; el.dataset.lcx='1'; el.classList.add('lcx'); el.style.setProperty('--lc',col);
+    var hd=h('div','lc-head');hd.appendChild(h('span','lc-star','\u2726'));hd.appendChild(h('span','lc-label',label));
+    el.insertBefore(hd,el.firstChild); el.insertBefore(h('div','lc-bar'),el.firstChild);
+  }
+  function act(box,txt,fn){var b=h('button','lc-act',txt);b.onclick=function(){fn(b);};box.appendChild(b);}
+  function ext(t){return /mpeg|mp3/.test(t)?'mp3':/ogg/.test(t)?'ogg':/flac/.test(t)?'flac':/wav/.test(t)?'wav':'mp3';}
+  function dl(url,name,b){fetch(url).then(function(r){return r.blob();}).then(function(bl){var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=name+'.'+ext(bl.type);document.body.appendChild(a);a.click();a.remove();}).catch(function(){b.textContent='Could not save';});}
+  function scan(root){
+    (root.querySelectorAll?root:document).querySelectorAll('.lume-image:not([data-lcx])').forEach(function(el){
+      frame(el,'Image','#38bdf8');var im=el.querySelector('img');if(!im) return;
+      function acts(){if(el.querySelector('.lc-acts')) return;var bar=h('div','lc-acts');
+        act(bar,'Save',function(b){dl(im.src,'lume-image',b);});
+        act(bar,'Open',function(){window.open(im.src,'_blank');});
+        act(bar,'Another take',function(){say('make an image, a different take on that');});
+        el.appendChild(bar);}
+      if(im.classList.contains('loaded')) acts(); else im.addEventListener('load',acts);
+    });
+    (root.querySelectorAll?root:document).querySelectorAll('.lume-player:not([data-lcx])').forEach(function(el){frame(el,'Music','#f472b6');});
+  }
+  var ci=document.getElementById('chat-inner');
+  if(ci){scan(document);new MutationObserver(function(){scan(document);}).observe(ci,{childList:true,subtree:true});}
+  if(typeof renderMusicPlayer==='function'){
+    var om=renderMusicPlayer;
+    window.renderMusicPlayer=function(id,url){
+      om(id,url);var el=document.getElementById(id);if(!el||el.querySelector('.lc-acts')) return;
+      var bar=h('div','lc-acts');
+      act(bar,'Save',function(b){dl(url,'lume-composition',b);});
+      act(bar,'Another take',function(){say('make something, a different take on that');});
+      el.appendChild(bar);
+    };
+  }
+})();
+</script>
 </body>
 </html>
