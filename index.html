@@ -573,7 +573,332 @@ body.light #journal-watermark { color: rgba(0,0,0,.025); }
 .attach-chip .attach-remove:hover{opacity:1}
 .attach-chip .attach-icon{opacity:.5;flex-shrink:0}
 
+/* ── LISTEN MODE ── */
+@keyframes listenPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.28)}}
+@keyframes listenGlow{0%,100%{opacity:.18}50%{opacity:.42}}
+@keyframes listenRing{0%{transform:scale(.85);opacity:0}40%{opacity:.25}100%{transform:scale(1.7);opacity:0}}
+@keyframes subtitleIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes subtitleOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-10px)}}
+@keyframes loadDot{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+@keyframes statusFade{from{opacity:0}to{opacity:1}}
+
+#listen-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:#070605;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .8s ease;
+  overflow:hidden;
+}
+#listen-overlay.show{opacity:1;pointer-events:all}
+
+/* radial glow behind star */
+#listen-glow{
+  position:absolute;
+  width:480px;height:480px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,.12) 0%,rgba(56,189,248,.06) 40%,transparent 70%);
+  animation:listenGlow 3s ease-in-out infinite;
+  pointer-events:none;
+}
+#listen-glow.speaking{
+  background:radial-gradient(circle,rgba(167,139,250,.22) 0%,rgba(56,189,248,.12) 35%,rgba(74,222,128,.04) 60%,transparent 75%);
+  animation:listenGlow 1.2s ease-in-out infinite;
+}
+
+/* ring pulses outward when speaking */
+#listen-ring{
+  position:absolute;
+  width:120px;height:120px;
+  border-radius:50%;
+  border:1px solid rgba(167,139,250,.3);
+  opacity:0;pointer-events:none;
+}
+#listen-ring.pulse{animation:listenRing 1.6s ease-out infinite}
+
+/* the star */
+#listen-star-wrap{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:120px;height:120px;
+}
+.listen-star{
+  font-size:80px;line-height:1;
+  background:linear-gradient(135deg,#a78bfa 0%,#38bdf8 35%,#4ade80 55%,#f472b6 75%,#fb923c 100%);
+  background-size:300% 300%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s linear infinite;
+  user-select:none;
+  filter:drop-shadow(0 0 24px rgba(167,139,250,.35));
+  transition:filter .4s ease;
+}
+.listen-star.speaking{
+  animation:shimmer 1.2s linear infinite, listenPulse 1.4s ease-in-out infinite;
+  filter:drop-shadow(0 0 40px rgba(167,139,250,.55)) drop-shadow(0 0 80px rgba(56,189,248,.2));
+}
+.listen-star.thinking{
+  animation:shimmer 4s linear infinite, thinkpulse 2.4s ease-in-out infinite;
+  filter:drop-shadow(0 0 20px rgba(167,139,250,.2));
+}
+
+/* wave — wider, more bars, gradient coloured */
+#listen-wave{
+  display:flex;align-items:center;gap:4px;
+  height:48px;margin-top:40px;
+  opacity:0;transition:opacity .6s ease;
+}
+#listen-wave.active{opacity:1}
+#listen-wave .bar{
+  width:3px;border-radius:3px;
+  transform-origin:center;transform:scaleY(.08);
+}
+#listen-wave .bar:nth-child(1){background:#a78bfa}
+#listen-wave .bar:nth-child(2){background:#8fb4f0}
+#listen-wave .bar:nth-child(3){background:#38bdf8}
+#listen-wave .bar:nth-child(4){background:#4ade80}
+#listen-wave .bar:nth-child(5){background:#38bdf8}
+#listen-wave .bar:nth-child(6){background:#f472b6}
+#listen-wave .bar:nth-child(7){background:#fb923c}
+#listen-wave .bar:nth-child(8){background:#f472b6}
+#listen-wave .bar:nth-child(9){background:#38bdf8}
+#listen-wave .bar:nth-child(10){background:#4ade80}
+#listen-wave .bar:nth-child(11){background:#38bdf8}
+#listen-wave .bar:nth-child(12){background:#8fb4f0}
+#listen-wave .bar:nth-child(13){background:#a78bfa}
+
+/* subtitles */
+#listen-subtitle{
+  position:absolute;bottom:13%;
+  left:0;right:0;
+  text-align:center;
+  padding:0 10%;
+  min-height:100px;
+  display:flex;align-items:center;justify-content:center;
+}
+.subtitle-line{
+  font-family:'Lora',serif;
+  font-style:italic;
+  font-size:clamp(16px,1.9vw,22px);
+  line-height:1.7;
+  background:linear-gradient(90deg,#a78bfa,#38bdf8,#4ade80,#f472b6,#fb923c,#a78bfa);
+  background-size:300% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 2.4s linear infinite, subtitleIn .5s cubic-bezier(.22,1,.36,1) both;
+  max-width:720px;
+  text-shadow:none;
+}
+.subtitle-line.out{
+  animation:subtitleOut .32s ease forwards;
+}
+
+/* header */
+#listen-header{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 32px;
+}
+#listen-wordmark{
+  font-family:'Lora',serif;font-size:14px;font-weight:500;
+  background:linear-gradient(90deg,#a78bfa,#38bdf8);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 4s linear infinite;
+  letter-spacing:.01em;
+}
+#listen-status-wrap{
+  display:flex;align-items:center;gap:8px;
+}
+#listen-status{
+  font-family:'Figtree',sans-serif;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:#2e2c2a;
+  transition:color .4s ease;
+  animation:statusFade .4s ease;
+}
+#listen-status.active{color:#585450}
+
+/* loading dots */
+.load-dots{display:inline-flex;gap:4px;align-items:center;margin-left:4px}
+.load-dots span{
+  width:3px;height:3px;border-radius:50%;
+  background:#3a3830;
+  animation:loadDot 1.2s ease-in-out infinite;
+}
+.load-dots span:nth-child(2){animation-delay:.15s}
+.load-dots span:nth-child(3){animation-delay:.3s}
+
+/* footer */
+#listen-footer{
+  position:absolute;bottom:16px;left:0;right:0;
+  display:flex;align-items:center;justify-content:center;gap:32px;
+}
+#listen-close{
+  font-family:'Figtree',sans-serif;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#1c1a17;
+  cursor:pointer;transition:color .2s;border:none;background:none;
+}
+#listen-close:hover{color:#2e2c2a}
+#listen-skip{
+  font-family:'Figtree',sans-serif;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#1c1a17;
+  cursor:pointer;transition:color .2s;border:none;background:none;
+}
+#listen-skip:hover{color:#2e2c2a}
+
+/* topbar button */
+#listen-btn{
+  display:flex;align-items:center;gap:5px;
+  font-family:'Figtree',sans-serif;font-size:10.5px;letter-spacing:.05em;
+  padding:4px 12px;border-radius:99px;
+  border:1px solid rgba(168,196,212,.18);
+  background:rgba(168,196,212,.04);
+  cursor:pointer;transition:all .18s;
+}
+#listen-btn .btn-star{
+  font-size:9px;
+  background:linear-gradient(90deg,#a78bfa,#38bdf8,#f472b6);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s linear infinite;
+}
+#listen-btn .btn-label{color:#6a9ab0}
+#listen-btn:hover{background:rgba(168,196,212,.09);border-color:rgba(168,196,212,.32)}
+
+/* listen input bar */
+/* ── LISTEN PILL INPUT ── */
+@keyframes pillShimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes sendPulse{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes trailGlow{0%{background-position:200% center;opacity:.7}100%{background-position:-200% center;opacity:0}}
+@keyframes pillExpand{0%{transform:translateX(-50%) scaleY(1)}50%{transform:translateX(-50%) scaleY(.95)}100%{transform:translateX(-50%) scaleY(1)}}
+
+/* mood chips */
+#listen-mood-chips{
+  position:absolute;
+  bottom:132px;
+  left:50%;transform:translateX(-50%);
+  display:flex;gap:7px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;
+  transform:translateX(-50%) translateY(6px);
+  white-space:nowrap;
+}
+#listen-mood-chips.show{
+  opacity:1;pointer-events:all;
+  transform:translateX(-50%) translateY(0);
+}
+.mood-chip{
+  font-family:'Figtree',sans-serif;font-size:10px;letter-spacing:.05em;
+  color:#2e2c2a;border:1px solid rgba(255,255,255,.06);
+  border-radius:99px;padding:4px 11px;cursor:pointer;
+  transition:all .15s;background:rgba(255,255,255,.02);
+  backdrop-filter:blur(8px);
+}
+.mood-chip:hover{color:#585450;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.04);}
+.mood-chip.active{
+  background:rgba(167,139,250,.08);
+  border-color:rgba(167,139,250,.25);
+  color:#a78bfa;
+}
+
+/* pill wrapper — handles shimmer border via pseudo */
+#listen-pill-outer{
+  position:absolute;
+  bottom:58px;
+  left:50%;transform:translateX(-50%);
+  width:min(520px,84vw);
+  border-radius:18px;
+  padding:1.5px;
+  background:rgba(255,255,255,.07);
+  transition:background .3s ease, box-shadow .3s ease;
+  backdrop-filter:blur(16px);
+}
+#listen-pill-outer.focused{
+  background:rgba(167,139,250,.5);
+  box-shadow:0 0 0 1px rgba(56,189,248,.2);
+}
+#listen-pill-outer.sending{
+  background:rgba(167,139,250,.7);
+  transition:background .1s ease;
+}
+#listen-pill-inner{
+  background:#0d0b09;
+  border-radius:17px;
+  padding:10px 10px 10px 14px;
+  display:flex;align-items:flex-end;gap:8px;
+}
+
+/* attach preview inside pill */
+#listen-attach-preview{
+  display:none;flex-wrap:wrap;gap:5px;
+  padding:0 0 8px 0;
+}
+#listen-attach-preview.show{display:flex;}
+
+#listen-inp{
+  flex:1;background:none;border:none;outline:none;
+  font-family:'Lora',serif;font-size:14px;font-style:italic;
+  color:#96918a;line-height:1.6;resize:none;
+  min-height:22px;max-height:90px;overflow-y:auto;
+  caret-color:#585450;
+}
+#listen-inp::placeholder{color:#252220;transition:color .4s ease;}
+#listen-inp:focus::placeholder{color:#2e2c2a;}
+
+/* buttons row */
+.listen-pill-btns{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-bottom:2px;}
+
+/* attach button */
+#listen-attach-btn{
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  color:#2e2c2a;cursor:pointer;border:none;background:none;
+  transition:color .15s;flex-shrink:0;
+}
+#listen-attach-btn:hover{color:#585450;}
+#listen-file-input{display:none;}
+
+/* send star */
+#listen-send{
+  width:28px;height:28px;border-radius:9px;
+  background:rgba(167,139,250,.12);
+  border:1px solid rgba(167,139,250,.2);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;
+  opacity:0;pointer-events:none;
+  font-size:13px;line-height:1;
+  background-clip:text; /* for the star itself, applied via inner span */
+}
+#listen-send.visible{opacity:1;pointer-events:all;}
+#listen-send:hover{background:rgba(167,139,250,.22);border-color:rgba(167,139,250,.4);}
+#listen-send.pulse{animation:sendPulse .22s cubic-bezier(.34,1.6,.64,1) forwards;}
+.send-star{
+  font-size:14px;line-height:1;
+  background:linear-gradient(135deg,#a78bfa,#38bdf8,#f472b6);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:pillShimmer 3s linear infinite;
+  pointer-events:none;
+}
+
+/* privacy notice */
+#listen-privacy{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  font-family:'Figtree',sans-serif;font-size:9.5px;letter-spacing:.07em;
+  color:#1a1815;white-space:nowrap;
+}
+
+/* thinking state inside pill */
+#listen-pill-thinking{
+  display:none;align-items:center;gap:5px;padding:2px 0;
+}
+#listen-pill-thinking.show{display:flex;}
+#listen-pill-thinking .pt-dot{
+  width:3px;height:3px;border-radius:50%;
+  background:rgba(167,139,250,.35);
+  animation:loadDot 1.2s ease-in-out infinite;
+}
+#listen-pill-thinking .pt-dot:nth-child(2){animation-delay:.15s;}
+#listen-pill-thinking .pt-dot:nth-child(3){animation-delay:.3s;}
+
+/* thinking — remove old separate indicator */
+#listen-thinking{display:none!important;}
 
 /* ── GENERATION MODAL ── */
 @keyframes genModalIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -1864,7 +2189,7 @@ body.ms-ready .lc-q::before{content:'search';font:400 16px/1 'Material Symbols R
 .lc-src:hover b{color:#fff}
 </style>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=add_photo_alternate,arrow_back,arrow_forward,arrow_outward,arrow_upward,auto_awesome,bar_chart,call_split,check,close,content_copy,dark_mode,description,diamond,download,edit_note,keep,keyboard_arrow_down,keyboard_double_arrow_down,mail,mic,pause,play_arrow,schedule,search,settings,stop,summarize,support_agent,volume_up,warning&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=arrow_back,arrow_forward,arrow_outward,auto_awesome,bar_chart,call_split,check,close,content_copy,dark_mode,description,diamond,download,edit_note,keep,keyboard_arrow_down,keyboard_double_arrow_down,mail,pause,play_arrow,schedule,search,settings,summarize,support_agent,volume_up,warning&display=block">
 <style id="lume-ms-css">
 .ms{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;font-size:1.15em;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;vertical-align:-.17em;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24}
 .lume-star .ms{font-size:1.08em;vertical-align:-.14em}
@@ -2120,8 +2445,8 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
   </div>
   <div class="flex items-center gap-3">
     <button onclick="openSettings()" style="font-family:'Figtree',sans-serif;font-size:10px;letter-spacing:.1em;color:#2e2c2a;border:none;background:none;cursor:pointer;transition:color .15s;text-transform:uppercase" onmouseover="this.style.color='#585450'" onmouseout="this.style.color='#2e2c2a'">Settings</button>
-    <button id="listen-btn" onclick="lumeConversation()" title="Talk with Lume">
-      <span class="btn-star">&#10022;</span><span class="btn-label">Talk</span>
+    <button id="listen-btn" onclick="enterListenMode()" title="Listen mode">
+      <span class="btn-star">&#10022;</span><span class="btn-label">Listen</span>
     </button>
     <button onclick="handleNew()" style="font-family:'Figtree',sans-serif;font-size:16px;color:#2e2c2a;border:none;background:none;cursor:pointer;transition:color .15s;line-height:1" onmouseover="this.style.color='#585450'" onmouseout="this.style.color='#2e2c2a'" title="New conversation">&#10022;</button>
   </div>
@@ -2429,6 +2754,82 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
   </div>
 </div>
 
+<!-- LISTEN OVERLAY -->
+<div id="listen-overlay">
+  <!-- radial glow -->
+  <div id="listen-glow"></div>
+  <div id="listen-ring"></div>
+
+  <!-- header -->
+  <div id="listen-header">
+    <div id="listen-wordmark">Lume</div>
+    <div id="listen-status-wrap">
+      <div id="listen-status">ready</div>
+    </div>
+  </div>
+
+  <!-- centre -->
+  <div id="listen-star-wrap">
+    <span class="listen-star" id="listen-star">&#10022;</span>
+  </div>
+
+  <!-- wave bars — 13 bars -->
+  <div id="listen-wave">
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <!-- subtitles -->
+  <div id="listen-subtitle"></div>
+
+  <!-- mood chips -->
+  <div id="listen-mood-chips">
+    <button class="mood-chip" onclick="setListenMood(this,'thinking through')">thinking through</button>
+    <button class="mood-chip" onclick="setListenMood(this,'deciding')">deciding</button>
+    <button class="mood-chip" onclick="setListenMood(this,'just venting')">just venting</button>
+    <button class="mood-chip" onclick="setListenMood(this,'something happened')">something happened</button>
+  </div>
+
+  <!-- thinking indicator (hidden, replaced by pill state) -->
+  <div id="listen-thinking"></div>
+
+  <!-- floating pill -->
+  <div id="listen-pill-outer">
+    <div id="listen-pill-inner">
+      <div id="listen-attach-preview"></div>
+      <div id="listen-pill-thinking">
+        <div class="pt-dot"></div><div class="pt-dot"></div><div class="pt-dot"></div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;flex:1;min-width:0;">
+        <textarea id="listen-inp" placeholder="say something..." rows="1"
+          onkeydown="listenInpKey(event)"
+          oninput="listenInpChange(this)"
+          onfocus="onListenPillFocus()"
+          onblur="onListenPillBlur()"></textarea>
+        <div class="listen-pill-btns">
+          <button id="listen-attach-btn" onclick="triggerListenFileUpload()" title="Attach">
+            <svg width="12" height="14" viewBox="0 0 13 15" fill="none"><path d="M11.5 6.5L5.5 12.5C4.1 13.9 1.9 13.9 0.5 12.5C-0.9 11.1 -0.9 8.9 0.5 7.5L7 1C8 0 9.6 0 10.6 1C11.6 2 11.6 3.6 10.6 4.6L4.6 10.6C4.1 11.1 3.3 11.1 2.8 10.6C2.3 10.1 2.3 9.3 2.8 8.8L8.3 3.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+          <input type="file" id="listen-file-input" accept=".txt,.md,.csv,.json,.js,.py,.html,.css,.pdf,.jpg,.jpeg,.png,.webp" onchange="handleListenFileSelect(event)">
+          <button id="listen-send" onclick="sendFromListen()"><span class="send-star">&#10022;</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- privacy -->
+  <div id="listen-privacy">Lume draws from your Altura Search activity &middot; your words stay in this session</div>
+
+  <!-- footer -->
+  <div id="listen-footer">
+    <button id="listen-skip" onclick="skipListenSpeech()">skip</button>
+    <button id="listen-close" onclick="exitListenMode()">esc to close</button>
+  </div>
+</div>
+
 <!-- FULL SETTINGS PAGE -->
 <div id="settings-page">
   <button class="settings-back" onclick="closeSettings()">&#8592; Back</button>
@@ -2536,14 +2937,14 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Voice model</div>
-          <div class="settings-row-desc">Kokoro when available, system voice as fallback. Choose the voice when you open Talk</div>
+          <div class="settings-row-desc">Kokoro (Bella) when available, system voice as fallback</div>
         </div>
         <div style="font-size:11px;color:#2e2c2a;font-family:'Figtree',sans-serif;" id="voice-status">checking...</div>
       </div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Auto-read responses</div>
-          <div class="settings-row-desc">Lume speaks every response without opening Talk mode</div>
+          <div class="settings-row-desc">Lume speaks every response without entering Listen mode</div>
         </div>
         <div class="tog" id="tog-autoread" onclick="toggleAutoRead(this)"></div>
       </div>
@@ -5419,6 +5820,8 @@ function addLumeMsg(text,cb){
     maybeShowQuestion(text);
     maybeMarkMemoryUsed(text, d);
     updateMemoryDot();
+    if(_autoRead && !_listenActive && _kokoroReady && _kokoroPipeline){ speakInListen(text); }
+    if(_listenActive){ _lastSpokeText=text; setListenStar('thinking'); setListenGlow(false); setListenStatus('thinking',false); var clean=cleanForSpeech(text); if(_kokoroReady&&_kokoroPipeline){_speakKokoro(clean);}else{_speakWebSpeech(clean);} }
     if(cb)cb();
   });
 }
@@ -5723,7 +6126,7 @@ function openSettings(){
   if(el){ el.textContent='1.'+String(parseInt(localStorage.getItem('lume_convos')||'0')).padStart(2,'0'); }
   // voice status
   el=document.getElementById('voice-status');
-  if(el){ var _vt=window.__kokoroPipeline&&window.lumeVoiceId?window.lumeVoiceId():''; el.textContent = _vt ? 'Kokoro ('+(window.lumeVoiceName?window.lumeVoiceName():_vt)+') ready' : 'System voice'; }
+  if(el) el.textContent = _kokoroReady ? 'Kokoro (Bella) ready' : 'System voice';
   // light mode toggle state
   var togLight=document.getElementById('tog-light');
   if(togLight) togLight.className='tog'+(document.body.classList.contains('light')?' on':'');
@@ -6739,12 +7142,17 @@ send = function(text){
 
   // ── Music request ──
   if(isMusicRequest(txt) && !busy){
+    if(_listenActive){ speakInListen("I can't make music while we're listening. Ask me when we're back in chat."); return; }
     handleMusicRequest(txt);
     return;
   }
 
   // ── Image request ──
   if(isImageRequest(txt) && !busy){
+    if(_listenActive && attachedFiles.filter(function(f){ return f.isImage; }).length === 0){
+      speakInListen("I can't generate images here. Attach one if you want me to look at something.");
+      return;
+    }
     handleImageRequest(txt);
     return;
   }
@@ -6993,26 +7401,24 @@ function addMsgActions(msgEl, text, isLume){
 }
 
 function readMsgAloud(text){
-  var clean = (window.lumeSpeakable ? window.lumeSpeakable(text) : text).replace(/\s+/g,' ').trim();
-  if(!clean) return;
-  var tts = window.__kokoroPipeline;
-  if(tts){
-    // the voice chosen in Talk mode, one sentence at a time
-    var sentences = clean.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [clean];
-    var idx = 0, vid = window.lumeVoiceId ? window.lumeVoiceId() : 'af_bella';
+  if(!window.speechSynthesis && !_kokoroPipeline) return;
+  var clean = text.replace(/```[\s\S]*?```/g,'').replace(/`([^`]+)`/g,'$1').replace(/\*+([^*]+)\*+/g,'$1').trim();
+  if(_kokoroReady && _kokoroPipeline){
+    // use kokoro briefly — single message, no listen mode
+    var sentences = clean.match(/[^.!?]+[.!?]+/g) || [clean];
+    var idx = 0;
     var audioCtx2 = new (window.AudioContext||window.webkitAudioContext)();
-    (function next(){
-      if(idx>=sentences.length) return; var s=sentences[idx++].trim(); if(!s) return next();
-      tts.generate(s,{voice:vid}).then(function(r){
+    function next(){ if(idx>=sentences.length) return; var s=sentences[idx++];
+      _kokoroPipeline.generate(s,{voice:'af_bella'}).then(function(r){
         var fa = r.audio instanceof Float32Array ? r.audio : new Float32Array(r.audio);
         var buf=audioCtx2.createBuffer(1,fa.length,r.sampling_rate||24000);
         buf.copyToChannel(fa,0);var src=audioCtx2.createBufferSource();
         src.buffer=buf;src.connect(audioCtx2.destination);src.onended=next;src.start();
-      }).catch(function(){ if(window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(clean)); });
-    })();
-  } else if(window.speechSynthesis){
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(clean));
+      }).catch(function(){ _speakWebSpeechSentence(s, next); });
+    }
+    next();
+  } else {
+    _speakWebSpeech(clean);
   }
 }
 
@@ -7473,6 +7879,10 @@ function dismissListenQuestion(){
   });
   resetIdle();
 })();
+
+// ── LISTEN MODE RESUME ──
+var _listenResumeText = null;
+var _lastSpokeText = null;
 
 // ── LOADING SCREEN ──
 (function(){
@@ -8918,6 +9328,511 @@ function closeShareModal(){
   }
 })();
 
+// ── LISTEN MODE ──
+// Kokoro TTS (kokoro-js) with Bella voice. Falls back to Web Speech.
+
+var _listenActive = false;
+var _kokoroLoading = false;
+var _kokoroReady = false;
+var _kokoroPipeline = null;
+var _listenAudioCtx = null;
+var _currentSource = null;
+var _waveInterval = null;
+
+function loadKokoro(cb){
+  if(_kokoroReady && _kokoroPipeline){ cb(true); return; }
+  if(_kokoroLoading){
+    var t=setInterval(function(){ if(!_kokoroLoading){clearInterval(t);cb(_kokoroReady);} },300);
+    return;
+  }
+  _kokoroLoading = true;
+  setListenStatus('loading voice', true);
+  var script = document.createElement('script');
+  script.type = 'module';
+  script.textContent = [
+    "import { KokoroTTS } from 'https://esm.sh/kokoro-js@1.2.0';",
+    "try {",
+    "  const tts = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });",
+    "  window.__kokoroPipeline = tts;",
+    "  document.dispatchEvent(new Event('kokoro-ready'));",
+    "} catch(e) {",
+    "  console.warn('Kokoro load error:', e);",
+    "  document.dispatchEvent(new CustomEvent('kokoro-failed', { detail: String(e) }));",
+    "}"
+  ].join('\n');
+  document.head.appendChild(script);
+  var timer = setTimeout(function(){
+    if(!_kokoroReady){ _kokoroLoading=false; cb(false); }
+  }, 60000);
+  document.addEventListener('kokoro-ready', function(){
+    clearTimeout(timer);
+    _kokoroPipeline = window.__kokoroPipeline;
+    _kokoroReady = true; _kokoroLoading = false;
+    cb(true);
+  }, {once:true});
+  document.addEventListener('kokoro-failed', function(){
+    clearTimeout(timer);
+    _kokoroLoading = false; _kokoroReady = false;
+    cb(false);
+  }, {once:true});
+}
+
+function enterListenMode(){
+  if(_listenActive) return;
+  _listenActive = true;
+  var hadResume = !!_listenResumeText;
+  var resumeText = _listenResumeText;
+  _listenResumeText = null;
+  document.getElementById('listen-overlay').classList.add('show');
+  setListenStar('idle'); setListenStatus('ready', false);
+  function onKey(e){ if(e.key==='Escape') exitListenMode(); }
+  document.getElementById('listen-overlay')._keyHandler = onKey;
+  document.addEventListener('keydown', onKey);
+  loadKokoro(function(ok){
+    if(!_listenActive) return;
+    setListenStatus(ok ? 'voice ready' : 'system voice', false);
+    updateListenPlaceholder();
+    if(hadResume && resumeText){
+      setListenStatus('continue from before?', false);
+      var el = document.getElementById('listen-inp');
+      if(el) el.placeholder = 'continue — or say something new';
+      var resumeTimer = setTimeout(function(){
+        if(_listenActive && !busy) speakInListen(resumeText);
+      }, 3000);
+      if(el) el.addEventListener('input', function cancel(){
+        clearTimeout(resumeTimer); el.removeEventListener('input', cancel);
+      }, {once:true});
+    } else {
+      var lastLume = null;
+      for(var i=msgs.length-1;i>=0;i--){ if(msgs[i].role==='assistant'){lastLume=msgs[i].content;break;} }
+      if(lastLume) setTimeout(function(){ if(_listenActive) speakInListen(lastLume); }, 700);
+    }
+  });
+}
+
+function exitListenMode(){
+  if(!_listenActive) return;
+  // save last spoken text for resume
+  if(_lastSpokeText) _listenResumeText = _lastSpokeText;
+  _listenActive = false;
+  stopListenAudio(); stopWave();
+  var o = document.getElementById('listen-overlay');
+  o.classList.remove('show');
+  if(o._keyHandler) document.removeEventListener('keydown', o._keyHandler);
+  clearSubtitle(); setListenGlow(false);
+}
+
+function skipListenSpeech(){
+  stopListenAudio(); stopWave();
+  setListenStar('idle'); setListenGlow(false);
+  setListenStatus('ready', false); clearSubtitle();
+}
+
+function setListenStar(state){
+  var star = document.getElementById('listen-star');
+  var ring = document.getElementById('listen-ring');
+  if(!star) return;
+  star.className = 'listen-star'+(state==='speaking'?' speaking':state==='thinking'?' thinking':'');
+  if(ring) ring.className = state==='speaking' ? 'pulse' : '';
+}
+
+function setListenGlow(speaking){
+  var g = document.getElementById('listen-glow');
+  if(g) g.className = speaking ? 'speaking' : '';
+}
+
+function setListenStatus(text, loading){
+  var el = document.getElementById('listen-status');
+  if(!el) return;
+  el.className = (text && text!=='ready') ? 'active' : '';
+  if(loading){
+    el.innerHTML = text+'<span class="load-dots"><span></span><span></span><span></span></span>';
+  } else {
+    el.textContent = text;
+  }
+}
+
+function startWave(){
+  var wave = document.getElementById('listen-wave');
+  if(!wave || _waveInterval) return;
+  wave.classList.add('active');
+  var bars = Array.prototype.slice.call(wave.querySelectorAll('.bar'));
+  var t = 0;
+  _waveInterval = setInterval(function(){
+    bars.forEach(function(b, i){
+      var v = Math.sin(t*0.09+i*0.55)*0.45 + Math.sin(t*0.17+i*1.1)*0.25 + 0.3;
+      b.style.transform = 'scaleY('+Math.max(.07,Math.min(1,v))+')';
+      b.style.height = (14 + i%3*8 + (bars.length-i)%3*4)+'px';
+    });
+    t++;
+  }, 55);
+}
+
+function stopWave(){
+  clearInterval(_waveInterval); _waveInterval = null;
+  var wave = document.getElementById('listen-wave');
+  if(wave){
+    wave.classList.remove('active');
+    Array.prototype.slice.call(wave.querySelectorAll('.bar')).forEach(function(b){
+      b.style.transform='scaleY(.08)';
+    });
+  }
+}
+
+var _subTimer = null;
+function showSubtitle(text){
+  var c = document.getElementById('listen-subtitle'); if(!c) return;
+  var old = c.querySelector('.subtitle-line');
+  if(old){ old.classList.add('out'); setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); },340); }
+  clearTimeout(_subTimer);
+  _subTimer = setTimeout(function(){
+    var el = document.createElement('div'); el.className='subtitle-line'; el.textContent=text;
+    c.appendChild(el);
+  }, old ? 340 : 0);
+}
+
+function clearSubtitle(){
+  clearTimeout(_subTimer);
+  var c = document.getElementById('listen-subtitle'); if(!c) return;
+  var old = c.querySelector('.subtitle-line');
+  if(old){ old.classList.add('out'); setTimeout(function(){ c.innerHTML=''; },340); }
+}
+
+function cleanForSpeech(text){
+  return text.replace(/```[\s\S]*?```/g,'code block.').replace(/`([^`]+)`/g,'$1')
+    .replace(/\*+([^*]+)\*+/g,'$1').replace(/#{1,6}\s/g,'')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g,'$1')
+    .replace(/\n\n+/g,' ').replace(/\n/g,' ').trim();
+}
+
+function splitSentences(text){
+  var raw = text.match(/[^.!?…]+(?:[.!?…]+["']?(?:\s|$))/g) || [text];
+  return raw.map(function(s){ return s.trim(); }).filter(function(s){ return s.length>1; });
+}
+
+function speakInListen(text){
+  if(!_listenActive) return;
+  _lastSpokeText = text;
+  setListenStar('thinking'); setListenGlow(false); setListenStatus('thinking', false);
+  var clean = cleanForSpeech(text);
+  if(_kokoroReady && _kokoroPipeline){ _speakKokoro(clean); } else { _speakWebSpeech(clean); }
+}
+
+function _speakKokoro(text){
+  var sentences = splitSentences(text); if(!sentences.length){ onSpeechEnd(); return; }
+  var idx = 0;
+  if(!_listenAudioCtx) _listenAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  function next(){
+    if(!_listenActive||idx>=sentences.length){ onSpeechEnd(); return; }
+    var s = sentences[idx++];
+    showSubtitle(s); setListenStar('speaking'); setListenGlow(true); setListenStatus('speaking',false); startWave();
+    _kokoroPipeline.generate(s, { voice:'af_bella' })
+      .then(function(result){
+        if(!_listenActive){ onSpeechEnd(); return; }
+        var audioData = result.audio || result;
+        var sr = result.sampling_rate || 24000;
+        if(audioData && typeof audioData.length !== 'undefined'){
+          var fa = audioData instanceof Float32Array ? audioData : new Float32Array(audioData);
+          var buf = _listenAudioCtx.createBuffer(1, fa.length, sr);
+          buf.copyToChannel(fa, 0);
+          var src = _listenAudioCtx.createBufferSource();
+          src.buffer = buf; src.connect(_listenAudioCtx.destination);
+          src.onended = function(){ stopWave(); next(); };
+          src.start(); _currentSource = src;
+        } else { _speakWebSpeechSentence(s, next); }
+      })
+      .catch(function(e){ console.warn('Kokoro err:',e); _speakWebSpeechSentence(s, next); });
+  }
+  next();
+}
+
+var _bestVoice = null;
+function _pickVoice(){
+  if(_bestVoice) return _bestVoice;
+  var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  var prefs = ['Samantha','Karen','Moira','Fiona','Google UK English Female','Microsoft Libby','Daniel'];
+  for(var i=0;i<prefs.length;i++){
+    var v=voices.find(function(vv){ return vv.name.indexOf(prefs[i])>-1; });
+    if(v){ _bestVoice=v; return v; }
+  }
+  _bestVoice = voices.find(function(v){ return v.lang&&v.lang.indexOf('en')===0; })||voices[0]||null;
+  return _bestVoice;
+}
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged = function(){ _bestVoice=null; };
+
+function _speakWebSpeech(text){
+  if(!window.speechSynthesis){ onSpeechEnd(); return; }
+  window.speechSynthesis.cancel();
+  var sentences = splitSentences(text); var idx=0;
+  function next(){ if(!_listenActive||idx>=sentences.length){ onSpeechEnd(); return; } _speakWebSpeechSentence(sentences[idx++], next); }
+  next();
+}
+
+function _speakWebSpeechSentence(s, cb){
+  showSubtitle(s); setListenStar('speaking'); setListenGlow(true); setListenStatus('speaking',false); startWave();
+  var utt = new SpeechSynthesisUtterance(s);
+  utt.voice = _pickVoice(); utt.rate=0.91; utt.pitch=0.94;
+  utt.onend = function(){ stopWave(); if(cb) cb(); };
+  utt.onerror = function(){ stopWave(); if(cb) cb(); };
+  window.speechSynthesis.speak(utt);
+}
+
+function onSpeechEnd(){
+  if(!_listenActive) return;
+  stopWave(); setListenStar('idle'); setListenGlow(false); setListenStatus('ready',false);
+  updateListenPlaceholder();
+  setTimeout(clearSubtitle, 1800);
+}
+
+function stopListenAudio(){
+  if(_currentSource){ try{_currentSource.stop();}catch(e){} _currentSource=null; }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  stopWave(); setListenGlow(false);
+}
+
+// hook: speak new Lume messages when listen mode active
+// ── Listen pill input ──
+var _listenMood = null;
+var _listenAttachFiles = [];
+
+function onListenPillFocus(){
+  var outer = document.getElementById('listen-pill-outer');
+  if(outer) outer.classList.add('focused');
+  // show mood chips if input is empty
+  var inp = document.getElementById('listen-inp');
+  if(inp && !inp.value.trim()) showListenMoodChips();
+}
+
+function onListenPillBlur(){
+  setTimeout(function(){
+    // only unfocus if nothing inside pill is focused
+    var pill = document.getElementById('listen-pill-outer');
+    if(!pill) return;
+    var focused = pill.contains(document.activeElement);
+    if(!focused){
+      pill.classList.remove('focused');
+      hideListenMoodChips();
+    }
+  }, 150);
+}
+
+function showListenMoodChips(){
+  var el = document.getElementById('listen-mood-chips');
+  if(el) el.classList.add('show');
+}
+function hideListenMoodChips(){
+  var el = document.getElementById('listen-mood-chips');
+  if(el) el.classList.remove('show');
+}
+
+function setListenMood(btn, mood){
+  var chips = document.querySelectorAll('.mood-chip');
+  chips.forEach(function(c){ c.classList.remove('active'); });
+  if(_listenMood === mood){
+    _listenMood = null; // toggle off
+  } else {
+    _listenMood = mood;
+    btn.classList.add('active');
+  }
+}
+
+// contextual placeholder — pull a fragment from last Lume message
+function updateListenPlaceholder(){
+  var inp = document.getElementById('listen-inp');
+  if(!inp || inp.value) return;
+  var lastLume = null;
+  for(var i=msgs.length-1;i>=0;i--){ if(msgs[i].role==='assistant'){lastLume=msgs[i].content;break;} }
+  if(!lastLume){ inp.placeholder = 'say something...'; return; }
+  // pull the last question if any, else a short fragment
+  var q = lastLume.match(/[^.!?]*\?/g);
+  var fragment = q ? q[q.length-1].trim().replace(/^["']|["']$/g,'') : '';
+  if(fragment.length > 6 && fragment.length < 60){
+    inp.placeholder = fragment.charAt(0).toLowerCase() + fragment.slice(1).replace(/\?$/,'') + '...';
+  } else {
+    var words = lastLume.split(/\s+/).slice(0,5).join(' ');
+    inp.placeholder = words.length > 3 ? words.toLowerCase().replace(/[.!?,]$/,'') + '...' : 'say something...';
+  }
+}
+
+// file handling for listen pill
+function triggerListenFileUpload(){
+  document.getElementById('listen-file-input').click();
+}
+
+function handleListenFileSelect(event){
+  var files = Array.prototype.slice.call(event.target.files);
+  files.forEach(function(file){
+    if(file.size > 5000000){ showToast('File too large.'); return; }
+    var isImage = file.type.startsWith('image/');
+    if(isImage){
+      var r = new FileReader();
+      r.onload = function(e){
+        var b64 = e.target.result.split(',')[1];
+        _listenAttachFiles.push({name:file.name,type:file.type,content:'[image]',isImage:true,base64:b64,mimeType:file.type});
+        renderListenAttachPreview();
+        document.getElementById('listen-send').classList.add('visible');
+      };
+      r.readAsDataURL(file);
+    } else {
+      if(file.size > 500000){ showToast('File too large — keep under 500KB.'); return; }
+      var r2 = new FileReader();
+      r2.onload = function(e){
+        _listenAttachFiles.push({name:file.name,type:file.type,content:e.target.result,isImage:false});
+        renderListenAttachPreview();
+        document.getElementById('listen-send').classList.add('visible');
+      };
+      r2.readAsText(file);
+    }
+  });
+  event.target.value='';
+}
+
+function renderListenAttachPreview(){
+  var wrap = document.getElementById('listen-attach-preview');
+  if(!wrap) return;
+  if(_listenAttachFiles.length===0){ wrap.classList.remove('show'); wrap.innerHTML=''; return; }
+  wrap.classList.add('show');
+  wrap.innerHTML='';
+  _listenAttachFiles.forEach(function(f,i){
+    var chip = document.createElement('div');
+    chip.className = 'attach-chip';
+    chip.style.cssText = 'font-size:10px;padding:2px 8px 2px '+(f.isImage?'3px':'8px');
+    if(f.isImage){
+      chip.innerHTML = '<img src="data:'+f.mimeType+';base64,'+f.base64+'" style="width:20px;height:20px;object-fit:cover;border-radius:2px;flex-shrink:0">'
+        +'<span class="attach-name" style="max-width:80px">'+esc(f.name)+'</span>'
+        +'<span class="attach-remove" onclick="removeListenAttach('+i+')">&#10005;</span>';
+    } else {
+      chip.innerHTML = '<span class="attach-name" style="max-width:100px">'+esc(f.name)+'</span>'
+        +'<span class="attach-remove" onclick="removeListenAttach('+i+')">&#10005;</span>';
+    }
+    wrap.appendChild(chip);
+  });
+}
+
+function removeListenAttach(idx){
+  _listenAttachFiles.splice(idx,1);
+  renderListenAttachPreview();
+  var inp = document.getElementById('listen-inp');
+  if(_listenAttachFiles.length===0 && inp && !inp.value.trim()){
+    document.getElementById('listen-send').classList.remove('visible');
+  }
+}
+
+function listenInpKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendFromListen(); }
+  if(e.key && e.key.length===1) hideListenMoodChips();
+}
+
+function listenInpChange(el){
+  el.style.height=''; el.style.height=Math.min(el.scrollHeight,90)+'px';
+  var hasContent = el.value.trim().length>0 || _listenAttachFiles.length>0;
+  document.getElementById('listen-send').classList.toggle('visible', hasContent);
+  if(el.value.trim()) hideListenMoodChips();
+  else if(document.activeElement===el) showListenMoodChips();
+}
+
+function setListenPillThinking(on){
+  var pt = document.getElementById('listen-pill-thinking');
+  var inp = document.getElementById('listen-inp');
+  var btns = document.querySelector('.listen-pill-btns');
+  if(pt) pt.className = on ? 'show' : '';
+  if(inp) inp.style.display = on ? 'none' : '';
+  if(btns) btns.style.opacity = on ? '0' : '1';
+}
+
+function listenSendTrail(){
+  var outer = document.getElementById('listen-pill-outer');
+  if(!outer) return;
+  outer.classList.add('sending');
+  // pulse the send star
+  var btn = document.getElementById('listen-send');
+  if(btn){ btn.classList.add('pulse'); setTimeout(function(){ btn.classList.remove('pulse'); },300); }
+  // pill compress
+  outer.style.transition='transform .18s cubic-bezier(.34,1.4,.64,1)';
+  outer.style.transform='translateX(-50%) scaleY(.94)';
+  setTimeout(function(){
+    outer.style.transform='translateX(-50%) scaleY(1)';
+    setTimeout(function(){ outer.classList.remove('sending'); outer.style.transition=''; },300);
+  },180);
+}
+
+function sendFromListen(){
+  var inp = document.getElementById('listen-inp');
+  if(!inp) return;
+  var txt = inp.value.trim();
+  var hasAttach = _listenAttachFiles.length > 0;
+  if(!txt && !hasAttach) return;
+  if(busy) return;
+
+  // block music
+  if(txt && isMusicRequest(txt)){
+    speakInListen("I can't make music in this mode. Ask me when we're back in chat.");
+    inp.value=''; inp.style.height=''; listenInpChange(inp); return;
+  }
+  // block image generation (allow vision with attachment)
+  if(txt && isImageRequest(txt) && !hasAttach){
+    speakInListen("I can't generate images here. Attach one if you want me to look at something.");
+    inp.value=''; inp.style.height=''; listenInpChange(inp); return;
+  }
+
+  var userText = txt;
+  inp.value=''; inp.style.height='';
+  document.getElementById('listen-send').classList.remove('visible');
+  hideListenMoodChips();
+
+  // send trail animation
+  listenSendTrail();
+
+  stopListenAudio();
+  setListenStar('thinking');
+  setListenStatus('thinking', false);
+  setListenPillThinking(true);
+
+  // prepend mood context invisibly if set
+  var fullText = _listenMood ? '[context: the person is '+_listenMood+'] '+userText : userText;
+  _listenMood = null;
+  document.querySelectorAll('.mood-chip').forEach(function(c){ c.classList.remove('active'); });
+
+  msgs.push({role:'user', content:userText}); // store clean version
+  busy = true; setStarActive(true);
+
+  var imageFiles = _listenAttachFiles.filter(function(f){ return f.isImage; });
+  // merge listen attachments into main attachedFiles for buildFileContext
+  _listenAttachFiles.filter(function(f){ return !f.isImage; }).forEach(function(f){ attachedFiles.push(f); });
+  _listenAttachFiles = [];
+  renderListenAttachPreview();
+
+  var SYS = lumeSystemPrompt() + buildFileContext();
+  clearAttachments();
+
+  if(imageFiles.length > 0){
+    // vision path
+    callVision(imageFiles, userText, SYS);
+    setListenPillThinking(false);
+    updateListenPlaceholder();
+    return;
+  }
+
+  fetchWorker(
+    {messages:[{role:'system',content:SYS},{role:'user',content:fullText}].concat(msgs.slice(-14))},
+    function(reply){
+      setListenPillThinking(false);
+      msgs.push({role:'assistant',content:reply});
+      busy=false; setStarActive(false);
+      saveCurrentConvo();
+      updateListenPlaceholder();
+      if(_listenActive) speakInListen(reply);
+    },
+    function(){
+      setListenPillThinking(false);
+      busy=false; setStarActive(false);
+      setListenStar('idle'); setListenStatus('ready',false);
+      if(_listenActive) speakInListen('Having a little trouble connecting right now.');
+    }
+  );
+}
+
+
 var _namePromptDone = !!localStorage.getItem('ac_name_asked');
 var _namePromptScheduled = false;
 
@@ -9539,7 +10454,7 @@ var _sendCount = 0;
   // presence: idle / thinking / searching / listening
   setInterval(function(){
     var g=document.getElementById('inp-ghost'),st='idle';
-    if(window.lumeSpoken) st='listening';
+    if(typeof _listenActive!=='undefined'&&_listenActive) st='listening';
     else if(typeof busy!=='undefined'&&busy) st=(g&&/Searching/.test(g.textContent))?'searching':'thinking';
     if(document.body.getAttribute('data-presence')!==st) document.body.setAttribute('data-presence',st);
   },300);
@@ -10726,6 +11641,7 @@ body.light .lora-prose a{color:#2f6f94}
       .replace(/(\*\*|__|~~)(.+?)\1/g,'$2').replace(/\*([^*\n]+)\*/g,'$1')
       .replace(/([^.!?:;,\s])[ \t]*\n/g,'$1.\n').replace(/\n{3,}/g,'\n\n').trim();
   };
+  if(typeof window.speakInListen==='function'){var oS=window.speakInListen;window.speakInListen=function(t){return oS.call(this,window.lumeSpeakable(t));};}
   // Teach Lume when and how to format. A spoken conversation (window.lumeSpoken) gets no markdown at all.
   var GUIDE='Formatting. Format only when it helps the reader scan. Use "## " headings for answers with three or more distinct sections, "-" bullets for parallel items, "1." for ordered steps, a table for comparisons across several attributes, **bold** for the few terms that matter, ">" for a quoted passage, and fenced code with a language tag for code. Short or casual replies are plain prose: no headings, no lists. Never put a heading on a one-paragraph answer, and do not use emoji as bullets.',
       SPOKEN='This reply will be spoken aloud. Use no markdown, no lists, no headings, no symbols. Speak in short natural sentences; for code or tables, say in one sentence what they show and that they are on screen.';
@@ -10733,307 +11649,120 @@ body.light .lora-prose a{color:#2f6f94}
 })();
 </script>
 <style id="lume-conv">
-#lcv{position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;z-index:7800;display:none;flex-direction:column;background:#0f0e0c;color:#aaa49a;padding-top:env(safe-area-inset-top,0px);overscroll-behavior:contain}
+#lcv{position:fixed;inset:0;z-index:7800;display:none;flex-direction:column;background:#0f0e0c;color:#aaa49a;padding-top:env(safe-area-inset-top,0px)}
 #lcv.show{display:flex;animation:lcpIn .3s ease}
-#lcv *{box-sizing:border-box}
-#lcv button{font-family:inherit;-webkit-tap-highlight-color:transparent}
-#lcv button:focus-visible,#lcv [role=radio]:focus-visible,#lcv input:focus-visible,#lcv textarea:focus-visible{outline:2px solid #a78bfa;outline-offset:2px}
-#lcv .ms{font-size:22px;width:1em;height:1em;overflow:hidden;vertical-align:middle}
-#lcv .top{display:flex;align-items:center;gap:6px;padding:10px 12px 10px 18px;flex:0 0 auto}
+#lcv .top{display:flex;align-items:center;gap:10px;padding:14px 18px}
 #lcv .wm{font:italic 500 18px Lora,serif;color:#f1ede6}
-#lcv .ct{flex:1;font:300 12px Figtree,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#6b6660;padding-left:6px}
-#lcv .ib{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;border-radius:50%;color:#8d877d;cursor:pointer}
-#lcv .ib:hover{background:rgba(255,255,255,.06);color:#e6e1d8}
-#lcv[data-m=live] .ib.gear{display:inline-flex}#lcv:not([data-m=live]) .ib.gear{display:none}
-/* three screens: pick, gate, live */
-#lcv .pick,#lcv .gate,#lcv .live{display:none}
-#lcv[data-m=pick] .pick{display:flex}#lcv[data-m=gate] .gate{display:flex}#lcv[data-m=live] .live{display:flex}
-/* voice picker */
-#lcv .pick{flex:1;flex-direction:column;min-height:0;width:100%;max-width:560px;margin:0 auto}
-#lcv .ph{padding:6px 20px 10px}
-#lcv .ph h3,#lcv .gate h3{font:italic 500 24px Lora,serif;color:#f1ede6;margin:0 0 6px}
-#lcv .ph p{font:300 14px/1.55 Figtree,sans-serif;margin:0}
-#lcv .vl{flex:1;overflow:auto;padding:4px 14px 12px;-webkit-overflow-scrolling:touch}
-#lcv .vg{font:500 11px Figtree,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6b6660;padding:14px 8px 6px}
-#lcv .vr{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 6px 6px 14px;border-radius:14px;border:1px solid transparent;cursor:pointer;color:#cfc9bf}
-#lcv .vr:hover{background:rgba(255,255,255,.04)}
-#lcv .vr[aria-checked=true]{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.45);color:#f1ede6}
-#lcv .vr .dot{width:16px;height:16px;border-radius:50%;border:1.5px solid #5d5851;flex:0 0 auto;position:relative}
-#lcv .vr[aria-checked=true] .dot{border-color:#a78bfa}
-#lcv .vr[aria-checked=true] .dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#a78bfa}
-#lcv .vr .vn{flex:1;font:400 16px Figtree,sans-serif}#lcv .vr .vn small{display:block;font:300 12px Figtree,sans-serif;color:#7a746b;margin-top:1px}
-#lcv .vr .vt{font:300 11.5px Figtree,sans-serif;color:#7a746b;margin-right:2px}
-#lcv .vp{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.05);color:#cfc9bf;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
-#lcv .vp:disabled{opacity:.3;cursor:not-allowed}
-#lcv .vp.busy .ms{animation:lcvT 1s ease-in-out infinite}
-#lcv .pf{flex:0 0 auto;padding:12px 20px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:14px;background:#0f0e0c}
-#lcv .pf .pn{flex:1;margin:0;font:300 12.5px/1.45 Figtree,sans-serif;color:#7a746b}
-#lcv .go{border-radius:12px;padding:0 22px;min-height:46px;font:500 14px Figtree,sans-serif;cursor:pointer;border:0;background:#fff;color:#161513;white-space:nowrap}
-/* gate: download progress and failures */
-#lcv .gate{flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
-#lcv .gate p{max-width:380px;font:300 14.5px/1.6 Figtree,sans-serif;margin:0}
+#lcv .ct{flex:1;font:300 12px Figtree,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#6b6660}
+#lcv .cl{background:none;border:0;color:#7a746b;font-size:18px;cursor:pointer;padding:6px}
+#lcv .gate{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
+#lcv.g .gate{display:flex}#lcv.g .live{display:none}
+#lcv .gate h3{font:italic 500 24px Lora,serif;color:#f1ede6}
+#lcv .gate p{max-width:380px;font:300 14.5px/1.6 Figtree,sans-serif}
 #lcv .pb{width:min(320px,80vw);height:4px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
 #lcv .pb i{display:block;height:100%;width:0;background:#a78bfa;transition:width .25s}
 #lcv .gb{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-#lcv .gb button{border-radius:12px;padding:0 20px;min-height:46px;font:500 13.5px Figtree,sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e6e1d8}
+#lcv .gb button{border-radius:9px;padding:10px 18px;font:500 13.5px Figtree,sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e6e1d8}
 #lcv .gb .go{background:#fff;color:#161513;border:0}
-/* live */
-#lcv .live{flex:1;flex-direction:column;min-height:0}
-#lcv .stage{flex:0 0 auto;text-align:center;padding:6px 20px 4px}
-#lcv .star{display:inline-flex;align-items:center;justify-content:center;width:84px;height:84px;font-size:54px;color:#c9b6ff;text-shadow:0 0 28px rgba(167,139,250,.7);cursor:pointer;border:0;background:none;transition:transform .3s}
+#lcv .live{flex:1;display:flex;flex-direction:column;min-height:0}
+#lcv .stage{flex:0 0 auto;text-align:center;padding:10px 20px 6px}
+#lcv .star{display:inline-block;font-size:54px;color:#c9b6ff;text-shadow:0 0 28px rgba(167,139,250,.7);cursor:pointer;transition:transform .3s}
 #lcv[data-s=thinking] .star{animation:lcvT 1.2s ease-in-out infinite}
 #lcv[data-s=speaking] .star{animation:lcvS .9s ease-in-out infinite;text-shadow:0 0 40px rgba(167,139,250,.95)}
-#lcv[data-s=listening] .star{color:#9fe3c0;text-shadow:0 0 34px rgba(110,231,183,.8);animation:lcvL 1.6s ease-in-out infinite}
-@keyframes lcvT{50%{opacity:.35;transform:scale(.88)}}@keyframes lcvS{50%{transform:scale(1.16)}}@keyframes lcvL{50%{transform:scale(1.1)}}
-#lcv .stat{font:300 12px Figtree,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6b6660;margin-top:2px}
+@keyframes lcvT{50%{opacity:.35;transform:scale(.88)}}@keyframes lcvS{50%{transform:scale(1.16)}}
+#lcv .stat{font:300 12px Figtree,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6b6660;margin-top:4px}
 #lcv .sub{min-height:44px;max-width:560px;margin:8px auto 0;font:italic 400 16px/1.5 Lora,serif;color:#d9d4ca}
-#lcv .sub.hear{color:#8d877d}
-#lcv.nocap .sub{visibility:hidden}
-#lcv .tx{flex:1;overflow:auto;padding:10px 20px 14px;max-width:700px;width:100%;margin:0 auto;-webkit-overflow-scrolling:touch}
+#lcv .tx{flex:1;overflow:auto;padding:10px 20px 14px;max-width:700px;width:100%;margin:0 auto}
 #lcv .u{margin:12px 0 4px auto;max-width:85%;width:fit-content;background:rgba(255,255,255,.06);border-radius:16px;padding:8px 13px;font:300 14.5px/1.5 Figtree,sans-serif;color:#e6e1d8}
-#lcv .u img{display:block;max-width:100%;max-height:160px;border-radius:10px;margin-bottom:6px}
 #lcv .l{margin:10px 0;font-size:15px;line-height:1.7}
-#lcv .gi{display:block;max-width:100%;max-height:360px;border-radius:14px;margin:8px 0}
-#lcv .n{margin:10px 0;font:300 13px/1.5 Figtree,sans-serif;color:#e8b04a;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-#lcv .n button{background:rgba(232,176,74,.12);border:1px solid rgba(232,176,74,.4);color:#f0c46c;border-radius:9px;min-height:34px;padding:0 12px;font:500 12.5px Figtree,sans-serif;cursor:pointer}
-#lcv .chip{display:none;align-items:center;gap:10px;max-width:700px;width:100%;margin:0 auto;padding:6px 16px 0}
-#lcv .chip.on{display:flex}
-#lcv .chip img{width:48px;height:48px;border-radius:10px;object-fit:cover}
-#lcv .chip span{flex:1;font:300 13px Figtree,sans-serif;color:#aaa49a}
-#lcv .in{display:flex;gap:8px;align-items:flex-end;max-width:700px;width:100%;margin:0 auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));flex:0 0 auto}
-#lcv textarea{flex:1;min-width:0;resize:none;max-height:120px;background:#1b1a17;color:#f1ede6;border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:12px 16px;font:300 16px/1.35 Figtree,sans-serif;min-height:48px}
-#lcv .rb{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e6e1d8;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
-#lcv .rb:disabled{opacity:.35;cursor:not-allowed}
-#lcv .mic.on{background:#6ee7b7;color:#0f0e0c;border-color:transparent;animation:lcvL 1.6s ease-in-out infinite}
-#lcv .snd{background:#fff;color:#161513;border:0}
+#lcv .n{margin:10px 0;font:300 12.5px Figtree,sans-serif;color:#e8b04a}
+#lcv .in{display:flex;gap:8px;align-items:flex-end;max-width:700px;width:100%;margin:0 auto;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px))}
+#lcv textarea{flex:1;resize:none;max-height:120px;background:#1b1a17;color:#f1ede6;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:11px 14px;font:300 15px Figtree,sans-serif}
+#lcv .snd{border:0;border-radius:14px;padding:11px 16px;background:#fff;color:#161513;font:500 13.5px Figtree,sans-serif;cursor:pointer}
 #lcv .snd.stop{background:rgba(255,255,255,.08);color:#e6e1d8;border:1px solid rgba(255,255,255,.14)}
-/* settings sheet */
-#lcv .set{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;background:rgba(9,8,7,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:flex-end}
-#lcv .set.on{display:flex}
-#lcv .sh{background:#1a1917;border-top:1px solid rgba(255,255,255,.1);border-radius:22px 22px 0 0;max-height:88%;display:flex;flex-direction:column;width:100%;max-width:560px;margin:0 auto}
-#lcv .sh header{display:flex;align-items:center;padding:12px 8px 4px 20px}
-#lcv .sh header b{flex:1;font:italic 500 19px Lora,serif;color:#f1ede6}
-#lcv .sb{overflow:auto;padding:4px 16px calc(18px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
-#lcv .sb .vl{padding:0;max-height:260px;border:1px solid rgba(255,255,255,.07);border-radius:14px;margin:6px 0 14px}
-#lcv .sl{font:500 11px Figtree,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6b6660;margin:14px 4px 4px}
-#lcv .tg{display:flex;align-items:center;gap:14px;min-height:56px;padding:8px 4px;cursor:pointer}
-#lcv .tg span{flex:1;font:400 14.5px Figtree,sans-serif;color:#e6e1d8}
-#lcv .tg span i{display:block;font:300 12.5px/1.45 Figtree,sans-serif;color:#7a746b;font-style:normal;margin-top:2px}
-#lcv .tg input[type=checkbox]{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:99px;background:rgba(255,255,255,.14);position:relative;cursor:pointer;flex:0 0 auto;transition:background .2s;margin:0}
-#lcv .tg input[type=checkbox]::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
-#lcv .tg input[type=checkbox]:checked{background:#a78bfa}#lcv .tg input[type=checkbox]:checked::after{transform:translateX(18px)}
-#lcv .sp{display:flex;align-items:center;gap:12px;padding:6px 4px;min-height:48px}
-#lcv .sp input{flex:1;accent-color:#a78bfa;min-height:32px}#lcv .sp output{font:300 13px Figtree,sans-serif;color:#aaa49a;min-width:42px;text-align:right}
-@media(max-width:520px){#lcv .pf{flex-direction:column;align-items:stretch}#lcv .go{width:100%}}
-@media(max-height:560px){#lcv .star{width:60px;height:60px;font-size:40px}#lcv .sub{min-height:24px;margin-top:2px}}
-@media(prefers-reduced-motion:reduce){#lcv *,#lcv{animation:none!important;transition:none!important}}
 </style>
 <script id="lume-conv-js">
 (function(){
   var WK=typeof WORKER!=='undefined'?WORKER:'';
   function ls(k,d){try{var v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}}
   function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-
-  /* ---------- the voices Kokoro ships with, grouped for the picker ---------- */
-  var VOICES=[
-    ['af_bella','Opal','American \u00b7 Female'],
-    ['af_heart','Halo','American \u00b7 Female'],
-    ['am_michael','Prism','American \u00b7 Male'],
-    ['bf_emma','Gleam','British \u00b7 Female'],
-    ['bm_george','Beacon','British \u00b7 Male']
-  ];
-  var DEFAULT_VOICE='af_bella',FLAT=[],NAMES={};
-  VOICES.forEach(function(v){FLAT.push(v[0]);NAMES[v[0]]=v[1];});
-  window.lumeVoiceName=function(){return NAMES[window.lumeVoiceId()]||'Opal';};
-  function pickedVoice(){var v=ls('lume_voice_id',DEFAULT_VOICE);return FLAT.indexOf(v)<0?DEFAULT_VOICE:v;}
-  window.lumeVoiceId=function(){var v=pickedVoice(),t=window.__kokoroPipeline;return(t&&t.voices&&!t.voices[v])?DEFAULT_VOICE:v;};
-  function speed(){var s=parseFloat(ls('lume_conv_speed','1'));return isNaN(s)?1:Math.max(.7,Math.min(1.3,s));}
-
-  var tts=null,ctx=null,turn=0,hist=[],src=null,Q=[],chain=Promise.resolve(),playing=false,streamDone=true,ctl=null;
-  var vp=null,lastP={l:0,t:0},spoken='',lastSpeechEnd=0,autoNext=false,tail=null,micBlocked=false,biLatched=false;
-  var rec=null,lsn=0,pend=null,prevSrc=null,SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-
-  var el=document.createElement('div');el.id='lcv';el.dataset.s='idle';el.dataset.m='pick';
-  el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Conversation with Lume');
-  el.innerHTML=
-    '<div class="top"><span class="wm">Lume</span><span class="ct">Conversation</span>'
-   +'<button class="ib gear" aria-label="Conversation settings"><span class="ms" aria-hidden="true">settings</span></button>'
-   +'<button class="ib cl" aria-label="Close conversation"><span class="ms" aria-hidden="true">close</span></button></div>'
-   +'<div class="pick"><div class="ph"><h3>Choose Lume’s voice</h3><p>Pick how Lume sounds. You can change it any time in settings.</p></div>'
-   +'<div class="vl" role="radiogroup" aria-label="Voice"></div>'
-   +'<div class="pf"><p class="pn"></p><button class="go">Start</button></div></div>'
+  var tts=null,ctx=null,turn=0,hist=[],src=null,Q=[],chain=Promise.resolve(),playing=false,streamDone=true,ctl=null,loading=false;
+  var el=document.createElement('div');el.id='lcv';el.dataset.s='idle';
+  el.innerHTML='<div class="top"><span class="wm">Lume</span><span class="ct">Conversation</span><button class="cl" aria-label="Close">&#10005;</button></div>'
    +'<div class="gate"></div>'
-   +'<div class="live"><div class="stage"><button class="star" aria-label="Tap to talk, or to stop Lume">&#10022;</button><div class="stat" aria-live="polite">ready</div><div class="sub" aria-hidden="true"></div></div>'
-   +'<div class="tx" aria-live="polite"></div>'
-   +'<div class="chip"><img alt=""><span></span><button class="ib rm" aria-label="Remove photo"><span class="ms" aria-hidden="true">close</span></button></div>'
-   +'<div class="in"><input type="file" accept="image/*" hidden>'
-   +'<button class="rb att" aria-label="Add a photo"><span class="ms" aria-hidden="true">add_photo_alternate</span></button>'
-   +'<textarea rows="1" placeholder="Type to Lume…" aria-label="Message"></textarea>'
-   +'<button class="rb mic" aria-label="Talk to Lume"><span class="ms" aria-hidden="true">mic</span></button>'
-   +'<button class="rb snd" aria-label="Send"><span class="ms" aria-hidden="true">arrow_upward</span></button></div></div>'
-   +'<div class="set"><div class="sh" role="dialog" aria-label="Conversation settings"><header><b>Conversation settings</b><button class="ib sx" aria-label="Close settings"><span class="ms" aria-hidden="true">close</span></button></header>'
-   +'<div class="sb"><div class="sl">Voice</div><div class="vl" role="radiogroup" aria-label="Voice"></div>'
-   +'<div class="sl">Speaking speed</div><div class="sp"><input type="range" min="0.7" max="1.3" step="0.05" aria-label="Speaking speed"><output></output></div>'
-   +'<div class="sl">Listening</div>'
-   +'<label class="tg"><span>Listen after Lume replies<i>When you spoke last, the mic reopens once Lume has finished.</i></span><input type="checkbox" data-k="auto"></label>'
-   +'<label class="tg"><span>Interrupt by speaking<i>Talk over Lume to cut it off. Best with headphones; on speakers Lume can hear itself, and it will turn this off if that happens.</i></span><input type="checkbox" data-k="bi"></label>'
-   +'<div class="sl">Display</div>'
-   +'<label class="tg"><span>Show captions<i>Show each sentence as Lume says it.</i></span><input type="checkbox" data-k="cap"></label>'
-   +'</div></div></div>';
+   +'<div class="live"><div class="stage"><span class="star" role="button" aria-label="Stop">&#10022;</span><div class="stat">ready</div><div class="sub"></div></div><div class="tx"></div>'
+   +'<div class="in"><textarea rows="1" placeholder="Type to Lume\u2026" aria-label="Message"></textarea><button class="snd">Send</button></div></div>';
   document.body.appendChild(el);
   function $(s){return el.querySelector(s);}
+  function setS(s){el.dataset.s=s;$('.stat').textContent=s==='idle'?'ready':s;var b=$('.snd');b.textContent=s==='idle'?'Send':'Stop';b.classList.toggle('stop',s!=='idle');}
+  function note(t){var d=document.createElement('div');d.className='n';d.textContent=t;$('.tx').appendChild(d);scroll();}
   function scroll(){var t=$('.tx');t.scrollTop=t.scrollHeight;}
-  function mode(m){el.dataset.m=m;}
 
-  /* ---------- state machine: idle, listening, thinking, speaking ---------- */
-  function setS(s){
-    el.dataset.s=s;
-    $('.stat').textContent=s==='idle'?'ready':s;
-    var busy=s!=='idle',b=$('.snd'),m=$('.mic');
-    b.firstChild.textContent=busy?'stop':'arrow_upward';b.setAttribute('aria-label',busy?'Stop':'Send');b.classList.toggle('stop',busy);
-    m.firstChild.textContent=s==='listening'?'stop':'mic';m.classList.toggle('on',s==='listening');
-    m.setAttribute('aria-label',s==='listening'?'Stop listening':'Talk to Lume');
-    if(s==='speaking')biStart();else biStop();
-  }
-  function note(t,retry){
-    var d=document.createElement('div');d.className='n';var s=document.createElement('span');s.textContent=t;d.appendChild(s);
-    if(retry){var b=document.createElement('button');b.textContent='Try again';b.onclick=function(){d.remove();retry();};d.appendChild(b);}
-    $('.tx').appendChild(d);scroll();return d;
-  }
-
-  /* ---------- voice engine: loading, preview ---------- */
-  function prog(f,l,t){var i=$('.pb i'),m=$('.pm');if(i)i.style.width=Math.round(f*100)+'%';if(m)m.textContent=t?Math.round(f*100)+'% · '+(l/1048576).toFixed(0)+' of '+(t/1048576).toFixed(0)+' MB':'Starting…';}
+  /* ---------- readiness gate: nothing starts until Kokoro is loaded ---------- */
+  function gate(h,btns){el.classList.add('g');var g=$('.gate');g.innerHTML=h+'<div class="gb"></div>';var b=g.querySelector('.gb');(btns||[]).forEach(function(x){var e=document.createElement('button');e.textContent=x[0];if(x[2])e.className='go';e.onclick=x[1];b.appendChild(e);});}
+  function consent(){gate('<h3>Lume\u2019s voice</h3><p>Conversation mode needs Lume\u2019s voice, a one-time download of about 90 MB stored on this device. Lume won\u2019t start until it is ready.</p>',[['Download voice',start,1],['Not now',close]]);}
+  function failed(e){loading=false;gate('<h3>Couldn\u2019t load the voice</h3><p>Conversation mode can\u2019t start without Lume\u2019s voice ('+(e&&e.message==='stalled'?'the download stopped making progress':'it didn\u2019t load')+'). Your normal chat is unaffected.</p>',[['Try again',start,1],['Close',close]]);}
+  function prog(f,l,t){var i=$('.pb i'),m=$('.pm');if(i)i.style.width=Math.round(f*100)+'%';if(m)m.textContent=t?Math.round(f*100)+'% \u00b7 '+(l/1048576).toFixed(0)+' of '+(t/1048576).toFixed(0)+' MB':'Starting\u2026';}
   function loadVoice(){
     if(window.__kokoroPipeline){tts=window.__kokoroPipeline;return Promise.resolve();}
-    if(vp)return vp;
-    vp=new Promise(function(res,rej){
+    return new Promise(function(res,rej){
       var files={},stall,done=false;
       function arm(){clearTimeout(stall);stall=setTimeout(function(){fail(new Error('stalled'));},30000);}
-      function fail(e){if(done)return;done=true;clearTimeout(stall);vp=null;rej(e);}
-      window.__lumeVoiceProgress=function(p){if(done)return;arm();if(p&&p.file&&p.total)files[p.file]={l:p.loaded||0,t:p.total};var l=0,t=0;for(var k in files){l+=files[k].l;t+=files[k].t;}lastP={l:l,t:t};prog(t?l/t:0,l,t);};
+      function fail(e){if(done)return;done=true;clearTimeout(stall);rej(e);}
+      window.__lumeVoiceProgress=function(p){if(done)return;arm();if(p&&p.file&&p.total)files[p.file]={l:p.loaded||0,t:p.total};var l=0,t=0;for(var k in files){l+=files[k].l;t+=files[k].t;}prog(t?l/t:0,l,t);};
       window.__lumeVoiceDone=function(t){if(done)return;done=true;clearTimeout(stall);window.__kokoroPipeline=t;tts=t;res();};
       window.__lumeVoiceFail=fail;arm();
       var s=document.createElement('script');s.type='module';s.onerror=function(){fail(new Error('load'));};
       s.textContent="import { KokoroTTS } from 'https://esm.sh/kokoro-js@1.2.0';try{const t=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',progress_callback:p=>window.__lumeVoiceProgress(p)});window.__lumeVoiceDone(t);}catch(e){window.__lumeVoiceFail(e);}";
       document.head.appendChild(s);
     });
-    return vp;
   }
-  function audio(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended'&&ctx.resume)ctx.resume();}catch(e){}return ctx;}
-  function gate(h,btns){mode('gate');var g=$('.gate');g.innerHTML=h+'<div class="gb"></div>';var b=g.querySelector('.gb');(btns||[]).forEach(function(x){var e=document.createElement('button');e.textContent=x[0];if(x[2])e.className='go';e.onclick=x[1];b.appendChild(e);});}
-  function failed(e){gate('<h3>Couldn’t load the voice</h3><p>Conversation mode can’t start without Lume’s voice ('+(!navigator.onLine?'you appear to be offline':e&&e.message==='stalled'?'the download stopped making progress':'it didn’t load')+'). Your normal chat is unaffected.</p>',[['Try again',begin,1],['Choose another voice',showPick],['Close',close]]);}
-  function ready(){return !!(tts||window.__kokoroPipeline);}
-
-  var pv=null;
-  function preview(id,btn){
-    if(!ready()||!audio())return;
-    tts=tts||window.__kokoroPipeline;
-    if(prevSrc){try{prevSrc.stop();}catch(e){}prevSrc=null;}
-    var all=el.querySelectorAll('.vp.busy');for(var i=0;i<all.length;i++){all[i].classList.remove('busy');}
-    btn.classList.add('busy');var tok=pv={};
-    var vid=(tts.voices&&!tts.voices[id])?DEFAULT_VOICE:id;
-    tts.generate('Hi, I’m Lume. This is how I sound.',{voice:vid,speed:speed()}).then(function(r){
-      if(pv!==tok)return;btn.classList.remove('busy');
-      var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
-      var s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);prevSrc=s;s.onended=function(){if(prevSrc===s)prevSrc=null;};s.start();
-    }).catch(function(){btn.classList.remove('busy');});
+  function start(){
+    if(loading)return;loading=true;
+    gate('<h3>Getting Lume\u2019s voice ready</h3><p>Lume will start as soon as the voice has loaded.</p><div class="pb"><i></i></div><p class="pm" style="font-size:12.5px;color:#6b6660">Starting\u2026</p>',[['Cancel',close]]);
+    loadVoice().then(function(){loading=false;lsSet('lume_voice_ok','1');live();},failed);
   }
-  function buildVoices(box,onPick){
-    var cur=pickedVoice(),h='';
-    VOICES.forEach(function(v){
-      h+='<div class="vr" role="radio" tabindex="0" aria-checked="'+(v[0]===cur)+'" data-v="'+v[0]+'"><span class="dot"></span><span class="vn">'+v[1]+'<small>'+v[2]+(v[0]===DEFAULT_VOICE?' \u00b7 Default':'')+'</small></span>'
-        +'<button class="vp" aria-label="Preview '+v[1]+'"'+(ready()?'':' disabled title="Previews play once the voice has downloaded"')+'><span class="ms" aria-hidden="true">play_arrow</span></button></div>';
-    });
-    box.innerHTML=h;
-    function choose(r){var all=box.querySelectorAll('.vr');for(var i=0;i<all.length;i++)all[i].setAttribute('aria-checked',all[i]===r);lsSet('lume_voice_id',r.dataset.v);if(onPick)onPick(r.dataset.v);}
-    box.onclick=function(e){var p=e.target.closest('.vp'),r=e.target.closest('.vr');if(!r)return;if(p){if(!p.disabled)preview(r.dataset.v,p);return;}choose(r);};
-    box.onkeydown=function(e){var r=e.target.closest&&e.target.closest('.vr');if(!r||e.target!==r)return;
-      if(e.key===' '||e.key==='Enter'){e.preventDefault();choose(r);}
-      else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();var all=[].slice.call(box.querySelectorAll('.vr')),i=all.indexOf(r)+(e.key==='ArrowDown'?1:-1);if(all[i]){all[i].focus();choose(all[i]);}}};
-  }
-  function refreshPreviews(){var b=el.querySelectorAll('.vp');for(var i=0;i<b.length;i++){b[i].disabled=!ready();b[i].removeAttribute('title');}}
-  function pickNote(){
-    var n=$('.pn'),g=$('.pick .go');
-    if(ready()||ls('lume_voice_ok','')==='1'){n.textContent='Lume speaks every reply aloud. Voice input needs microphone access, which is asked for only when you tap the mic.';g.textContent='Start';}
-    else{n.textContent='Needs a one-time download of about 90 MB, stored on this device. Lume won’t start until it is ready.';g.textContent='Download and start';}
-  }
-  function showPick(){
-    mode('pick');buildVoices($('.pick .vl'));pickNote();
-    // a voice already on this device loads quietly so previews work before starting
-    if(!ready()&&ls('lume_voice_ok','')==='1')loadVoice().then(refreshPreviews,function(){});
-    var sel=$('.pick .vr[aria-checked=true]');if(sel&&sel.scrollIntoView)try{sel.scrollIntoView({block:'center'});}catch(e){}
-  }
-
-  /* ---------- opening: picker, then voice load, then greeting ---------- */
-  function begin(){
-    audio();
-    if(ready()){tts=tts||window.__kokoroPipeline;enterLive();return;}
-    gate('<h3>Getting Lume’s voice ready</h3><p>Lume will start as soon as the voice has loaded.</p><div class="pb"><i></i></div><p class="pm" style="font-size:12.5px;color:#6b6660">Starting…</p>',[['Cancel',showPick]]);
-    prog(lastP.t?lastP.l/lastP.t:0,lastP.l,lastP.t);
-    loadVoice().then(function(){lsSet('lume_voice_ok','1');if(el.dataset.m==='gate')enterLive();},function(e){if(el.dataset.m==='gate')failed(e);});
-  }
-  function enterLive(){
-    if(!el.classList.contains('show'))return;
-    mode('live');window.lumeSpoken=true;audio();setS('idle');
-    $('.mic').disabled=!SR;$('.mic').title=SR?'':'Voice input isn’t available in this browser';
-    if(!hist.length&&!$('.tx').children.length&&!SR)note('Voice input isn’t supported in this browser, so you can type and Lume will still answer out loud.');
-    greet();
-    if(!matchMedia('(pointer:coarse)').matches)$('textarea').focus();
-  }
-  function greet(){
-    var h=new Date().getHours(),p=h<5?'Hello':h<12?'Good morning':h<18?'Good afternoon':'Good evening',n=ls('ac_name','').trim().split(/\s+/)[0];
-    if(/^(Lume|Altura|guest)$/i.test(n))n='';
-    var t=hist.length?'Welcome back. Pick up where we left off, or start something new?':p+(n?', '+n:'')+'. I’m here. What’s on your mind?';
-    var l=document.createElement('div');l.className='l lora-prose';l.textContent=t;$('.tx').appendChild(l);scroll();
-    stop();streamDone=true;autoNext=true;enqueue(t);pump();
+  function live(){
+    if(!el.classList.contains('show')||!tts)return;
+    el.classList.remove('g');window.lumeSpoken=true;
+    try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.resume)ctx.resume();}catch(e){}
+    setS('idle');$('textarea').focus();
   }
   function open(){
     try{if(typeof closeSidebar==='function')closeSidebar();}catch(e){}
-    el.classList.add('show');audio();
-    el.classList.toggle('nocap',ls('lume_conv_cap','1')==='0');
-    showPick();
-    var s=$('.pick .go');if(s)s.focus();
+    el.classList.add('show');
+    try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.resume)ctx.resume();}catch(e){}
+    if(tts||window.__kokoroPipeline){tts=tts||window.__kokoroPipeline;live();}
+    else if(ls('lume_voice_ok','')==='1')start();else consent();
   }
-  function close(){
-    stop();pv=null;if(prevSrc){try{prevSrc.stop();}catch(e){}prevSrc=null;}
-    window.lumeSpoken=false;$('.set').classList.remove('on');el.classList.remove('show');mode('pick');
-  }
+  function close(){stop();loading=false;window.lumeSpoken=false;el.classList.remove('show');}
 
-  /* ---------- speaking: sentence queue, next sentence is generated while one plays ---------- */
+  /* ---------- speaking: sentence queue, next sentence generated while one plays ---------- */
   function stop(){
-    turn++;Q=[];streamDone=true;playing=false;clearTimeout(tail);
+    turn++;Q=[];streamDone=true;playing=false;
     if(ctl){try{ctl.abort();}catch(e){}ctl=null;}
-    abortRec();
-    var s=src;src=null;if(s){try{s.stop();}catch(e){}lastSpeechEnd=Date.now();}
-    $('.sub').textContent='';$('.sub').classList.remove('hear');if(tts)setS('idle');
+    var s=src;src=null;if(s){try{s.stop();}catch(e){}}
+    if($('.sub'))$('.sub').textContent='';if(tts)setS('idle');
   }
-  function stopByUser(){autoNext=false;stop();}
   function enqueue(text){
     var c=(window.lumeSpeakable?window.lumeSpeakable(text):text).replace(/\s+/g,' ').trim();
     if(!c||!/[A-Za-z0-9]/.test(c))return;
-    var my=turn,vid=window.lumeVoiceId(),sp=speed();
-    var p=chain=chain.then(function(){return my!==turn?null:tts.generate(c,{voice:vid,speed:sp});}).catch(function(){note('The voice failed on part of that reply. The text is below.');return null;});
+    var my=turn,p=chain=chain.then(function(){return my!==turn?null:tts.generate(c,{voice:'af_bella'});}).catch(function(){note('The voice failed on part of that reply. The text is below.');return null;});
     Q.push({p:p,t:c,turn:my});pump();
   }
   function pump(){
     if(playing)return;
     var it=Q.shift();
-    if(!it){if(streamDone&&el.dataset.s!=='idle'&&el.dataset.s!=='listening'){setS('idle');finished();}return;}
+    if(!it){if(streamDone&&el.dataset.s!=='idle'){setS('idle');setTimeout(function(){if(el.dataset.s==='idle')$('.sub').textContent='';},1500);}return;}
     playing=true;
     it.p.then(function(r){
       if(it.turn!==turn||!r){playing=false;return pump();}
       var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
       var s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);src=s;
-      setS('speaking');$('.sub').classList.remove('hear');$('.sub').textContent=it.t;spoken=(spoken+' '+it.t).slice(-900);
-      s.onended=function(){if(src!==s)return;src=null;playing=false;lastSpeechEnd=Date.now();pump();};
+      setS('speaking');$('.sub').textContent=it.t;
+      s.onended=function(){if(src!==s)return;src=null;playing=false;pump();};
       s.start();
     });
-  }
-  function finished(){
-    setTimeout(function(){if(el.dataset.s==='idle')$('.sub').textContent='';},1500);
-    clearTimeout(tail);
-    // half-duplex: the mic only opens after Lume has been silent for a moment, so it never hears itself
-    if(autoNext&&canAuto())tail=setTimeout(function(){if(el.dataset.s==='idle'&&el.classList.contains('show')&&el.dataset.m==='live'&&!document.hidden)listen();},800);
   }
   function take(b,fin){
     var out=[],st=0;
@@ -11049,204 +11778,25 @@ body.light .lora-prose a{color:#2f6f94}
   }
   window.__lumeTake=take;
 
-  /* ---------- voice input: tap to talk, half-duplex, with an echo guard ---------- */
-  function canAuto(){return ls('lume_conv_auto','1')!=='0'&&!!SR&&!micBlocked&&ls('lume_conv_mic_ok','')==='1';}
-  function abortRec(){lsn++;var r=rec;rec=null;if(r){try{r.abort();}catch(e){}}}
-  function words(s){return String(s).toLowerCase().replace(/[^a-z0-9\s']/g,' ').split(/\s+/).filter(Boolean);}
-  // true when a transcript is mostly Lume's own recent speech, heard back just after it stopped
-  function echoLike(t){
-    var w=words(t);if(w.length<5||Date.now()-lastSpeechEnd>5000)return false;
-    var set={};words(spoken).forEach(function(x){set[x]=1;});
-    var hit=w.filter(function(x){return set[x];}).length;return hit/w.length>=.85;
-  }
-  function listen(){
-    if(!tts||el.dataset.m!=='live')return;
-    if(!SR){note('Voice input isn’t supported in this browser. You can type instead.');return;}
-    micBlocked=false; // a deliberate tap always tries again, in case access was allowed since
-    if(!navigator.onLine){note('Voice input needs a connection, and you appear to be offline. You can still type.');return;}
-    if(el.dataset.s!=='idle')return;
-    clearTimeout(tail);audio();
-    var my=++lsn,r,text='',interim='',err='',wd;
-    try{r=new SR();}catch(e){note('Couldn’t start voice input.');return;}
-    rec=r;r.lang=navigator.language||'en-GB';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
-    function arm(ms){clearTimeout(wd);wd=setTimeout(function(){if(my===lsn){try{r.stop();}catch(e){}}},ms);}
-    r.onresult=function(e){
-      if(my!==lsn)return;arm(6000);lsSet('lume_conv_mic_ok','1');
-      var f='',a='';for(var i=0;i<e.results.length;i++){a+=e.results[i][0].transcript;if(e.results[i].isFinal)f+=e.results[i][0].transcript;}
-      text=f;interim=a;var s=$('.sub');s.classList.add('hear');s.textContent=a;
-    };
-    r.onerror=function(e){err=(e&&e.error)||'error';};
-    r.onend=function(){
-      clearTimeout(wd);if(my!==lsn)return;rec=null;lsn++;
-      var t=(text||interim).trim();$('.sub').classList.remove('hear');$('.sub').textContent='';
-      if(err==='not-allowed'||err==='service-not-allowed'){micBlocked=true;setS('idle');note('Microphone access is blocked. Allow it in your browser’s site settings, then tap the mic again, or type instead.');return;}
-      if(err==='audio-capture'){setS('idle');note('No microphone was found. Check that one is connected, or type instead.');return;}
-      if(err==='network'){setS('idle');note('Voice input couldn’t reach the speech service. Check your connection and tap the mic to try again, or type instead.');return;}
-      if(!t){setS('idle');if(err&&err!=='no-speech'&&err!=='aborted')note('Voice input stopped unexpectedly. Tap the mic to try again.');else{var sb=$('.sub');sb.textContent='I didn\u2019t hear anything. Tap the mic to try again.';setTimeout(function(){if(el.dataset.s==='idle'&&sb.textContent.indexOf('didn')>=0)sb.textContent='';},4000);}return;}
-      if(echoLike(t)){
-        setS('idle');
-        if(ls('lume_conv_bi','')==='1'&&!biLatched){biLatched=true;note('Lume heard its own voice, so interrupt-by-speaking is off for now. Tap the star to interrupt instead, or use headphones.');}
-        else note('That sounded like Lume’s own voice, so I ignored it.');
-        return;
-      }
-      autoNext=true;var im=pend;setPend(null);run({text:t,img:im});
-    };
-    try{r.start();setS('listening');$('.sub').textContent='';arm(10000);}
-    catch(e){rec=null;setS('idle');note('Couldn’t start the microphone. Tap the mic to try again.');}
-  }
-
-  /* optional: talk over Lume to interrupt. The mic stream is open only while Lume speaks, with echo cancellation on */
-  var bi={s:null,t:null,n:0,starting:false};
-  function biOn(){return ls('lume_conv_bi','')==='1'&&!biLatched&&SR&&!micBlocked&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;}
-  function biStart(){
-    if(!biOn()||bi.s||bi.starting)return;bi.starting=true;
-    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).then(function(s){
-      bi.starting=false;
-      if(el.dataset.s!=='speaking'||!audio()){s.getTracks().forEach(function(t){t.stop();});return;}
-      bi.s=s;var a=ctx.createMediaStreamSource(s),an=ctx.createAnalyser();an.fftSize=1024;a.connect(an);bi.n=0;
-      var buf=new Float32Array(an.fftSize);bi.a=a;
-      bi.t=setInterval(function(){
-        an.getFloatTimeDomainData(buf);var sum=0;for(var i=0;i<buf.length;i++)sum+=buf[i]*buf[i];
-        bi.n=Math.sqrt(sum/buf.length)>.06?bi.n+1:0;
-        if(bi.n>=7){biStop();autoNext=true;stop();setTimeout(listen,150);}
-      },50);
-    }).catch(function(){bi.starting=false;lsSet('lume_conv_bi','0');syncSettings();note('Interrupt by speaking needs microphone access, so it has been turned off.');});
-  }
-  function biStop(){
-    clearInterval(bi.t);bi.t=null;if(bi.a){try{bi.a.disconnect();}catch(e){}bi.a=null;}
-    if(bi.s){bi.s.getTracks().forEach(function(t){t.stop();});bi.s=null;}
-  }
-
-  /* ---------- images: a photo plus a question gets a spoken answer ---------- */
-  var VPROMPT='You are Lume answering aloud about a photo the person just shared. Speak in two to four short, plain sentences with no markdown, lists or symbols. Describe only what you can actually see and answer their question from it. If the image is blank, too dark, too blurry, or you cannot tell what it shows, say that plainly and say what you cannot tell. Never guess at details you cannot see.';
-  function visionEP(){return(typeof POLLINATIONS_TEXT!=='undefined')?POLLINATIONS_TEXT:'https://text.pollinations.ai/';}
-  function readImage(f){
-    return new Promise(function(res,rej){
-      if(f.size>20*1048576)return rej(new Error('big'));
-      if(f.type&&!/^image\//.test(f.type))return rej(new Error('type'));
-      var img=new Image(),u=URL.createObjectURL(f);
-      img.onload=function(){
-        if(!img.width||!img.height){URL.revokeObjectURL(u);return rej(new Error('decode'));}
-        function draw(max,q){var k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*k));c.height=Math.max(1,Math.round(img.height*k));c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q);}
-        try{var full=draw(1280,.8),th=draw(160,.7);URL.revokeObjectURL(u);res({base64:full.split(',')[1],mime:'image/jpeg',thumb:th,name:f.name||'Photo'});}
-        catch(e){URL.revokeObjectURL(u);rej(new Error('decode'));}
-      };
-      img.onerror=function(){URL.revokeObjectURL(u);rej(new Error('decode'));};img.src=u;
-    });
-  }
-  function setPend(im){
-    pend=im||null;var c=$('.chip');c.classList.toggle('on',!!pend);
-    if(pend){c.querySelector('img').src=pend.thumb;c.querySelector('span').textContent=pend.name;$('textarea').placeholder='Ask about this photo…';}
-    else $('textarea').placeholder='Type to Lume…';
-  }
-  function pickFile(f){
-    if(!f)return;stopByUser();
-    readImage(f).then(setPend,function(e){
-      var m=e.message==='big'?'That image is too large. Photos up to 20 MB work.':e.message==='type'?'That file isn’t an image. Choose a photo or screenshot.':'I couldn’t open that image. It may be damaged or in a format this browser can’t read, such as some HEIC photos. Try a JPEG or PNG.';
-      note(m);
-    });
-  }
-  // one function owns the vision call, so moving to another model later means changing only this.
-  // The Worker's /lume/vision route (a dedicated vision model) is tried first; Pollinations is the fallback.
-  function hdr(){return typeof getDeviceHeaders==='function'?getDeviceHeaders():{'Content-Type':'application/json'};}
-  function routeMissing(r){return r.status===404||r.status===405||r.status===501;}
-  function lookWorker(im,q,signal,sys){
-    return fetch(WK+'/lume/vision',{method:'POST',headers:hdr(),signal:signal,body:JSON.stringify({image:'data:'+im.mime+';base64,'+im.base64,question:q,system:sys,uid:ls('lume_uid','')})})
-    .then(function(r){if(!r.ok)throw new Error(routeMissing(r)?'missing':'http');return r.json();})
-    .then(function(j){var t=String((j&&(j.text||j.response))||'').trim();if(!t)throw new Error('empty');return t;});
-  }
-  function lookFallback(im,q,signal,sys){
-    return fetch(visionEP(),{method:'POST',headers:{'Content-Type':'application/json'},signal:signal,body:JSON.stringify({
-      messages:[{role:'system',content:sys},
-        {role:'user',content:[{type:'image_url',image_url:{url:'data:'+im.mime+';base64,'+im.base64}},{type:'text',text:q}]}],
-      model:'openai',seed:Math.floor(Math.random()*99999),private:true})
-    }).then(function(r){if(!r.ok)throw new Error('http');return r.text();}).then(function(t){
-      t=(t||'').trim();
-      if(/^[{\[]/.test(t)){var j;try{j=JSON.parse(t);}catch(e){throw new Error('bad');}var m=j&&j.choices&&j.choices[0]&&j.choices[0].message;if(m&&m.content)t=String(m.content).trim();else throw new Error('bad');}
-      if(!t||/^<(!doctype|html)/i.test(t))throw new Error('empty');
-      return t;
-    });
-  }
-  function look(im,q,signal){
-    var recent=hist.slice(-4).map(function(m){return(m.role==='user'?'Person: ':'Lume: ')+m.content;}).join('\n');
-    var sys=VPROMPT+(recent?'\n\nConversation so far:\n'+recent:'');
-    return lookWorker(im,q,signal,sys).catch(function(e){if(e&&e.name==='AbortError')throw e;return lookFallback(im,q,signal,sys);});
-  }
-
-  /* ---------- image creation: the Worker's /lume/image route (a dedicated image model) ---------- */
-  var MAKE_RX=/\b(make|generate|create|draw|paint|design|render|sketch)\b[^.?!]{0,24}\b(image|picture|photo|illustration|drawing|painting|artwork|logo|wallpaper|portrait|poster)\b|^\s*(please\s+)?(draw|paint|sketch)\b/i;
-  function wantsImage(t){return MAKE_RX.test(t);}
-  function makeImage(prompt,signal){
-    return fetch(WK+'/lume/image',{method:'POST',headers:hdr(),signal:signal,body:JSON.stringify({prompt:prompt,uid:ls('lume_uid','')})})
-    .then(function(r){
-      if(!r.ok){var e=new Error(routeMissing(r)?'missing':r.status===429?'limit':'http');throw e;}
-      return r.json();
-    }).then(function(j){
-      var d=j&&(j.image||j.dataURI);if(!d)throw new Error('empty');
-      return /^data:image\//.test(d)?d:'data:image/jpeg;base64,'+d;
-    });
-  }
-
-  /* ---------- a turn: text or photo in, reply streamed and spoken as sentences complete ---------- */
-  function run(p){
-    var t=(p.text||'').trim(),im=p.img||null;if(!tts||(!t&&!im))return;
+  /* ---------- a turn: stream the reply, speak as sentences complete ---------- */
+  function say(t){
+    t=t.trim();if(!t||!tts)return;
     stop();var my=turn;
-    if(!p.bubble){
-      var u=document.createElement('div');u.className='u';
-      if(im){var g=document.createElement('img');g.src=im.thumb;g.alt='Photo you shared';u.appendChild(g);}
-      if(t||!im)u.appendChild(document.createTextNode(t));$('.tx').appendChild(u);p.bubble=u;
-    }
+    hist.push({role:'user',content:t});
+    var u=document.createElement('div');u.className='u';u.textContent=t;$('.tx').appendChild(u);
     var l=document.createElement('div');l.className='l lora-prose';$('.tx').appendChild(l);scroll();
-    $('textarea').value='';$('textarea').style.height='auto';setS('thinking');streamDone=false;
-    var q=t||'What do you see in this photo?';
-    var entry={role:'user',content:im?'[Shared a photo] '+q:t};hist.push(entry);
-    var acc='',buf='';
-    ctl=typeof AbortController!=='undefined'?new AbortController():null;
-    function fail(m,spoken){
-      if(my!==turn)return;streamDone=true;autoNext=false;
-      var i=hist.lastIndexOf(entry);if(i>=0)hist.splice(i,1);
-      if(!l.textContent.trim())l.remove();
-      note(m,function(){run(p);});setS('idle');if(spoken){streamDone=false;enqueue(spoken);streamDone=true;pump();}
-    }
-    function fin(){
-      if(my!==turn)return;var r=take(buf,true);r.s.forEach(enqueue);buf='';streamDone=true;
-      if(acc.trim()){hist.push({role:'assistant',content:acc.trim()});}else{note('Lume returned an empty reply.');}
-      pump();
-    }
-    if(!navigator.onLine)return fail('You appear to be offline, so Lume can’t answer. Check your connection and try again.','You appear to be offline.');
-    if(im){
-      var timedOut=false,to=setTimeout(function(){timedOut=true;if(ctl)try{ctl.abort();}catch(e){}},45000);
-      look(im,q,ctl?ctl.signal:undefined).then(function(a){
-        clearTimeout(to);if(my!==turn)return;
-        acc=a;l.innerHTML=renderMarkdown(acc);scroll();
-        take(a,true).s.forEach(enqueue);streamDone=true;hist.push({role:'assistant',content:acc});pump();
-      }).catch(function(){
-        clearTimeout(to);if(my!==turn)return;
-        fail(timedOut?'Looking at that photo took too long, so I stopped. Try again, or try a smaller photo.':'I couldn\u2019t get a look at that photo just now, so I can\u2019t tell you what\u2019s in it. Try again in a moment.',
-             timedOut?'That took too long, so I stopped. Please try again.':'I couldn\u2019t get a look at that photo just now, so I can\u2019t say what\u2019s in it. Please try again in a moment.');
-      });
-      return;
-    }
-    if(wantsImage(t)){
-      var slow=false,tg=setTimeout(function(){slow=true;if(ctl)try{ctl.abort();}catch(e){}},90000);
-      makeImage(t,ctl?ctl.signal:undefined).then(function(d){
-        clearTimeout(tg);if(my!==turn)return;
-        var g=document.createElement('img');g.className='gi';g.src=d;g.alt='Image Lume made: '+t.slice(0,120);l.appendChild(g);scroll();
-        var say2='Here\u2019s what I made. Tell me what to change.';
-        acc=say2;take(say2,true).s.forEach(enqueue);streamDone=true;hist.push({role:'assistant',content:'[Made an image from the description above.] '+say2});pump();
-      }).catch(function(e){
-        clearTimeout(tg);if(my!==turn)return;var k=e&&e.message;
-        if(slow)return fail('Making that image took too long, so I stopped. Try again, or try a simpler description.','That took too long, so I stopped. Please try again.');
-        if(k==='missing')return fail('Image creation isn\u2019t set up on the server yet, so I can\u2019t make that.','Image creation isn\u2019t set up yet, so I can\u2019t make that.');
-        if(k==='limit')return fail('You\u2019ve used up today\u2019s image allowance.','You\u2019ve used up today\u2019s image allowance.');
-        fail('I couldn\u2019t make that image just now. Try again in a moment.','I couldn\u2019t make that image just now. Please try again in a moment.');
-      });
-      return;
-    }
-    var model=ls('lume_model','auto');if(['auto','balanced','fast','deep'].indexOf(model)<0)model='auto';
+    $('textarea').value='';setS('thinking');streamDone=false;
+    var acc='',buf='',model=ls('lume_model','auto');if(['auto','balanced','fast','deep'].indexOf(model)<0)model='auto';
     var eff=(window.lumePersonaEffort&&window.lumePersonaEffort())||'low';
     var sys=typeof window.lumeSystemPrompt==='function'?window.lumeSystemPrompt():'';
     var hd=typeof getDeviceHeaders==='function'?getDeviceHeaders():{'Content-Type':'application/json'};
+    ctl=typeof AbortController!=='undefined'?new AbortController():null;
+    function fail(m,spoken){if(my!==turn)return;streamDone=true;note(m);setS('idle');if(spoken)enqueue(spoken);}
+    function fin(){
+      if(my!==turn)return;var r=take(buf,true);r.s.forEach(enqueue);buf='';streamDone=true;
+      if(acc.trim()){hist.push({role:'assistant',content:acc.trim()});}else{note('Lume returned an empty reply.');}
+      pump();if(!Q.length&&!playing)setS('idle');
+    }
     function tok(line){
       if(line.indexOf('data:')!==0)return;var d=line.slice(5).trim();if(!d||d==='[DONE]')return;
       try{var x=((JSON.parse(d).choices||[{}])[0].delta||{}).content;if(!x)return;
@@ -11256,7 +11806,7 @@ body.light .lora-prose a{color:#2f6f94}
     fetch(WK+'/lume',{method:'POST',headers:hd,signal:ctl?ctl.signal:undefined,body:JSON.stringify({stream:true,model:model,persona:'assistant',uid:ls('lume_uid',''),reasoning_effort:eff,include_reasoning:false,messages:[{role:'system',content:sys}].concat(hist.slice(-20))})})
     .then(function(r){
       if(my!==turn)return;
-      if(!r.ok)return fail(r.status===429?'You’ve used up today’s allowance for this model.':'Lume couldn’t be reached (error '+r.status+').','I couldn’t get a reply. Please try again.');
+      if(!r.ok)return fail(r.status===429?'You\u2019ve used up today\u2019s allowance for this model.':'Lume couldn\u2019t be reached (error '+r.status+').','I couldn\u2019t get a reply. Please try again.');
       if(!r.body||!/event-stream/.test(r.headers.get('content-type')||'')){return r.json().then(function(j){var m=j&&j.choices&&j.choices[0]&&j.choices[0].message;acc=(m&&m.content)||'';buf=acc;l.innerHTML=renderMarkdown(acc);fin();});}
       var rd=r.body.getReader(),dec=new TextDecoder(),lb='';
       (function pump2(){rd.read().then(function(x){
@@ -11264,57 +11814,15 @@ body.light .lora-prose a{color:#2f6f94}
         if(x.done){if(lb)tok(lb);return fin();}
         lb+=dec.decode(x.value,{stream:true});var ls2=lb.split('\n');lb=ls2.pop();ls2.forEach(tok);pump2();
       }).catch(function(){if(my===turn)acc?fin():fail('The connection dropped.','The connection dropped. Please try again.');});})();
-    }).catch(function(){if(my===turn)fail('Lume couldn’t be reached.','I couldn’t reach the server. Please try again.');});
+    }).catch(function(){if(my===turn)fail('Lume couldn\u2019t be reached.','I couldn\u2019t reach the server. Please try again.');});
   }
-    function submit(){
-    if(el.dataset.s!=='idle'){stopByUser();return;}
-    var t=$('textarea').value;if(!t.trim()&&!pend)return;
-    autoNext=false;var im=pend;setPend(null);run({text:t,img:im});
-  }
-
-  /* ---------- settings ---------- */
-  function syncSettings(){
-    var s=$('.set');
-    s.querySelector('[data-k=auto]').checked=ls('lume_conv_auto','1')!=='0';
-    s.querySelector('[data-k=bi]').checked=ls('lume_conv_bi','')==='1';
-    s.querySelector('[data-k=cap]').checked=ls('lume_conv_cap','1')!=='0';
-    var r=s.querySelector('input[type=range]');r.value=speed();s.querySelector('output').textContent=speed().toFixed(2).replace(/0$/,'')+'×';
-  }
-  function openSet(){buildVoices($('.set .vl'));syncSettings();$('.set').classList.add('on');var x=$('.sx');if(x)x.focus();}
-  function closeSet(){$('.set').classList.remove('on');pv=null;if(prevSrc){try{prevSrc.stop();}catch(e){}prevSrc=null;}}
-  $('.set').addEventListener('change',function(e){
-    var k=e.target.dataset&&e.target.dataset.k;
-    if(k==='auto')lsSet('lume_conv_auto',e.target.checked?'1':'0');
-    if(k==='bi'){lsSet('lume_conv_bi',e.target.checked?'1':'0');if(e.target.checked){biLatched=false;if(!SR)note('Interrupt by speaking needs voice input, which this browser doesn’t support.');}else biStop();}
-    if(k==='cap'){lsSet('lume_conv_cap',e.target.checked?'1':'0');el.classList.toggle('nocap',!e.target.checked);}
-  });
-  $('.set input[type=range]').addEventListener('input',function(){lsSet('lume_conv_speed',this.value);$('.set output').textContent=speed().toFixed(2).replace(/0$/,'')+'×';});
-  $('.set').addEventListener('click',function(e){if(e.target===this)closeSet();});
-  $('.sx').onclick=closeSet;$('.gear').onclick=openSet;
-
-  /* ---------- wiring ---------- */
-  $('.pick .go').onclick=begin;
+  function submit(){if(el.dataset.s!=='idle'){stop();return;}say($('textarea').value);}
   $('.snd').onclick=submit;
-  $('.mic').onclick=function(){
-    if(el.dataset.s==='listening'){autoNext=false;stop();return;}
-    if(el.dataset.s!=='idle')stopByUser();
-    autoNext=true;listen();
-  };
-  $('.star').onclick=function(){
-    if(el.dataset.s==='idle'){autoNext=true;listen();}else stopByUser();
-  };
-  $('.att').onclick=function(){$('input[type=file]').click();};
-  $('input[type=file]').onchange=function(){var f=this.files[0];this.value='';pickFile(f);};
-  $('.rm').onclick=function(){setPend(null);};
+  $('.star').onclick=function(){if(el.dataset.s!=='idle')stop();};
   $('textarea').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submit();}});
   $('textarea').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';});
-  $('textarea').addEventListener('paste',function(e){var it=e.clipboardData&&e.clipboardData.files&&e.clipboardData.files[0];if(it&&/^image\//.test(it.type)){e.preventDefault();pickFile(it);}});
   $('.cl').onclick=close;
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('show')){if($('.set').classList.contains('on'))closeSet();else close();}});
-  // leaving the tab silences Lume and closes the mic
-  document.addEventListener('visibilitychange',function(){if(document.hidden&&el.classList.contains('show')&&el.dataset.m==='live')stopByUser();});
-  // keep the layout above the on-screen keyboard
-  if(window.visualViewport){var fit=function(){if(!el.classList.contains('show'))return;var v=window.visualViewport;el.style.height=v.height+'px';el.style.transform=v.offsetTop?'translateY('+v.offsetTop+'px)':'';};window.visualViewport.addEventListener('resize',fit);window.visualViewport.addEventListener('scroll',fit);}
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('show'))close();});
   window.lumeConversation=open;
   var anchor=document.querySelector('#sidebar .sb-nav-item.sb-secondary');
   if(anchor){var d=document.createElement('div');d.className='sb-nav-item sb-secondary';d.textContent='Conversation';d.onclick=open;anchor.parentNode.insertBefore(d,anchor);}
@@ -11420,17 +11928,29 @@ body.light .lora-prose a{color:#2f6f94}
 })();
 </script>
 <style id="lume-code-mode">
-html.lume-code #chat-pill-inner{border-radius:14px;border-color:rgba(232,176,74,.3)!important}
-html.lume-code #chat-pill-inner:focus-within{box-shadow:0 0 0 3px rgba(232,176,74,.14)!important}
-html.lume-code #inp{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
-html.lume-code #send-btn .send-star{font-size:0}
-html.lume-code #send-btn .send-star::after{content:'>_';font:600 13px ui-monospace,Menlo,Consolas,monospace;color:#e8b04a}
-html.lume-code #model-btn{color:#e8b04a;font-family:ui-monospace,Menlo,Consolas,monospace}
-html.lume-code #model-pop .mp-ck{color:#e8b04a}
-html.lume-code .lume-msg-row{border-left:2px solid rgba(232,176,74,.35);padding-left:12px}
-html.lume-code #chat-empty-star{filter:hue-rotate(150deg) saturate(1.2)}
-#code-badge{display:none;flex-shrink:0;margin-right:6px;padding:3px 7px;border-radius:6px;background:rgba(232,176,74,.12);color:#e8b04a;font:600 11px ui-monospace,Menlo,Consolas,monospace}
-html.lume-code #code-badge{display:block}
+html.lume-code{--lc:168,196,212;--lc-mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+html.lume-code #chat-pill-inner{border-radius:14px;border-color:rgba(var(--lc),.28)!important}
+html.lume-code #chat-pill-inner:focus-within{box-shadow:0 0 0 3px rgba(var(--lc),.12)!important}
+html.lume-code #inp{font-family:var(--lc-mono);font-size:13.5px}
+html.lume-code #model-btn{color:rgb(var(--lc));font-family:var(--lc-mono)}
+html.lume-code #model-pop .mp-ck{color:rgb(var(--lc))}
+html.lume-code .lora-prose{font-family:'Figtree',sans-serif;font-size:15px;line-height:1.65;letter-spacing:-.003em}
+html.lume-code .lora-prose h2,html.lume-code .lora-prose h3,html.lume-code .lora-prose h4{font-family:'Figtree',sans-serif;font-weight:600;letter-spacing:-.01em}
+html.lume-code .lora-prose li{line-height:1.6}
+html.lume-code .lora-prose blockquote{font-style:normal;border-left-color:rgba(var(--lc),.5)}
+html.lume-code .lora-prose a{color:rgb(var(--lc))}
+html.lume-code .lora-prose code{font-family:var(--lc-mono);font-size:13px;line-height:1.65;color:#e4e2de}
+html.lume-code .lora-prose p code,html.lume-code .lora-prose li code{background:rgba(255,255,255,.07);padding:.1em .4em;border-radius:5px;font-size:.88em}
+html.lume-code .lora-prose pre{position:relative;overflow:visible;background:#0c0b0a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:34px 0 0!important;margin:12px 0}
+html.lume-code .lora-prose pre::before{content:'';position:absolute;left:0;right:0;top:0;height:30px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);border-radius:9px 9px 0 0}
+html.lume-code .lora-prose pre>code{display:block;overflow-x:auto;padding:12px 14px 14px;-webkit-overflow-scrolling:touch}
+html.lume-code .lcb{top:4px;right:6px;opacity:1}
+html.lume-code .lcb button{font:500 11px Figtree,sans-serif;background:transparent;border-color:transparent}
+html.lume-code .lcb button:hover{border-color:rgba(var(--lc),.45)}
+html.lume-code .lcb-lang{top:9px;left:14px;font:500 10.5px var(--lc-mono);letter-spacing:.02em;text-transform:none;color:#8d877d}
+html.lume-code .lcb-out,html.lume-code .lh-snip pre{font-family:var(--lc-mono)}
+#code-badge{display:none;flex-shrink:0;margin-right:6px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.06);color:#b9b3a8;font:500 11px ui-monospace,Menlo,Consolas,monospace}
+html.lume-code #code-badge{display:block;font-family:var(--lc-mono)}
 html[data-voice=quick]{--voice:79,209,181}html[data-voice=deep]{--voice:165,139,255}html[data-voice=coach]{--voice:240,138,107}
 html:is([data-voice=quick],[data-voice=deep],[data-voice=coach]) #chat-pill-inner{border-color:rgba(var(--voice),.3)!important}
 html:is([data-voice=quick],[data-voice=deep],[data-voice=coach]) #chat-pill-inner:focus-within{box-shadow:0 0 0 3px rgba(var(--voice),.14)!important}
@@ -11444,7 +11964,7 @@ html:is([data-voice=quick],[data-voice=deep],[data-voice=coach]) #code-badge{dis
   var b=document.createElement('span');b.id='code-badge';b.textContent='code';inp.parentNode.insertBefore(b,inp);
   function apply(){
     var v='auto';try{v=localStorage.getItem('lume_persona')||'auto';}catch(e){}var on=v==='code';
-    document.documentElement.classList.toggle('lume-code',on);document.documentElement.dataset.voice=v;b.textContent=v==='auto'?'':v;
+    document.documentElement.classList.toggle('lume-code',on);if(on&&!document.getElementById('lume-geist-mono')){var gl=document.createElement('link');gl.id='lume-geist-mono';gl.rel='stylesheet';gl.href='https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap';document.head.appendChild(gl);}document.documentElement.dataset.voice=v;b.textContent=v==='auto'?'':v;
     if(inp.dataset.ph===undefined)inp.dataset.ph=inp.placeholder;
     inp.placeholder={code:'Paste code or describe a change...',quick:'Ask something quick...',deep:'Give me something to think hard about...',coach:'What are you working through?'}[v]||inp.dataset.ph;
     if(window.lumeModelsRefresh)window.lumeModelsRefresh();
@@ -11452,6 +11972,128 @@ html:is([data-voice=quick],[data-voice=deep],[data-voice=coach]) #code-badge{dis
   var si=Storage.prototype.setItem;
   Storage.prototype.setItem=function(k){si.apply(this,arguments);if(k==='lume_persona')apply();};
   apply();
+})();
+</script>
+<style id="lume-code-hl">
+#lc-status{display:none;position:fixed;top:46px;left:0;right:0;height:22px;z-index:29;align-items:center;justify-content:center;gap:7px;font:500 10.5px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.01em;color:#8d877d;pointer-events:none;background:linear-gradient(#100f0d 55%,rgba(16,15,13,0))}
+html.lume-code #lc-status{display:flex;font-family:var(--lc-mono)}
+#lc-status i{width:5px;height:5px;border-radius:50%;background:rgb(var(--lc,168,196,212));display:block}
+#lc-status b{font-weight:500;color:#c4bfb8}
+#lc-status .sep{opacity:.5}
+html.lume-code #chat-inner{padding-top:48px!important}
+html.lume-code .hl-k{color:#b3a2d4}
+html.lume-code .hl-s{color:#9dbf9e}
+html.lume-code .hl-n{color:#d0b088}
+html.lume-code .hl-f{color:#8fb8d4}
+html.lume-code .hl-t{color:#d9d5cd}
+html.lume-code .hl-c{color:#6f6b64}
+html.lume-code .dw{display:block;margin:0 -14px;width:max-content;min-width:calc(100% + 28px)}
+html.lume-code .dl{display:block;padding:0 14px}
+html.lume-code .dl-add{background:rgba(120,190,140,.13);color:#b5d6bd}
+html.lume-code .dl-del{background:rgba(220,110,110,.13);color:#e0b0b0}
+html.lume-code .dl-hunk{background:rgba(143,184,212,.09);color:#8fb8d4}
+html.lume-code .dl-meta{color:#8d877d}
+</style>
+<script id="lume-code-hl-js">
+(function(){
+  function on(){return document.documentElement.classList.contains('lume-code');}
+  /* ---------- status strip: which mode, model and effort ---------- */
+  var st=document.createElement('div');st.id='lc-status';st.setAttribute('aria-hidden','true');document.body.appendChild(st);
+  function add(tag,text,cls){var n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;st.appendChild(n);return n;}
+  function paint(){
+    if(!on())return;
+    var e='auto';try{e=localStorage.getItem('lume_effort')||'auto';}catch(x){}
+    var auto=['low','medium','high'].indexOf(e)<0;if(auto)e='medium'; /* Lume Code's default effort */
+    var mb=document.getElementById('model-btn'),m=mb?(mb.textContent||'').replace(/\s+/g,' ').trim():'';
+    st.textContent='';
+    add('i');add('span','Lume Code');add('span','\u00b7','sep');add('b',m||'Diode 1');add('span','\u00b7','sep');
+    var es=add('span','effort ');var eb=document.createElement('b');eb.textContent=e+(auto?' (auto)':'');es.appendChild(eb);
+  }
+  /* ---------- syntax highlighting (muted theme, Lume Code only, no dependencies) ---------- */
+  function esc(x){return x.replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
+  function set(s){var o={};s.split(' ').forEach(function(w){o[w]=1;});return o;}
+  var KW={
+    js:set('break case catch class const continue debugger default delete do else export extends finally for from function if import in instanceof let new of return super switch this throw try typeof var void while with yield async await static get set interface type enum implements public private protected readonly as namespace declare abstract'),
+    c:set('abstract auto bool boolean break byte case catch char class const continue default defer do double else enum extends extern final finally float fn for func goto if impl implements import in include instanceof int interface let long loop match mod move mut namespace new package private protected pub public return short signed sizeof static struct super switch this throw throws trait try typedef typeof union unsigned use using var virtual void volatile where while yield async await'),
+    py:set('and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case'),
+    sh:set('if then else elif fi for while until do done case esac function in return export local select time break continue exit set unset source alias'),
+    sql:set('select from where and or not in is null as join left right inner outer full cross on group by order having limit offset insert into values update set delete create alter drop table index view primary key foreign references unique default distinct union all case when then else end exists between like asc desc with returning')
+  };
+  var LIT=set('true false null undefined NaN Infinity True False None nil');
+  var DQ=/"(?:\\.|[^"\\\n])*"?/.source,SQ=/'(?:\\.|[^'\\\n])*'?/.source,BT=/`(?:\\.|[^`\\])*`?/.source,TRI=/"""[\s\S]*?(?:"""|$)|'''[\s\S]*?(?:'''|$)/.source;
+  var NUM=/\b0x[0-9a-fA-F]+\b|\b\d[\d_]*(?:\.\d+)?(?:[eE][+-]?\d+)?\b/.source,WORD=/[A-Za-z_$][\w$]*/.source;
+  var SLASH=/\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)/.source,HASH=/#[^\n]*/.source,DASH=/--[^\n]*|\/\*[\s\S]*?(?:\*\/|$)/.source,BLOCK=/\/\*[\s\S]*?(?:\*\/|$)/.source;
+  function rx(com,str,num,word){return new RegExp('('+com+')|('+str+')|('+num+')|('+word+')','g');}
+  var NEVER='(?!)';
+  var RX={
+    js:{r:rx(SLASH,[DQ,SQ,BT].join('|'),NUM,WORD),kw:KW.js},
+    c:{r:rx(SLASH,[DQ,SQ,BT].join('|'),NUM,WORD),kw:KW.c},
+    py:{r:rx(HASH,[TRI,DQ,SQ].join('|'),NUM,WORD),kw:KW.py},
+    sh:{r:rx(HASH,[DQ,SQ].join('|'),NUM,WORD),kw:KW.sh},
+    cfg:{r:rx(HASH,[DQ,SQ].join('|'),NUM,WORD),kw:{}},
+    sql:{r:rx(DASH,[SQ,DQ].join('|'),NUM,WORD),kw:KW.sql,ci:1},
+    json:{r:rx(NEVER,DQ,NUM,WORD),kw:{}},
+    css:{r:rx(BLOCK,[DQ,SQ].join('|'),/#[0-9a-fA-F]{3,8}\b|\b\d[\d.]*(?:px|em|rem|%|vh|vw|s|ms|deg)?/.source,/@[\w-]+|[A-Za-z_][\w-]*/.source),kw:{}},
+    markup:{r:rx(/<!--[\s\S]*?(?:-->|$)/.source,DQ,NEVER,/<\/?[A-Za-z][\w:-]*|\/?>/.source),kw:{},tags:1}
+  };
+  var FAM={javascript:'js',js:'js',jsx:'js',mjs:'js',typescript:'js',ts:'js',tsx:'js',java:'c',c:'c',cpp:'c','c++':'c',cs:'c',csharp:'c',go:'c',golang:'c',rust:'c',rs:'c',swift:'c',kotlin:'c',kt:'c',dart:'c',
+    python:'py',py:'py',bash:'sh',sh:'sh',shell:'sh',zsh:'sh',yaml:'cfg',yml:'cfg',toml:'cfg',sql:'sql',json:'json',jsonc:'json',css:'css',scss:'css',html:'markup',xml:'markup',svg:'markup',vue:'markup'};
+  function hl(text,fam){
+    var f=RX[fam],r=f.r,out='',last=0,m;r.lastIndex=0;
+    while((m=r.exec(text))){
+      if(m[0]===''){r.lastIndex++;continue;}
+      if(m.index>last)out+=esc(text.slice(last,m.index));
+      var t=m[0],cls=null,after=text.charAt(r.lastIndex);
+      if(m[1]!==undefined)cls='c';
+      else if(m[2]!==undefined){cls='s';if(fam==='json'&&/^\s*:/.test(text.slice(r.lastIndex,r.lastIndex+40)))cls='f';}
+      else if(m[3]!==undefined)cls='n';
+      else if(f.tags)cls='k';
+      else if(t.charAt(0)==='@')cls='k';
+      else if(f.kw[f.ci?t.toLowerCase():t])cls='k';
+      else if(LIT[t])cls='n';
+      else if(after==='('&&fam!=='css')cls='f';
+      else if(/^[A-Z][A-Za-z0-9_]*$/.test(t)&&(fam==='js'||fam==='c'||fam==='py'))cls='t';
+      out+=cls?'<span class="hl-'+cls+'">'+esc(t)+'</span>':esc(t);
+      last=r.lastIndex;
+    }
+    return out+esc(text.slice(last));
+  }
+  /* ---------- diff blocks: coloured lines, original text (and so Copy) untouched ---------- */
+  function isDiff(t){return /^@@ /m.test(t)||(/^--- /m.test(t)&&/^\+\+\+ /m.test(t))||/^diff --git /m.test(t);}
+  function diff(t){
+    var lines=t.split('\n'),inH=false,out='<span class="dw">';
+    lines.forEach(function(l,i){
+      var c='ctx';
+      if(/^diff /.test(l)){inH=false;c='meta';}
+      else if(l.charAt(0)==='@'&&l.charAt(1)==='@'){inH=true;c='hunk';}
+      else if(!inH&&/^(--- |\+\+\+ |index |new file|deleted file|similarity|rename |old mode|new mode)/.test(l))c='meta';
+      else if(l.charAt(0)==='+')c='add';
+      else if(l.charAt(0)==='-')c='del';
+      out+='<span class="dl dl-'+c+'">'+esc(l)+(i<lines.length-1?'\n':'')+'</span>';
+    });
+    return out+'</span>';
+  }
+  function fmt(code){
+    var txt=code.textContent,lang=(code.getAttribute('data-lang')||'').toLowerCase(),html=null;
+    code.dataset.hl='1';
+    if(txt.length>20000)return;
+    if(lang==='diff'||lang==='patch'||(!lang&&isDiff(txt)))html=diff(txt);
+    else if(FAM[lang])html=hl(txt,FAM[lang]);
+    if(html===null)return;
+    code.innerHTML=html;
+    if(code.textContent!==txt)code.textContent=txt; /* safety net: Copy/Run/Pin must see the original text */
+  }
+  var T=0;
+  function run(){if(!on())return;[].forEach.call(document.querySelectorAll('#chat-inner pre>code:not([data-hl])'),fmt);}
+  function scan(){clearTimeout(T);T=setTimeout(run,180);}
+  var ci=document.getElementById('chat-inner');
+  if(ci)new MutationObserver(scan).observe(ci,{childList:true,subtree:true});
+  new MutationObserver(function(){paint();scan();}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  var mb=document.getElementById('model-btn');
+  if(mb)new MutationObserver(paint).observe(mb,{childList:true,characterData:true,subtree:true});
+  var si=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(k){var r=si.apply(this,arguments);if(k==='lume_effort'||k==='lume_model'||k==='lume_persona')setTimeout(function(){paint();scan();},0);return r;};
+  paint();scan();
 })();
 </script>
 <style id="lume-r2">
@@ -12112,7 +12754,7 @@ html.lr4-cmp-on #cmp-badge{display:block}
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&S.classList.contains('on'))closeCap();});
   fl.onclick=function(e){var b=e.target.closest('[data-f]');if(!b)return;flt=b.dataset.f;render();};
   if(mic)mic.onclick=function(){
-    if(window.lumeSpoken){say('Close Talk mode first.');return;}
+    if(typeof _listenActive!=='undefined'&&_listenActive){say('Stop voice mode first.');return;}
     if(listening){try{rec.stop();}catch(e){}return;}
     rec=new SR();rec.lang=navigator.language||'en-GB';rec.interimResults=true;rec.continuous=true;
     base=ta.value?ta.value.replace(/\s*$/,' '):'';
@@ -12220,7 +12862,7 @@ body[data-presence=thinking] .lm-star,body[data-presence=searching] .lm-star{ani
 @media (hover:none){.msg-actions,.msg-ts{opacity:1!important}}
 @media (max-width:640px){
  #tb-title,#topbar button[onclick="openSettings()"]{display:none}
- #inp,#journal-inp,#recall-inp,#sb-search,.corr-field,#share-url{font-size:16px!important}
+ #inp,#listen-inp,#journal-inp,#recall-inp,#sb-search,.corr-field,#share-url{font-size:16px!important}
  #chat-inner{padding:20px 16px 8px!important}
  .sb-nav-item,.sb-convo-item{padding-top:11px;padding-bottom:11px}
  #welcome-returning{flex-direction:column!important;max-width:none!important;padding:0 20px!important}
