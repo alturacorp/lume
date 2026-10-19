@@ -2189,7 +2189,7 @@ body.ms-ready .lc-q::before{content:'search';font:400 16px/1 'Material Symbols R
 .lc-src:hover b{color:#fff}
 </style>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=arrow_back,arrow_forward,arrow_outward,auto_awesome,bar_chart,call_split,check,close,content_copy,dark_mode,description,diamond,download,edit_note,keep,keyboard_arrow_down,keyboard_double_arrow_down,mail,pause,play_arrow,schedule,search,settings,summarize,support_agent,volume_up,warning&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&icon_names=arrow_back,arrow_forward,arrow_outward,auto_awesome,bar_chart,call_split,check,close,content_copy,dark_mode,description,diamond,download,edit_note,keep,keyboard_arrow_down,keyboard_double_arrow_down,mail,pause,play_arrow,reply,schedule,search,settings,summarize,support_agent,volume_up,warning&display=block">
 <style id="lume-ms-css">
 .ms{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;font-size:1.15em;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;vertical-align:-.17em;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24}
 .lume-star .ms{font-size:1.08em;vertical-align:-.14em}
@@ -2261,6 +2261,11 @@ body:not(.light)::after{background:radial-gradient(38% 34% at 18% 26%,rgba(167,1
 #sb-search{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;font-style:normal;font-family:Figtree,sans-serif;font-size:13px;color:#f2f0ec;margin-bottom:10px}
 #sb-search::placeholder{color:rgba(232,230,226,.38)}
 #sb-search:focus{border-color:rgba(167,139,250,.5);box-shadow:0 0 0 3px rgba(167,139,250,.12)}
+#sb-search::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.sb-hit{background:rgba(167,139,250,.22);color:inherit;border-radius:3px;padding:0 1px}
+.sb-search-empty{padding:10px 12px;font-family:Figtree,sans-serif;font-size:12.5px;color:rgba(232,230,226,.4);line-height:1.5}
+body.light .sb-hit{background:rgba(124,92,220,.18)}
+body.light .sb-search-empty{color:#8a8580}
 #uname{color:rgba(232,230,226,.78)!important;font-style:normal!important;font-size:13.5px!important}
 </style>
 <style id="lume-portrait-css">
@@ -2281,6 +2286,11 @@ body:not(.light)::after{background:radial-gradient(38% 34% at 18% 26%,rgba(167,1
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#100f0d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lume">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style id="lume-cool">
 :root{--ma:rgba(167,139,250,.28);--mb:rgba(56,189,248,.2);--mc:rgba(244,114,182,.18)}
 body:not(.light)::after{background:radial-gradient(38% 34% at 18% 26%,var(--ma),transparent 70%),radial-gradient(34% 30% at 82% 16%,var(--mb),transparent 70%),radial-gradient(40% 34% at 62% 88%,var(--mc),transparent 70%);transition:filter 1.4s ease}
@@ -2309,6 +2319,14 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
 #lume-greet+#lume-quip{margin-top:10px;text-align:center;font:italic 400 15px Lora,serif;color:rgba(232,230,226,.42);animation:fadeup 1.4s ease .5s both}
 </style>
 <link rel="preconnect" href="https://iole.graggle9901.workers.dev" crossorigin>
+<style id="lume-att-css">
+/* saved attachments shown when a conversation is restored */
+.lume-att-row{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:84%;margin-bottom:6px}
+.lume-att-chip{font-family:'Figtree',sans-serif;font-size:11px;letter-spacing:.02em;color:#7a7570;padding:5px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lume-att-chip.lume-att-img{padding:0;border-radius:12px;overflow:hidden;line-height:0}
+.lume-att-chip.lume-att-img img{display:block;max-width:180px;max-height:140px;object-fit:cover}
+body.light .lume-att-chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.07);color:#6a6560}
+</style>
 </head>
 <body class="bg-[#100f0d] text-t0 font-geist text-[15px]">
 
@@ -2351,7 +2369,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         <span style="font-family:'Lora',serif;font-style:italic;font-size:10px;color:#1c1a17">conversations</span>
         <button onclick="startNewConversation()" style="font-family:'Figtree',sans-serif;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#1c1a17;background:none;border:none;cursor:pointer;transition:color .15s" onmouseover="this.style.color='#2e2c2a'" onmouseout="this.style.color='#1c1a17'">+ new</button>
       </div>
-      <input id="sb-search" placeholder="search..." oninput="filterConvos(this.value)">
+      <input id="sb-search" type="search" placeholder="Search chats" aria-label="Search saved chats" autocomplete="off" oninput="filterConvos(this.value)" onkeydown="if(event.key==='Escape'){this.value='';filterConvos('');}">
       <div id="nav-chat" class="sb-nav-item nav-on" onclick="switchMode('chat');closeSidebar()">
         <span id="current-convo-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;display:block" ondblclick="renameCurrentConvo(this)" title="Double-click to rename">Now</span>
       </div>
@@ -2483,7 +2501,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
     -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text"></div>
 
   <!-- FIRST-TIME: centred column -->
-  <div id="welcome-first" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px">
+  <div id="welcome-first" style="display:none;min-height:100vh;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:32px">
       <span class="lume-star active" style="font-size:56px;line-height:1">&#10022;</span>
       <span style="font-family:'Lora',serif;font-weight:600;font-size:56px;letter-spacing:-.02em;line-height:1;
@@ -2497,7 +2515,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
   </div>
 
   <!-- RETURNING: split layout -->
-  <div id="welcome-returning" style="display:none;min-height:100vh;align-items:stretch;max-width:900px;margin:0 auto;padding:0 32px;gap:0">
+  <div id="welcome-returning" style="display:none;min-height:100vh;min-height:100dvh;align-items:stretch;max-width:900px;margin:0 auto;padding:0 32px;gap:0">
 
     <!-- LEFT: identity + greeting -->
     <div id="welcome-left" style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:80px 48px 80px 0;border-right:1px solid rgba(255,255,255,.05)">
@@ -2527,7 +2545,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
 </div>
 
 <!-- MAIN AREA (all panels live here) -->
-<div id="main-area" class="hidden" style="height:100vh;padding-top:46px;display:none">
+<div id="main-area" class="hidden" style="height:100vh;height:100dvh;padding-top:46px;display:none">
 
   <!-- ── CHAT PANEL ── -->
   <div id="panel-chat" class="panel" style="height:100%">
@@ -2716,6 +2734,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
       <div id="share-url-row">
         <input id="share-url" readonly spellcheck="false">
         <button id="share-copy-btn" onclick="copyShareUrl()">Copy</button>
+        <button id="share-native-btn" type="button" style="display:none">Share&hellip;</button>
       </div>
     </div>
     <div id="share-footer">
@@ -2838,6 +2857,17 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
   <div class="settings-layout">
     <div class="settings-heading">Settings</div>
     <div class="settings-subheading">Everything Lume knows about you, and everything you can change.</div>
+
+    <div class="settings-section" id="lume-install-sec" style="display:none">
+      <div class="settings-section-title">App</div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-title">Install Lume</div>
+          <div class="settings-row-desc" id="lume-install-desc"></div>
+        </div>
+        <button type="button" class="settings-danger-btn" id="lume-install-btn">Install</button>
+      </div>
+    </div>
 
         <!-- Privacy -->
     <div class="settings-section">
@@ -3817,13 +3847,215 @@ function handleNew(){
 }
 
 // ── CONVERSATION PERSISTENCE ──
-var CONVOS_KEY = 'lume_saved_convos'; // [{id, label, ts, msgs}]
+var CONVOS_KEY = 'lume_saved_convos'; // [{id, label, ts, msgs, att}]  (legacy localStorage key, kept for fallback + migration)
 var activeConvoId = null;
+var _activeAtt = {}; // attachments of the open conversation: { msgIndex: [{id,name,type,image}] } (files themselves live in IndexedDB)
 
-function loadSavedConvos(){
-  try{ return JSON.parse(localStorage.getItem(CONVOS_KEY)||'[]'); }catch(e){ return []; }
+// ── LUME STORAGE: IndexedDB with localStorage fallback ──
+// Public API stays synchronous (loadSavedConvos / saveSavedConvos) so existing callers keep working.
+// An in-memory cache is the source of truth while the page is open; changes are written through to IndexedDB.
+// If IndexedDB is unavailable or fails, everything falls back to the old localStorage key.
+var lumeDB = (function(){
+  var NAME='lume_db', VER=1, LSKEY='lume_saved_convos', MIG='lume_idb_migrated';
+  var CAP_IDB=200, CAP_LS=12;
+  var db=null, mode='init', cache=null, written={}, queue=Promise.resolve(), waiters=[];
+
+  function lsRead(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function lsWrite(a){ try{ localStorage.setItem(LSKEY, JSON.stringify(a)); return true; }catch(e){ return false; } }
+  function num(c){ var m=/^c(\d+)/.exec(String(c.id||'')); return m?parseInt(m[1],10):(c.ts||0); }
+  function order(a){ return a.slice().sort(function(x,y){ return num(y)-num(x); }); } // ids are 'c'+creation time, newest first (same order the old array had)
+  function sig(c){ return [c.ts,c.label,c.starred?1:0,c.msgs?c.msgs.length:0,(c.tags||[]).join(','),c.snippet||'',c.att?Object.keys(c.att).length:0].join('|'); }
+  function attIds(c){ var o=[]; if(c&&c.att) Object.keys(c.att).forEach(function(k){ (c.att[k]||[]).forEach(function(m){ if(m&&m.id) o.push(m.id); }); }); return o; }
+
+  function open(){
+    return new Promise(function(res,rej){
+      if(!window.indexedDB){ rej(new Error('IndexedDB unavailable')); return; }
+      var r; try{ r=indexedDB.open(NAME,VER); }catch(e){ rej(e); return; }
+      r.onupgradeneeded=function(){
+        var d=r.result;
+        if(!d.objectStoreNames.contains('convos')) d.createObjectStore('convos',{keyPath:'id'});
+        if(!d.objectStoreNames.contains('attachments')) d.createObjectStore('attachments',{keyPath:'id'});
+      };
+      r.onsuccess=function(){ res(r.result); };
+      r.onerror=function(){ rej(r.error||new Error('open failed')); };
+      r.onblocked=function(){ rej(new Error('open blocked')); };
+    });
+  }
+  function getAll(){
+    return new Promise(function(res,rej){
+      var t=db.transaction('convos','readonly'), rq=t.objectStore('convos').getAll();
+      t.oncomplete=function(){ res(rq.result||[]); };
+      t.onerror=t.onabort=function(){ rej(t.error||new Error('read failed')); };
+    });
+  }
+  function writeDiff(snap){
+    var seen={}, puts=[], dels=[], attDel=[];
+    snap.forEach(function(c){ seen[c.id]=1; if(!written[c.id]||written[c.id].sig!==sig(c)) puts.push(c); });
+    Object.keys(written).forEach(function(id){ if(!seen[id]){ dels.push(id); (written[id].att||[]).forEach(function(a){ attDel.push(a); }); } });
+    if(!puts.length&&!dels.length) return Promise.resolve();
+    var sigs=puts.map(sig), ids=puts.map(attIds);
+    return new Promise(function(res,rej){
+      var t=db.transaction(['convos','attachments'],'readwrite');
+      var cs=t.objectStore('convos'), as=t.objectStore('attachments');
+      puts.forEach(function(c){ cs.put(c); });
+      dels.forEach(function(id){ cs.delete(id); });
+      attDel.forEach(function(id){ as.delete(id); });
+      t.oncomplete=function(){
+        puts.forEach(function(c,i){ written[c.id]={sig:sigs[i],att:ids[i]}; });
+        dels.forEach(function(id){ delete written[id]; });
+        res();
+      };
+      t.onerror=t.onabort=function(){ rej(t.error||new Error('write failed')); };
+    });
+  }
+  function fail(e){
+    // IndexedDB went wrong: keep working from memory and mirror to localStorage like before
+    mode='ls';
+    try{ console.warn('Lume storage: IndexedDB failed, using localStorage.', e); }catch(x){}
+    try{ localStorage.setItem('lume_idb_failed','1'); }catch(x){}
+    if(cache) lsWrite(cache);
+  }
+  function flush(){
+    var snap=cache.slice();
+    queue=queue.then(function(){ if(mode==='idb') return writeDiff(snap); }).catch(fail);
+  }
+  function done(){
+    var w=waiters; waiters=[];
+    w.forEach(function(fn){ try{ fn(); }catch(e){} });
+    try{ renderSavedConvos(); }catch(e){}
+  }
+  function gc(){
+    // remove attachments no conversation refers to any more (e.g. a send that never completed)
+    try{
+      var keep={}; (cache||[]).forEach(function(c){ attIds(c).forEach(function(id){ keep[id]=1; }); });
+      var t=db.transaction('attachments','readwrite'), st=t.objectStore('attachments'), cur=st.openCursor();
+      cur.onsuccess=function(){ var c=cur.result; if(!c) return; var v=c.value; if(!keep[v.id]&&Date.now()-(v.ts||0)>86400000) c.delete(); c.continue(); };
+    }catch(e){}
+  }
+  function init(){
+    open().then(function(d){
+      db=d;
+      db.onversionchange=function(){ try{ db.close(); }catch(e){} fail(new Error('version change')); };
+      return getAll();
+    }).then(function(rows){
+      var map={}; rows.forEach(function(c){ if(c&&c.id){ map[c.id]=c; written[c.id]={sig:sig(c),att:attIds(c)}; } });
+      var legacy=lsRead();
+      function overlay(arr){ arr.forEach(function(c,i){
+        if(!c) return;
+        if(!c.id) c.id='c'+(c.ts||Date.now())+'x'+i;
+        var o=map[c.id]; if(!o||(c.ts||0)>(o.ts||0)) map[c.id]=c;
+      }); }
+      overlay(legacy);              // one-time migration (and anything saved while IndexedDB was still opening)
+      if(cache) overlay(cache);     // anything saved in memory while opening
+      cache=order(Object.keys(map).map(function(k){ return map[k]; })).slice(0,CAP_IDB);
+      mode='idb';
+      return writeDiff(cache).then(getAll).then(function(after){
+        if(!legacy.length) return;
+        var have={}; after.forEach(function(r){ have[r.id]=1; });
+        var ok=legacy.every(function(c){ return !c||have[c.id]; });
+        if(!ok) throw new Error('migration read-back mismatch');
+        // verified: free the localStorage copy and note the migration
+        try{ localStorage.removeItem(LSKEY); localStorage.setItem(MIG,'1'); }catch(e){}
+      });
+    }).then(function(){ done(); setTimeout(gc,4000); })
+      .catch(function(e){ fail(e); done(); });
+  }
+
+  function list(){ return cache?cache.slice():lsRead(); }
+  function save(arr){
+    cache=arr.slice();
+    if(mode==='idb'){ flush(); return true; }
+    return lsWrite(cache); // not ready yet, or fallback mode
+  }
+
+  // ── attachments ──
+  function putAttachment(rec){
+    if(mode!=='idb'||!db) return Promise.resolve(false);
+    return new Promise(function(res){
+      try{
+        var data;
+        if(rec.base64){ var bin=atob(rec.base64), u=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); data=u.buffer; }
+        else data=new TextEncoder().encode(String(rec.text||'')).buffer;
+        var t=db.transaction('attachments','readwrite');
+        t.objectStore('attachments').put({id:rec.id,name:rec.name,mimeType:rec.mimeType,size:data.byteLength,ts:Date.now(),data:data});
+        t.oncomplete=function(){ res(true); };
+        t.onerror=t.onabort=function(){ res(false); };
+      }catch(e){ res(false); }
+    });
+  }
+  function getAttachment(id){
+    if(mode!=='idb'||!db) return Promise.resolve(null);
+    return new Promise(function(res){
+      try{
+        var t=db.transaction('attachments','readonly'), rq=t.objectStore('attachments').get(id);
+        t.oncomplete=function(){ res(rq.result||null); };
+        t.onerror=t.onabort=function(){ res(null); };
+      }catch(e){ res(null); }
+    });
+  }
+  // Re-draw the saved attachments for message i when a conversation is restored (call right after addUserMsg).
+  function showAttachments(att,i){
+    try{
+      var metas=att&&att[i]; if(!metas||!metas.length) return;
+      var ci=document.getElementById('chat-inner'); if(!ci) return;
+      var outs=ci.querySelectorAll('.user-msg-outer'), el=outs[outs.length-1]; if(!el) return;
+      var row=document.createElement('div'); row.className='lume-att-row';
+      el.insertBefore(row,el.firstChild);
+      metas.forEach(function(m){
+        var chip=document.createElement('div'); chip.className='lume-att-chip'; row.appendChild(chip);
+        getAttachment(m.id).then(function(rec){
+          if(rec&&m.image&&rec.data){
+            var url=URL.createObjectURL(new Blob([rec.data],{type:rec.mimeType||'image/jpeg'}));
+            var img=new Image(); img.alt=m.name||'Attachment';
+            img.onload=function(){ URL.revokeObjectURL(url); };
+            img.src=url; chip.classList.add('lume-att-img'); chip.appendChild(img);
+          } else { chip.textContent=m.name||'Attachment'; }
+        });
+      });
+    }catch(e){}
+  }
+  // Delete everything (used by "Clear everything" and "Delete my data").
+  function wipe(cb){
+    var fin=false; function end(){ if(fin) return; fin=true; if(cb) cb(); }
+    try{
+      cache=[]; written={}; mode='ls';
+      if(db){ try{ db.close(); }catch(e){} db=null; }
+      if(!window.indexedDB){ end(); return; }
+      var r=indexedDB.deleteDatabase(NAME);
+      r.onsuccess=r.onerror=r.onblocked=end;
+      setTimeout(end,1500);
+    }catch(e){ end(); }
+  }
+
+  init();
+  return {
+    list:list, save:save, ready:function(fn){ if(mode==='init') waiters.push(fn); else fn(); },
+    cap:function(){ return mode==='idb'?CAP_IDB:CAP_LS; },
+    usable:function(){ return mode==='idb'; }, mode:function(){ return mode; },
+    putAttachment:putAttachment, getAttachment:getAttachment, showAttachments:showAttachments, wipe:wipe
+  };
+})();
+
+function loadSavedConvos(){ try{ return lumeDB.list(); }catch(e){ return []; } }
+function saveSavedConvos(arr){ try{ lumeDB.save(arr); }catch(e){ try{ localStorage.setItem(CONVOS_KEY, JSON.stringify(arr)); }catch(x){} } }
+
+// Called from callLume right after a message with files is sent: stores the files in IndexedDB and remembers which message they belong to.
+function lumeAttachCapture(files){
+  try{
+    if(!files||!files.length||!msgs.length||msgs[msgs.length-1].role!=='user'||!lumeDB.usable()) return;
+    var idx=msgs.length-1, metas=[];
+    files.forEach(function(f){
+      var id='a'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+      var type=f.isImage?(f.mimeType||'image/jpeg'):(f.type||'text/plain');
+      metas.push({id:id,name:String(f.name||'file').slice(0,120),type:type,image:!!f.isImage});
+      lumeDB.putAttachment({id:id,name:f.name,mimeType:type,base64:f.isImage?f.base64:null,text:f.isImage?null:f.content});
+    });
+    _activeAtt[idx]=(_activeAtt[idx]||[]).concat(metas);
+  }catch(e){}
 }
-function saveSavedConvos(arr){ localStorage.setItem(CONVOS_KEY, JSON.stringify(arr)); }
+function lumeAttSnapshot(){
+  try{ return Object.keys(_activeAtt).length?JSON.parse(JSON.stringify(_activeAtt)):undefined; }catch(e){ return undefined; }
+}
 
 function updateConvoLabel(){
   var el = document.getElementById('current-convo-label');
@@ -3851,13 +4083,13 @@ function saveCurrentConvo(){
   var isNew = !activeConvoId;
   if(activeConvoId){
     var idx = convos.findIndex(function(c){ return c.id===activeConvoId; });
-    if(idx > -1){ convos[idx] = Object.assign(convos[idx],{snippet:snippet, ts:ts, msgs:msgs.slice()}); label = convos[idx].label; }
-    else { convos.unshift({id:activeConvoId, label:label, snippet:snippet, ts:ts, msgs:msgs.slice()}); }
+    if(idx > -1){ convos[idx] = Object.assign(convos[idx],{snippet:snippet, ts:ts, msgs:msgs.slice()}); var _as=lumeAttSnapshot(); if(_as) convos[idx].att=_as; label = convos[idx].label; }
+    else { convos.unshift({id:activeConvoId, label:label, snippet:snippet, ts:ts, msgs:msgs.slice(), att:lumeAttSnapshot()}); }
   } else {
     activeConvoId = 'c'+ts;
-    convos.unshift({id:activeConvoId, label:label, snippet:snippet, ts:ts, msgs:msgs.slice()});
+    convos.unshift({id:activeConvoId, label:label, snippet:snippet, ts:ts, msgs:msgs.slice(), att:lumeAttSnapshot()});
   }
-  convos = convos.slice(0,12);
+  convos = convos.slice(0, lumeDB.cap());
   saveSavedConvos(convos);
   renderSavedConvos();
   syncConvoToServer(convos[0]);
@@ -4712,29 +4944,85 @@ function recordConsent(){
 }
 // ─────────────────────────────────────────────────────────────
 
+var _sbQuery = '';
+var _sbTextCache = {};
+function sbConvoText(c){
+  // lower-cased searchable text of a chat (label + all message text), cached per chat revision
+  try{
+    var key = (c.ts||0)+'|'+(c.msgs?c.msgs.length:0)+'|'+(c.label||'');
+    var hit = _sbTextCache[c.id];
+    if(hit && hit.key===key) return hit.text;
+    var parts = [];
+    (c.msgs||[]).forEach(function(m){ if(m && typeof m.content==='string') parts.push(m.content); });
+    var text = parts.join('\n').toLowerCase();
+    _sbTextCache[c.id] = {key:key, text:text, raw:parts};
+    return text;
+  }catch(e){ return ''; }
+}
+function sbMatchSnippet(c, tokens){
+  // first message line containing a search word, trimmed around the match
+  try{
+    var raw = (_sbTextCache[c.id]||{}).raw || [];
+    for(var i=0;i<raw.length;i++){
+      var low = raw[i].toLowerCase(), pos = -1;
+      for(var t=0;t<tokens.length;t++){ var k = low.indexOf(tokens[t]); if(k>-1 && (pos<0||k<pos)) pos = k; }
+      if(pos>-1){
+        var from = Math.max(0, pos-24), out = raw[i].slice(from, from+90).replace(/\s+/g,' ').trim();
+        return (from>0?'…':'') + out + (raw[i].length>from+90?'…':'');
+      }
+    }
+  }catch(e){}
+  return '';
+}
+function sbHighlight(text, tokens){
+  var safe = esc(text);
+  if(!tokens.length) return safe;
+  try{
+    var re = new RegExp('('+tokens.map(function(t){ return esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|')+')','gi');
+    return safe.replace(re,'<mark class="sb-hit">$1</mark>');
+  }catch(e){ return safe; }
+}
 function renderSavedConvos(filter){
   var list = document.getElementById('saved-convos-list');
   if(!list) return;
+  if(typeof filter==='string') _sbQuery = filter;
   var convos = loadSavedConvos();
   // starred first
   convos.sort(function(a,b){ return (b.starred?1:0)-(a.starred?1:0); });
   list.innerHTML = '';
-  var query = (filter||'').toLowerCase().trim();
+  var query = (_sbQuery||'').toLowerCase().trim();
+  var tokens = query ? query.split(/\s+/).filter(Boolean) : [];
+  var shown = 0;
   convos.forEach(function(c){
     if(c.id === activeConvoId) return;
-    if(query && !c.label.toLowerCase().includes(query)) return;
+    var snippet = c.snippet || '', inBody = false;
+    if(tokens.length){
+      var label = String(c.label||'').toLowerCase();
+      var body = sbConvoText(c);
+      var ok = tokens.every(function(t){ return label.indexOf(t)>-1 || body.indexOf(t)>-1; });
+      if(!ok) return;
+      var inLabel = tokens.some(function(t){ return label.indexOf(t)>-1; });
+      var ms = sbMatchSnippet(c, tokens);
+      if(ms){ snippet = ms; inBody = true; }
+    }
+    shown++;
     var d = document.createElement('div');
     d.className = 'sb-convo-item' + (c.starred?' sb-convo-starred':'');
-    var snippet = c.snippet || '';
     d.innerHTML = '<div class="sb-convo-top">'
-      +'<span class="sb-convo-label">'+esc(c.label)+'</span>'
+      +'<span class="sb-convo-label">'+(tokens.length?sbHighlight(String(c.label||''),tokens):esc(c.label))+'</span>'
       +'<button class="sb-star-btn" onclick="event.stopPropagation();toggleConvoStar(\''+c.id+'\')" title="Star">&#10022;</button>'
       +'<button class="sb-del-btn" onclick="event.stopPropagation();deleteConvo(\''+c.id+'\')" title="Delete">&#10005;</button>'
       +'</div>'
-      +(snippet?'<div class="sb-convo-snippet">'+esc(snippet)+'</div>':'');
+      +(snippet?'<div class="sb-convo-snippet">'+(inBody?sbHighlight(snippet,tokens):esc(snippet))+'</div>':'');
     d.onclick = function(){ loadConvo(c.id); };
     list.appendChild(d);
   });
+  if(tokens.length && !shown){
+    var e = document.createElement('div');
+    e.className = 'sb-search-empty';
+    e.textContent = 'No saved chats match \u201c' + (_sbQuery||'').trim() + '\u201d.';
+    list.appendChild(e);
+  }
 }
 
 function toggleConvoStar(id){
@@ -4745,8 +5033,10 @@ function toggleConvoStar(id){
   renderSavedConvos();
 }
 
+var _sbTimer = null;
 function filterConvos(q){
-  renderSavedConvos(q);
+  clearTimeout(_sbTimer);
+  _sbTimer = setTimeout(function(){ try{ renderSavedConvos(String(q||'')); }catch(e){} }, 120);
 }
 
 function renameCurrentConvo(el){
@@ -4789,12 +5079,13 @@ function loadConvo(id){
   // restore
   activeConvoId = c.id;
   msgs = c.msgs.slice();
+  _activeAtt = c.att ? JSON.parse(JSON.stringify(c.att)) : {};
   // rebuild chat UI
   var ci = document.getElementById('chat-inner');
   ci.innerHTML = '';
   addDateDiv('Restored');
-  msgs.forEach(function(m){
-    if(m.role==='user') addUserMsg(m.content);
+  msgs.forEach(function(m,i){
+    if(m.role==='user'){ addUserMsg(m.content); lumeDB.showAttachments(c.att,i); }
     else if(m.role==='assistant') addLumeMsgInstant(m.content);
   });
   document.getElementById('current-convo-label').textContent = c.label.slice(0,22)+(c.label.length>22?'…':'');
@@ -4845,6 +5136,7 @@ function send(text){
   document.getElementById('send-btn').classList.remove('visible');
   document.querySelectorAll('.suggs').forEach(function(s){s.remove();});
   pulseStar();playSend();
+  try{if(window.lumeHaptic)window.lumeHaptic(8);}catch(e){}
   addUserMsg(txt);msgs.push({role:'user',content:txt});
   busy=true;setStarActive(true);
   var _baseDelay=800+Math.floor(Math.random()*600);
@@ -5367,6 +5659,7 @@ function callLume(){
   // check for image attachments — route to vision
   var imageFiles = attachedFiles.filter(function(f){ return f.isImage; });
   var lastUserMsg = msgs[msgs.length-1] ? msgs[msgs.length-1].content : '';
+  lumeAttachCapture(attachedFiles);
   clearAttachments();
   // route to vision if image attached
   if(imageFiles.length > 0){
@@ -5530,7 +5823,7 @@ function clearChat(){
   ma.style.opacity='0';
   setTimeout(function(){
     msgs=[];busy=false;started=false;pendingStart=null;stopGhost();
-    activeConvoId=null;
+    activeConvoId=null;_activeAtt={};
     _toneCleared=false;
     _contradictionChecked=false;
     var labelEl=document.getElementById('current-convo-label');
@@ -6175,8 +6468,8 @@ function clearAllMemories(){
 
 function clearAllData(){
   if(!confirm('Clear everything? This cannot be undone.')) return;
-  localStorage.clear();
-  location.reload();
+  try{ localStorage.clear(); }catch(e){}
+  try{ lumeDB.wipe(function(){ location.reload(); }); }catch(e){ location.reload(); }
 }
 
 function toggleLightMode(tog){
@@ -7531,7 +7824,7 @@ function summariseFromHere(msgEl){
     // Replace all prior messages with a thread divider + summary
     var ci = document.getElementById('chat-inner');
     for(var j=allMsgs.length-1;j>=0;j--){ if(allMsgs[j].parentNode) allMsgs[j].parentNode.removeChild(allMsgs[j]); }
-    msgs = [];
+    msgs = [];_activeAtt = {};
     addThreadDivider('Summary');
     addLumeMsg(reply, function(){
       msgs.push({role:'assistant',content:reply});
@@ -9256,14 +9549,14 @@ function closeShareModal(){
 
       /* page */
       'html{background:#0a0908;-webkit-font-smoothing:antialiased;}',
-      'body{background:#0a0908;min-height:100vh;',
+      'body{background:#0a0908;min-height:100vh;min-height:100dvh;',
         /* grain overlay */
         'background-image:url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E");',
         'background-size:180px 180px;',
       '}',
 
       /* centred column */
-      '.pc-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:64px 20px 100px;}',
+      '.pc-wrap{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:64px 20px 100px;}',
 
       /* from label above card */
       '.pc-from{font-family:Figtree,sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;',
@@ -10048,13 +10341,18 @@ var _sendCount = 0;
       <p>That&rsquo;s deliberate. A moderation system you can reset by clearing your browser protects nobody. We use fingerprinting for this and nothing else. We don&rsquo;t use it to follow you across other sites, build advertising profiles, or hand fingerprint data to anyone else.</p>
 
       <h3>What stays on your device</h3>
-      <p>Some of what Lume uses never leaves your device unless a feature needs it. Past conversations and memory are kept in your browser&rsquo;s local storage. Settings, timers and your Capture notes are kept there too.</p>
+      <p>Some of what Lume uses never leaves your device unless a feature needs it. Past conversations, and any images or files you attached to them, are kept in your browser&rsquo;s on-device database (IndexedDB), or in local storage if your browser can&rsquo;t use that. Attachments saved this way stay on your device. Sending one in a message still passes it to Lume so it can read it. Memory, settings, timers and your Capture notes are kept in local storage.</p>
       <p>Clearing your site data removes those on-device copies, the offline queue described below, and any check-in markers from Part Four. It doesn&rsquo;t delete what&rsquo;s already stored on our servers. To delete that, use the delete option in the Privacy &amp; Data panel, or write to the Data Protection Officer (Part Eleven).</p>
 
       <h3>Offline use</h3>
       <p>Lume can open without a connection. To do that, a service worker on your device stores Lume&rsquo;s own app files, and copies of the fonts it uses. It isn&rsquo;t set up to store your conversations with Lume&rsquo;s servers or other API responses.</p>
       <p>If you send a message while you&rsquo;re offline, Lume holds it on your device (up to five messages) and sends it when your connection comes back. Those messages sit in your browser&rsquo;s local storage until then.</p>
+      <p>If you install Lume to your home screen or desktop, your device adds an icon and keeps those same app files. Installing doesn&rsquo;t make Lume send anything extra. If you close the install prompt, Lume stores the date on your device so it doesn&rsquo;t ask again for 30 days.</p>
       <p>When Lume loads, your device contacts Google Fonts. Google can see your IP address, as any website host would. We don&rsquo;t control what it does with it.</p>
+
+      <h3>Sharing</h3>
+      <p>When you share a conversation, Lume stores a copy of it on its servers so the link can work. Anyone who has the link can read that copy, and it expires after the number of days Lume shows you when the link is created. If you use your device&rsquo;s Share button, Lume only hands the link to the app you pick. What that app does with it is up to that app.</p>
+      <p>If you share text or a link to Lume from another app, Lume shows you what you shared and asks what to do with it. Nothing leaves your device until you pick an action. Reading a page or summarising sends the link or text to Lume&rsquo;s servers, and saving to notes keeps it in local storage on your device.</p>
 
       <h3>Voice and listening</h3>
       <p>When you dictate in Capture, your audio is sent to Lume Inc. to be processed. It&rsquo;s anonymised and encrypted, and no one at Lume Inc. can access voice recordings. Audio is stored for 48 hours, unless it&rsquo;s necessary to keep it longer.</p>
@@ -10105,7 +10403,7 @@ var _sendCount = 0;
       <p>This Part says who owns what.</p>
       <p>Lume is proprietary software. The model weights, training methods, system architecture and product design belong to Lume Inc. You may not copy, decompile, reverse engineer or build derivative works from Lume without our written consent.</p>
       <p>What you put into your conversations, meaning your questions, what you share and the thoughts you work through, stays yours. We store it, in the ways Part Three describes, but storing something isn&rsquo;t owning it.</p>
-      <p>Lume&rsquo;s replies are generated by a computer system, and Lume Inc. doesn&rsquo;t claim copyright in them. Whether you can claim it, under Halonesian law or anyone else&rsquo;s, is something courts are still working out. We don&rsquo;t think it&rsquo;s our place to answer for them.</p>
+      <p>Lume&rsquo;s replies are generated by a computer system, and Lume Inc. doesn&rsquo;t claim copyright in them. Whether you can claim it, under UK law or anyone else&rsquo;s, is something courts are still working out. We don&rsquo;t think it&rsquo;s our place to answer for them.</p>
       <p>We may use feedback you send to improve Lume. By sending it, you give Lume Inc. a non-exclusive, royalty-free licence to use it for that.</p>
 
       <h2 id="lsa-p7"><span class="lsa-part">Part Seven</span><span class="lsa-ptitle">Availability and Reliability</span></h2>
@@ -10126,12 +10424,12 @@ var _sendCount = 0;
       <p>If you have a concern about how Lume behaves, a privacy matter, a moderation decision or a technical problem, start with the feedback option inside the app. We read those. More than once they&rsquo;ve flagged real problems, and we&rsquo;ve fixed them.</p>
       <p>For moderation disputes, meaning you think a suspension was a mistake, use the appeal form that appears when you&rsquo;re suspended, or write to Lume Inc. at the address in Part Eleven. Lume Monitoring Services will reply within five working days.</p>
       <p>For privacy questions, including asking to see, correct or delete your personal data, write to the Data Protection Officer at the address in Part Eleven. We&rsquo;ll respond within thirty days, in line with the Halonesian Data Governance Act 2021.</p>
-      <p>If you think Lume Inc. has broken your rights under data protection law, you can complain to the Federal Data Protection Authority of Halonesia. We&rsquo;d rather you came to us first, because most problems get fixed faster that way, but the right to go further is yours.</p>
+      <p>If you think Lume Inc. has broken your rights under data protection law, you can complain to the Information Commissioner&rsquo;s Office (ICO), the UK&rsquo;s data protection regulator. We&rsquo;d rather you came to us first, because most problems get fixed faster that way, but the right to go further is yours.</p>
 
       <h2 id="lsa-p10"><span class="lsa-part">Part Ten</span><span class="lsa-ptitle">Governing Law</span></h2>
       <p>This Part says which law applies and where disputes are heard.</p>
-      <p>This agreement is governed by the laws of the Halonesian Federation, specifically the federal statutes that apply in the state of Serena, where Lume Inc.&rsquo;s principal place of business is. Disputes that can&rsquo;t be settled informally go to the exclusive jurisdiction of the federal courts of Halonesia, sitting in Mountain View, Serena.</p>
-      <p>If you use Lume from outside Halonesia, local consumer protection laws may apply as well as, or instead of, parts of this agreement. Where Halonesian law and a more protective standard conflict, we&rsquo;ll follow the more protective one.</p>
+      <p>This agreement, and Lume Inc.&rsquo;s operation of Lume, are governed by the laws of the United Kingdom of Great Britain and Northern Ireland, specifically the law of England and Wales. Disputes that can&rsquo;t be settled informally go to the courts of England and Wales. If you use Lume as a consumer and live in Scotland or Northern Ireland, you can also bring a claim in the courts where you live.</p>
+      <p>If you use Lume from outside the United Kingdom, local consumer protection laws may apply as well as, or instead of, parts of this agreement. Where UK law and a more protective standard conflict, we&rsquo;ll follow the more protective one.</p>
       <p>If any part of this agreement turns out to be unenforceable, that part is removed and the rest carries on. Legal documents say this because clauses sometimes get badly drafted or overtaken by new law. It&rsquo;s an admission of fallibility in formal clothing.</p>
 
       <h2 id="lsa-p11"><span class="lsa-part">Part Eleven</span><span class="lsa-ptitle">Contact</span></h2>
@@ -10620,6 +10918,106 @@ var _sendCount = 0;
   }
   // PWA
   if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+</script>
+<style id="lume-install-css">
+#lume-install-btn:hover{border-color:rgba(74,222,128,.4);color:#4ade80}
+.lc-two{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.lc-two .lc-go{margin:0}
+.lc-gap{margin-top:8px}
+</style>
+<script id="lume-install-js">
+(function(){
+  // Install prompt: beforeinstallprompt (Android, desktop Chrome/Edge) and an iOS instruction card.
+  var KEY='lume_install_dismissed',HOLD=30*864e5,deferred=null,card=null,ready=false;
+  var L=window.lumeCards;
+  function snoozed(){try{var t=parseInt(localStorage.getItem(KEY),10);return !!t&&Date.now()-t<HOLD;}catch(e){return false;}}
+  function snooze(){try{localStorage.setItem(KEY,String(Date.now()));}catch(e){}}
+  function standalone(){try{return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}catch(e){return false;}}
+  function ios(){var ua=navigator.userAgent||'';return /iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+  function mode(){if(standalone())return null;if(deferred)return 'prompt';if(ios())return 'ios';return null;}
+  function $(id){return document.getElementById(id);}
+  function drop(){if(card&&card.parentNode)card.parentNode.removeChild(card);card=null;}
+  function install(){
+    var d=deferred;if(!d)return;deferred=null;
+    try{
+      d.prompt();
+      var p=d.userChoice;
+      if(p&&p.then)p.then(function(r){if(r&&r.outcome==='dismissed')snooze();sync();},function(){sync();});
+    }catch(e){}
+    drop();sync();
+  }
+  function build(m){
+    if(!L)return null;
+    var c=L.shell({title:m==='ios'?'Add Lume to your home screen':'Keep Lume on your home screen'},'Install','#4ade80');
+    c.setAttribute('role','region');c.setAttribute('aria-label','Install Lume');
+    c.appendChild(L.h('div','lc-text','Lume opens on its own, like an app, and still loads without a connection.'));
+    if(m==='ios'){
+      ['1.  Tap Share, the square with an arrow.','2.  Scroll down and tap Add to Home Screen.','3.  Tap Add.'].forEach(function(t){var d=L.h('div','lc-text lc-gap',t);c.appendChild(d);});
+    }
+    c.appendChild(L.h('div','lc-count','Installing keeps Lume\u2019s app files on this device. It doesn\u2019t make Lume send anything extra.'));
+    var bar=L.h('div','lc-two');
+    if(m==='prompt'){var b=L.h('button','lc-go','Install');b.type='button';b.onclick=install;bar.appendChild(b);}
+    var n=L.h('button','lc-go',m==='ios'?'Got it':'Not now');n.type='button';n.onclick=function(){snooze();drop();};bar.appendChild(n);
+    c.appendChild(bar);return c;
+  }
+  function show(force){
+    var m=mode();if(!m||!L)return;
+    if(!force&&snoozed())return;
+    if(card&&card.parentNode){if(force&&card.scrollIntoView)card.scrollIntoView({block:'center'});return;}
+    var ci=$('chat-inner');if(!ci)return;
+    if(!force&&ci.querySelector('.mb-9'))return;
+    card=build(m);if(!card)return;
+    ci.insertBefore(card,ci.firstChild);
+    requestAnimationFrame(function(){if(card)card.classList.add('in');});
+    if(force&&card.scrollIntoView)card.scrollIntoView({block:'center'});
+  }
+  function sync(){
+    var m=mode(),sec=$('lume-install-sec'),btn=$('lume-install-btn'),d=$('lume-install-desc');
+    if(!m)drop();
+    if(!sec)return;
+    sec.style.display=m?'':'none';
+    if(!m)return;
+    if(d)d.textContent=m==='ios'?'Tap Share, then Add to Home Screen. Installing keeps Lume\u2019s app files on this device and sends nothing extra.':'Add Lume to this device. It opens on its own and loads without a connection. Installing keeps Lume\u2019s app files on this device and sends nothing extra.';
+    if(btn)btn.textContent=m==='ios'?'Show me how':'Install';
+  }
+  var sb=$('lume-install-btn');
+  if(sb)sb.addEventListener('click',function(){
+    var m=mode();
+    if(m==='prompt'){install();}
+    else if(m==='ios'){if(typeof closeSettings==='function'){try{closeSettings();}catch(e){}}show(true);}
+  });
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();deferred=e;sync();if(ready)show(false);
+  });
+  window.addEventListener('appinstalled',function(){deferred=null;drop();sync();});
+  try{var mq=matchMedia('(display-mode: standalone)');var f=function(){sync();};if(mq.addEventListener)mq.addEventListener('change',f);}catch(e){}
+  sync();
+  setTimeout(function(){ready=true;show(false);},5000);
+})();
+</script>
+<style id="lume-share-css">
+#share-native-btn{flex-shrink:0;font-family:'Figtree',sans-serif;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#2e2c2a;background:none;border:none;border-left:1px solid rgba(255,255,255,.06);padding:11px 16px;cursor:pointer;transition:all .15s;white-space:nowrap}
+#share-native-btn:hover{color:#585450;background:rgba(255,255,255,.03)}
+</style>
+<script id="lume-share-js">
+(function(){
+  // System share sheet for the read-only link. Incoming shares are handled by the existing 'Shared to Lume' sheet.
+  function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){}}
+  var btn=document.getElementById('share-native-btn');
+  if(btn&&typeof navigator.share==='function'){
+    btn.style.display='';
+    btn.addEventListener('click',function(){
+      var inp=document.getElementById('share-url'),url=inp&&inp.value;
+      if(!url||!/^https?:\/\//.test(url)){toast('The link isn\u2019t ready yet.');return;}
+      var lab=(document.getElementById('current-convo-label')||{}).textContent||'A conversation with Lume';
+      try{
+        navigator.share({title:lab,text:'A conversation with Lume',url:url}).catch(function(e){
+          if(!e||e.name!=='AbortError')toast('Couldn\u2019t open the share sheet. Copy the link instead.');
+        });
+      }catch(e){toast('Couldn\u2019t open the share sheet. Copy the link instead.');}
+    });
+  }
 })();
 </script>
 <script id="lume-spark-js">
@@ -11134,6 +11532,7 @@ var _sendCount = 0;
         if(t!=='DELETE'){dm.textContent='Cancelled.';return;}
         jf('/privacy/delete',{method:'POST',headers:hd(),body:JSON.stringify({confirm:'DELETE'})}).then(function(){
           try{Object.keys(localStorage).forEach(function(k){if(/convo|memory|lume_outbox|lume_timers/i.test(k))localStorage.removeItem(k);});}catch(e){}
+          try{lumeDB.wipe();}catch(e){}
           dm.textContent='Deleted. Reloading…';setTimeout(function(){location.reload();},900);
         },function(){dm.textContent='Could not delete right now.';});
       };
@@ -11836,6 +12235,9 @@ body.light .lora-prose a{color:#2f6f94}
 #lcv textarea{flex:1;resize:none;max-height:120px;background:#1b1a17;color:#f1ede6;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:11px 14px;font:300 15px Figtree,sans-serif}
 #lcv .snd{border:0;border-radius:14px;padding:11px 16px;background:#fff;color:#161513;font:500 13.5px Figtree,sans-serif;cursor:pointer}
 #lcv .snd.stop{background:rgba(255,255,255,.08);color:#e6e1d8;border:1px solid rgba(255,255,255,.14)}
+#lcv .mic{border-radius:14px;padding:11px 13px;background:rgba(255,255,255,.06);color:#aaa49a;border:1px solid rgba(255,255,255,.12);font:500 15px/1 Figtree,sans-serif;cursor:pointer;display:none}
+#lcv .mic.ok{display:block}#lcv .mic.on{color:#c9b6ff;border-color:rgba(167,139,250,.6);background:rgba(167,139,250,.12)}
+#lcv .mic.rec{animation:lcvT 1s ease-in-out infinite;color:#fff;background:rgba(167,139,250,.35)}
 </style>
 <script id="lume-conv-js">
 (function(){
@@ -11848,7 +12250,7 @@ body.light .lora-prose a{color:#2f6f94}
   el.innerHTML='<div class="top"><span class="wm">Lume</span><span class="ct">Conversation</span><button class="cl" aria-label="Close">&#10005;</button></div>'
    +'<div class="gate"></div>'
    +'<div class="live"><div class="stage"><span class="star" role="button" aria-label="Stop">&#10022;</span><div class="stat">ready</div><div class="sub"></div></div><div class="tx"></div>'
-   +'<div class="in"><textarea rows="1" placeholder="Type to Lume\u2026" aria-label="Message"></textarea><button class="snd">Send</button></div></div>';
+   +'<div class="in"><textarea rows="1" placeholder="Type to Lume\u2026" aria-label="Message"></textarea><button class="mic" aria-label="Hands-free voice" aria-pressed="false">&#127908;</button><button class="snd">Send</button></div></div>';
   document.body.appendChild(el);
   function $(s){return el.querySelector(s);}
   function setS(s){el.dataset.s=s;$('.stat').textContent=s==='idle'?'ready':s;var b=$('.snd');b.textContent=s==='idle'?'Send':'Stop';b.classList.toggle('stop',s!=='idle');}
@@ -11881,23 +12283,28 @@ body.light .lora-prose a{color:#2f6f94}
       var files={},stall,done=false;
       function arm(){clearTimeout(stall);stall=setTimeout(function(){fail(new Error('stalled'));},30000);}
       function fail(e){if(done)return;done=true;clearTimeout(stall);try{if(wk)wk.terminate();}catch(x){}wk=null;rej(e);}
-      var code=["import { KokoroTTS } from 'https://esm.sh/kokoro-js@1.2.0';",
+      var code=["const SRC=['https://esm.sh/kokoro-js@1.2.0','https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/+esm'];",
+        "const MD='onnx-community/Kokoro-82M-v1.0-ONNX';",
+        "async function lib(){for(const u of SRC){try{return (await import(u)).KokoroTTS;}catch(e){}}throw new Error('import');}",
         "let tts=null;",
         "self.onmessage=async(e)=>{const m=e.data;",
-        "if(m.t==='init'){try{tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',progress_callback:p=>self.postMessage({t:'prog',file:p.file,loaded:p.loaded,total:p.total})});self.postMessage({t:'ready'});}catch(err){self.postMessage({t:'fail'});}}",
-        "else if(m.t==='gen'){try{const r=await tts.generate(m.text,{voice:'af_bella'});const a=r.audio;self.postMessage({t:'audio',id:m.id,audio:a,sr:r.sampling_rate},[a.buffer]);}catch(err){self.postMessage({t:'audio',id:m.id,err:1});}}};"].join("\n");
+        "if(m.t==='init'){try{const K=await lib();const pcb=p=>self.postMessage({t:'prog',file:p.file,loaded:p.loaded,total:p.total});let dev='wasm';",
+        "if(m.gpu){try{const ad=self.navigator&&navigator.gpu&&await navigator.gpu.requestAdapter();if(ad){tts=await K.from_pretrained(MD,{dtype:'fp32',device:'webgpu',progress_callback:pcb});await tts.generate('Hi.',{voice:'af_bella'});dev='webgpu';}}catch(err){tts=null;}}",
+        "if(!tts)tts=await K.from_pretrained(MD,{dtype:'q8',progress_callback:pcb});",
+        "self.postMessage({t:'ready',dev:dev});}catch(err){self.postMessage({t:'fail'});}}",
+        "else if(m.t==='gen'){try{const t0=performance.now();const r=await tts.generate(m.text,{voice:'af_bella'});const a=r.audio;self.postMessage({t:'audio',id:m.id,audio:a,sr:r.sampling_rate,ms:Math.round(performance.now()-t0)},[a.buffer]);}catch(err){self.postMessage({t:'audio',id:m.id,err:1});}}};"].join("\n");
       try{wk=new Worker(URL.createObjectURL(new Blob([code],{type:'text/javascript'})),{type:'module'});}catch(e){return rej(new Error('noworker'));}
       wk.onerror=function(){fail(new Error('noworker'));};
       wk.onmessage=function(ev){
         var m=ev.data||{};
         if(m.t==='prog'){if(done)return;arm();if(m.file&&m.total)files[m.file]={l:m.loaded||0,t:m.total};var l=0,t=0;for(var k in files){l+=files[k].l;t+=files[k].t;}prog(t?l/t:0,l,t);}
-        else if(m.t==='ready'){if(done)return;done=true;clearTimeout(stall);
+        else if(m.t==='ready'){if(done)return;done=true;clearTimeout(stall);window.__lumeVoiceDev=m.dev||'wasm';
           engine={gen:function(text){return new Promise(function(r,j){var id=++wid;wp[id]={res:r,rej:j};wk.postMessage({t:'gen',id:id,text:text});});}};
           tts=engine;res();}
         else if(m.t==='fail'){fail(new Error('load'));}
-        else if(m.t==='audio'){var h=wp[m.id];delete wp[m.id];if(h){if(m.err)h.rej(new Error('gen'));else h.res({audio:m.audio,sampling_rate:m.sr});}}
+        else if(m.t==='audio'){var h=wp[m.id];delete wp[m.id];if(h){if(m.err)h.rej(new Error('gen'));else h.res({audio:m.audio,sampling_rate:m.sr,ms:m.ms});}}
       };
-      arm();wk.postMessage({t:'init'});
+      arm();wk.postMessage({t:'init',gpu:ls('lume_voice_webgpu','')==='1'});
     });
   }
   function loadVoice(){
@@ -11907,7 +12314,19 @@ body.light .lora-prose a{color:#2f6f94}
     vp=loadWorker().catch(function(e){if(e&&e.message==='stalled')throw e;return loadMain();}).then(function(){vp=null;},function(e){vp=null;throw e;});
     return vp;
   }
-  function warm(){if(warmed||!engine)return;warmed=true;engine.gen('Hello there.').catch(function(){});}
+  var FILL=['Hmm.','Let me think.','Okay.','Mm.'],fillers=[],lastFiller=-1,fillerTimer=null;
+  function warm(){if(warmed||!engine)return;warmed=true;engine.gen('Hello there.').catch(function(){}).then(function(){return FILL.reduce(function(p,t){return p.then(function(){return engine.gen(t).then(function(r){if(r&&r.audio&&r.audio.length)fillers.push(r);},function(){});});},Promise.resolve());});}
+  /* filler: if nothing is playing or queued 1.2 s after sending, play a short clip so the wait is not silent; real speech queues after it */
+  function fillerArm(my){clearTimeout(fillerTimer);if(!fillers.length)return;fillerTimer=setTimeout(function(){if(my!==turn||!ctx)return;if(srcs.length||nextEnd>ctx.currentTime)return;playFiller();},1200);}
+  function playFiller(){
+    var n=fillers.length,i;do{i=Math.floor(Math.random()*n);}while(n>1&&i===lastFiller);lastFiller=i;var r=fillers[i];
+    var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
+    var s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.85;s.buffer=b;s.connect(g);g.connect(ctx.destination);
+    var t=ctx.currentTime+0.03;nextEnd=t+b.duration;srcs.push(s);
+    s.onended=function(){var k=srcs.indexOf(s);if(k>=0)srcs.splice(k,1);check();};
+    if(tm&&!tm.filler)tm.filler=performance.now();
+    s.start(t);
+  }
   function start(){
     if(loading)return;loading=true;
     try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
@@ -11927,17 +12346,17 @@ body.light .lora-prose a{color:#2f6f94}
     if(tts||window.__kokoroPipeline){if(!tts)adopt(window.__kokoroPipeline);live();}
     else if(ls('lume_voice_ok','')==='1')start();else consent();
   }
-  function close(){stop();loading=false;window.lumeSpoken=false;el.classList.remove('show');}
+  function close(){hf=false;stopVad();stopListen();setMic();stop();loading=false;window.lumeSpoken=false;el.classList.remove('show');}
 
   /* ---------- speaking: next sentence is generated while the current one plays, and clips are scheduled back to back ---------- */
   function stop(){
-    turn++;streamDone=true;inflight=0;nextEnd=0;
+    turn++;streamDone=true;inflight=0;nextEnd=0;clearTimeout(fillerTimer);
     if(ctl){try{ctl.abort();}catch(e){}ctl=null;}
     var a=srcs;srcs=[];a.forEach(function(s){s.onended=null;try{s.stop();}catch(e){}});
     if($('.sub'))$('.sub').textContent='';if(tts)setS('idle');
   }
   function check(){
-    if(streamDone&&inflight===0&&srcs.length===0&&el.dataset.s!=='idle'){setS('idle');setTimeout(function(){if(el.dataset.s==='idle')$('.sub').textContent='';},1500);}
+    if(streamDone&&inflight===0&&srcs.length===0&&el.dataset.s!=='idle'){setS('idle');setTimeout(function(){if(el.dataset.s==='idle')$('.sub').textContent='';},1500);if(hf)setTimeout(function(){if(hf&&el.dataset.s==='idle')listen();},500);}
   }
   function schedule(r,text,gap){
     var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
@@ -11947,7 +12366,7 @@ body.light .lora-prose a{color:#2f6f94}
     s.onended=function(){var i=srcs.indexOf(s);if(i>=0)srcs.splice(i,1);check();};
     setTimeout(function(){if(my!==turn)return;setS('speaking');$('.sub').textContent=text;},Math.max(0,(t-now)*1000));
     if(tm&&!tm.audio){tm.audio=performance.now()+Math.max(0,(t-now)*1000);
-      var o={firstTokenMs:Math.round((tm.tok||0)-tm.t0),firstChunkMs:Math.round((tm.chunk||0)-tm.t0),audioStartMs:Math.round(tm.audio-tm.t0)};TM.push(o);if(TM.length>20)TM.shift();try{console.log('lume-voice',o);}catch(e){}}
+      var o={firstTokenMs:Math.round((tm.tok||0)-tm.t0),firstChunkMs:Math.round((tm.chunk||0)-tm.t0),audioStartMs:Math.round(tm.audio-tm.t0),genMs:r.ms||0,fillerMs:tm.filler?Math.round(tm.filler-tm.t0):0,device:window.__lumeVoiceDev||'main'};TM.push(o);if(TM.length>20)TM.shift();try{console.log('lume-voice',o);}catch(e){}}
     s.start(t);
   }
   function enqueue(text,gap){
@@ -11972,6 +12391,51 @@ body.light .lora-prose a{color:#2f6f94}
   }
   window.__lumeTake=take;
 
+  /* ---------- voice input and barge-in (opt-in, mic button) ----------
+     hands-free ON: the mic watches for you talking while Lume thinks or speaks; sustained speech stops her and starts listening.
+     Recognition uses the browser's own speech service (SpeechRecognition); that audio goes to the browser vendor. */
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,listening=false,hf=false,micStream=null,an=null,vadTimer=null,vadId=0,hot=0,vbuf=null;
+  function setMic(){var b=$('.mic');b.classList.toggle('on',hf);b.classList.toggle('rec',listening);b.setAttribute('aria-pressed',hf?'true':'false');}
+  function stopVad(){vadId++;clearInterval(vadTimer);vadTimer=null;hot=0;if(micStream){micStream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});micStream=null;}an=null;}
+  function startVad(){
+    if(!hf||micStream||vadTimer||listening||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!ctx)return;
+    var want=++vadId;
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).then(function(st){
+      if(want!==vadId||!hf||listening){st.getTracks().forEach(function(t){t.stop();});return;}
+      micStream=st;an=ctx.createAnalyser();an.fftSize=1024;vbuf=new Float32Array(an.fftSize);ctx.createMediaStreamSource(st).connect(an);
+      vadTimer=setInterval(function(){
+        if(!an||el.dataset.s==='idle'){hot=0;return;}
+        an.getFloatTimeDomainData(vbuf);var sum=0;for(var i=0;i<vbuf.length;i++)sum+=vbuf[i]*vbuf[i];var rms=Math.sqrt(sum/vbuf.length);
+        var playing=srcs.length>0;var th=playing?0.08:0.035;  /* higher bar while her own voice is coming out of the speaker */
+        hot=rms>th?hot+1:0;
+        if(hot>=6){hot=0;barge();}   /* ~300 ms of sustained speech */
+      },50);
+    },function(e){hf=false;setMic();note('Microphone access was blocked, so hands-free is off.');});
+  }
+  function barge(){stop();stopVad();if(SR)listen();else startVad();}
+  function stopListen(){if(rec){rec.__drop=true;try{rec.abort();}catch(e){}}}
+  function listen(){
+    if(!SR||listening||!tts||el.dataset.s!=='idle')return;
+    stopVad();  /* release the mic so recognition can use it */
+    var r=new SR(),got='',sent=false;r.lang=document.documentElement.lang||'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+    rec=r;listening=true;setMic();$('.stat').textContent='listening';
+    r.onresult=function(e){var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;got=t;$('textarea').value=t;if(e.results[e.results.length-1].isFinal&&!sent){sent=true;try{r.stop();}catch(x){}}};
+    r.onerror=function(e){if(e&&(e.error==='not-allowed'||e.error==='service-not-allowed')){hf=false;note('Microphone access was blocked.');}};
+    r.onend=function(){
+      listening=false;if(rec===r)rec=null;setMic();if(el.dataset.s==='idle')$('.stat').textContent='ready';
+      var t=r.__drop?'':got.trim();
+      if(t){$('textarea').value='';say(t);}else{$('textarea').value='';}
+    };
+    try{r.start();}catch(e){listening=false;rec=null;setMic();}
+  }
+  function toggleHf(){
+    hf=!hf;setMic();
+    try{if(ctx&&ctx.resume)ctx.resume();}catch(e){}
+    if(hf){if(el.dataset.s==='idle')listen();else startVad();}
+    else{stopVad();stopListen();}
+  }
+  if(SR&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){var mb=$('.mic');mb.classList.add('ok');mb.onclick=toggleHf;}
+
   /* ---------- a turn: stream the reply, speak as sentences complete ---------- */
   function say(t){
     t=t.trim();if(!t||!tts)return;
@@ -11979,7 +12443,7 @@ body.light .lora-prose a{color:#2f6f94}
     hist.push({role:'user',content:t});
     var u=document.createElement('div');u.className='u';u.textContent=t;$('.tx').appendChild(u);
     var l=document.createElement('div');l.className='l lora-prose';$('.tx').appendChild(l);scroll();
-    $('textarea').value='';setS('thinking');streamDone=false;
+    $('textarea').value='';setS('thinking');streamDone=false;fillerArm(my);if(hf)startVad();
     var acc='',buf='',model=ls('lume_model','auto');if(['auto','balanced','fast','deep'].indexOf(model)<0)model='auto';
     if(model==='auto')model='fast';
     var eff=model==='deep'?((window.lumePersonaEffort&&window.lumePersonaEffort())||'low'):'low';
@@ -12011,9 +12475,9 @@ body.light .lora-prose a{color:#2f6f94}
       }).catch(function(){if(my===turn)acc?fin():fail('The connection dropped.','The connection dropped. Please try again.');});})();
     }).catch(function(){if(my===turn)fail('Lume couldn\u2019t be reached.','I couldn\u2019t reach the server. Please try again.');});
   }
-  function submit(){if(el.dataset.s!=='idle'){stop();return;}say($('textarea').value);}
+  function submit(){if(listening){stopListen();return;}if(el.dataset.s!=='idle'){stop();return;}say($('textarea').value);}
   $('.snd').onclick=submit;
-  $('.star').onclick=function(){if(el.dataset.s!=='idle')stop();};
+  $('.star').onclick=function(){if(listening){stopListen();return;}if(el.dataset.s!=='idle')stop();else if(hf)listen();};
   $('textarea').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submit();}});
   $('textarea').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';});
   $('.cl').onclick=close;
@@ -13876,6 +14340,232 @@ html.lm-contrast #lsa-inner{border-color:rgba(255,255,255,.35)!important}
     document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#lp-seg button');if(!b)return;try{localStorage.setItem(K,b.dataset.p);}catch(_){}sync();});
     sync();
   }
+})();
+</script>
+<style id="lume-mobile">
+/* keyboard: height follows the visual viewport (set by lume-mobile-js) */
+html.kb-open #main-area{height:var(--vvh,100dvh)!important}
+@media (hover:none) and (pointer:coarse){
+  /* 16px minimum so iOS does not zoom on focus */
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=button]):not([type=submit]),textarea,select,[contenteditable="true"]{font-size:16px!important}
+  /* 44px tap targets: real size for text buttons and rows */
+  #topbar button,#model-btn,.sb-nav-item,.sb-convo-item,.settings-danger-btn,.collab-btn,.tone-chip,.gen-chip,#lume-question-dismiss{min-height:44px}
+  #topbar button{min-width:44px}
+  .sb-nav-item,.sb-convo-item{display:flex;align-items:center}
+  .sb-convo-item{flex-wrap:wrap}
+  /* tiny icon buttons keep their look; the touch area grows */
+  #send-btn,#attach-btn,.sb-star-btn,.sb-del-btn,.msg-actions button,.tog{position:relative}
+  #send-btn::before,#attach-btn::before,.sb-star-btn::before,.sb-del-btn::before,.msg-actions button::before,.tog::before{content:"";position:absolute;inset:-9px;min-width:44px;min-height:44px;left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%)}
+  /* star and delete have no hover on touch, so keep them visible */
+  .sb-star-btn,.sb-del-btn{opacity:.6}
+  .sb-convo-starred .sb-star-btn{opacity:1}
+}
+</style>
+<script id="lume-mobile-js">
+(function(){
+  var root=document.documentElement, vv=window.visualViewport, raf=0, wasOpen=false;
+  window.lumeHaptic=function(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||8); }catch(e){} };
+  function upd(){
+    raf=0;
+    try{
+      var h=vv?vv.height:window.innerHeight, top=vv?vv.offsetTop:0;
+      var kb=Math.max(0,window.innerHeight-h-top), open=kb>120;
+      root.style.setProperty('--vvh',Math.round(h)+'px');
+      root.style.setProperty('--kb',Math.round(kb)+'px');
+      root.classList.toggle('kb-open',open);
+      if(open&&(window.scrollY||document.body.scrollTop)) window.scrollTo(0,0);
+      if(open&&!wasOpen){
+        var a=document.activeElement;
+        if(a&&/^(TEXTAREA|INPUT)$/.test(a.tagName)){
+          var c=document.getElementById('chat');
+          if(c&&a.id==='inp') c.scrollTop=c.scrollHeight;
+          setTimeout(function(){ try{ a.scrollIntoView({block:'nearest'}); }catch(e){} },60);
+        }
+      }
+      wasOpen=open;
+    }catch(e){}
+  }
+  function sched(){ if(!raf) raf=requestAnimationFrame(upd); }
+  try{
+    if(vv){ vv.addEventListener('resize',sched); vv.addEventListener('scroll',sched); }
+    window.addEventListener('resize',sched);
+    window.addEventListener('orientationchange',function(){ setTimeout(sched,250); });
+    upd();
+  }catch(e){}
+})();
+</script>
+<style id="lume-gestures">
+html,body{overscroll-behavior-x:none}
+#chat-inner .mb-9{touch-action:pan-y}
+.lume-swipe-hint{position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(167,139,250,.16);border:1px solid rgba(167,139,250,.3);color:#d9cffc;opacity:0;pointer-events:none;transform:scale(.7)}
+.lume-swipe-hint.hit{background:rgba(167,139,250,.34)}
+.lume-swipe-hint .ms{font-size:20px;vertical-align:0}
+.lume-scrim{display:none}
+@media (max-width:640px){
+  .lume-scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s ease}
+  .lume-scrim.on{opacity:1;pointer-events:auto}
+  #lume-scrim-set{z-index:109}
+  #lume-scrim-model{z-index:9998}
+  /* model picker as a bottom sheet */
+  #model-pop{left:0!important;right:0!important;bottom:0!important;top:auto!important;width:auto!important;max-width:none!important;max-height:80dvh;overflow-y:auto;overscroll-behavior:contain;border-radius:24px 24px 0 0;padding:6px 10px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(105%)!important;transform-origin:bottom center;transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .2s!important}
+  #model-pop.on{transform:none!important}
+  #model-pop::before{content:"";display:block;position:sticky;top:0;width:36px;height:4px;margin:6px auto 8px;border-radius:2px;background:rgba(255,255,255,.2)}
+  #model-pop .mp-row{min-height:52px}
+  /* settings as a bottom sheet */
+  #settings-page{inset:calc(env(safe-area-inset-top,0px) + 36px) 0 0 0!important;border-radius:24px 24px 0 0;background:#14120f!important;box-shadow:0 -10px 50px rgba(0,0,0,.5);opacity:1!important;transform:translateY(105%)!important;transition:transform .4s cubic-bezier(.2,.8,.2,1)!important;overscroll-behavior:contain}
+  #settings-page.show{transform:none!important}
+  body.light #settings-page{background:#f0ece4!important}
+  #settings-page::before{content:"";display:block;position:sticky;top:8px;width:36px;height:4px;margin:8px auto 0;border-radius:2px;background:rgba(255,255,255,.2);z-index:2}
+  #settings-page .settings-back{display:none}
+  #settings-page .settings-close{position:sticky;top:10px;float:right;margin:2px 20px 0 0;z-index:3;min-height:44px;color:#8d887f}
+  #settings-page .settings-layout{padding:0 20px 60px;padding-top:24px}
+}
+</style>
+<script id="lume-gestures-js">
+(function(){
+  var mqSheet=window.matchMedia?window.matchMedia('(max-width:640px)'):{matches:false};
+  function $(id){return document.getElementById(id);}
+  function haptic(ms){ try{ if(window.lumeHaptic) window.lumeHaptic(ms||8); }catch(e){} }
+  function toast(m){ try{ showToast(m); }catch(e){} }
+  function blocked(){
+    var sp=$('settings-page'); if(sp&&sp.classList.contains('show')) return true;
+    var mp=$('model-pop'); if(mp&&mp.classList.contains('on')) return true;
+    return false;
+  }
+
+  /* ---------- scrims for the two sheets ---------- */
+  function mkScrim(id,onTap){
+    var d=document.createElement('div'); d.className='lume-scrim'; d.id=id;
+    d.addEventListener('click',function(e){ onTap(e); });
+    document.body.appendChild(d); return d;
+  }
+  var scrimSet=mkScrim('lume-scrim-set',function(){ try{ closeSettings(); }catch(e){} });
+  var scrimModel=mkScrim('lume-scrim-model',function(){});   // the document click handler closes the picker
+  function watch(el,scrim){
+    if(!el||!window.MutationObserver) return;
+    var f=function(){ scrim.classList.toggle('on',el.classList.contains(el.id==='settings-page'?'show':'on')); };
+    new MutationObserver(f).observe(el,{attributes:true,attributeFilter:['class']}); f();
+  }
+  watch($('settings-page'),scrimSet);
+  // the model picker is created later by another script
+  (function waitPop(n){
+    var mp=$('model-pop');
+    if(mp){ watch(mp,scrimModel); bindSheetDrag(mp,function(){ return mp.scrollTop<=0; },function(){ scrimModel.click(); }); return; }
+    if(n<40) setTimeout(function(){ waitPop(n+1); },250);
+  })(0);
+
+  /* ---------- drag down to dismiss a sheet ---------- */
+  function bindSheetDrag(el,atTop,close){
+    var y0=0,x0=0,dy=0,on=false,dead=false;
+    el.addEventListener('touchstart',function(e){
+      if(!mqSheet.matches||e.touches.length!==1||!atTop()){ dead=true; return; }
+      dead=false; on=false; dy=0; y0=e.touches[0].clientY; x0=e.touches[0].clientX;
+    },{passive:true});
+    el.addEventListener('touchmove',function(e){
+      if(dead) return;
+      var t=e.touches[0], ddy=t.clientY-y0, ddx=t.clientX-x0;
+      if(!on){
+        if(Math.abs(ddx)>Math.abs(ddy)&&Math.abs(ddx)>8){ dead=true; return; }
+        if(ddy<=8||!atTop()){ if(ddy<-4) dead=true; return; }
+        on=true; el.style.transition='none';
+      }
+      dy=Math.max(0,ddy); el.style.transform='translateY('+dy+'px)';
+    },{passive:true});
+    function end(){
+      if(!on){ dead=false; return; }
+      on=false; el.style.transition=''; el.style.transform='';
+      if(dy>110){ haptic(6); close(); }
+      dy=0;
+    }
+    el.addEventListener('touchend',end,{passive:true});
+    el.addEventListener('touchcancel',end,{passive:true});
+  }
+  var sp=$('settings-page');
+  if(sp) bindSheetDrag(sp,function(){ return sp.scrollTop<=0; },function(){ try{ closeSettings(); }catch(e){} });
+
+  /* ---------- edge swipe for the sidebar + swipe a message ---------- */
+  var st=null, hint=null;
+  var EDGE=22, SB_DIST=56, MSG_DIST=64, MSG_MAX=96;
+  var SKIP='pre,code,table,input,textarea,select,[contenteditable="true"],.lc,.lume-image,.lume-player,.msg-actions,button,a';
+  function sbOpen(){ var sb=$('sidebar'); return !!(sb&&sb.classList.contains('open')); }
+  function msgText(b){
+    var el=b.querySelector('.msg-text')||b.querySelector('.user-bubble');
+    return el?String(el.innerText||el.textContent||'').trim():'';
+  }
+  function doCopy(txt){
+    if(!txt) return;
+    var ok=function(){ toast('Copied.'); haptic(10); };
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(ok,function(){ toast('Could not copy.'); });
+      }else{ toast('Could not copy.'); }
+    }catch(e){ toast('Could not copy.'); }
+  }
+  function doReply(txt){
+    if(!txt) return;
+    var inp=$('inp'); if(!inp) return;
+    try{
+      inp.value='> '+txt.replace(/\s+/g,' ').slice(0,400)+'\n\n'+inp.value;
+      inp.dispatchEvent(new Event('input',{bubbles:true}));
+      inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length);
+      haptic(10);
+    }catch(e){}
+  }
+  function mkHint(b,dir){
+    var h=document.createElement('div'); h.className='lume-swipe-hint';
+    h.innerHTML='<span class="ms">'+(dir>0?'reply':'content_copy')+'</span>';
+    if(dir>0) h.style.left='-46px'; else h.style.right='-46px';
+    b.appendChild(h); return h;
+  }
+  function reset(b){
+    if(!b) return;
+    b.style.transition='transform .25s cubic-bezier(.2,.8,.2,1)'; b.style.transform='';
+    var h=hint; hint=null;
+    setTimeout(function(){ b.style.transition=''; if(h&&h.parentNode) h.parentNode.removeChild(h); },260);
+  }
+  document.addEventListener('touchstart',function(e){
+    st=null;
+    if(!(window.matchMedia&&window.matchMedia('(hover:none)').matches)) return;
+    if(e.touches.length!==1||blocked()){ return; }
+    var t=e.touches[0], tg=e.target;
+    if(!sbOpen()&&t.clientX<=EDGE){ st={mode:'sb-open',x:t.clientX,y:t.clientY,lock:false}; return; }
+    if(sbOpen()&&tg.closest&&(tg.closest('#sidebar')||tg.closest('#backdrop'))){ st={mode:'sb-close',x:t.clientX,y:t.clientY,lock:false}; return; }
+    var b=tg.closest&&tg.closest('#chat-inner .mb-9');
+    if(b&&!tg.closest(SKIP)&&!sbOpen()) st={mode:'msg',x:t.clientX,y:t.clientY,lock:false,b:b,dx:0};
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!st) return;
+    var t=e.touches[0], dx=t.clientX-st.x, dy=t.clientY-st.y;
+    if(!st.lock){
+      if(Math.abs(dx)<10&&Math.abs(dy)<10) return;
+      if(Math.abs(dy)>Math.abs(dx)*0.8){ st=null; return; }
+      st.lock=true;
+    }
+    if(st.mode==='sb-open'){ if(dx>SB_DIST){ haptic(8); try{ toggleSidebar(); }catch(er){} st=null; } return; }
+    if(st.mode==='sb-close'){ if(dx<-SB_DIST){ haptic(8); try{ closeSidebar(); }catch(er){} st=null; } return; }
+    if(st.mode==='msg'){
+      var cap=Math.max(-MSG_MAX,Math.min(MSG_MAX,dx*0.7));
+      st.dx=cap;
+      st.b.style.transition='none'; st.b.style.transform='translateX('+cap+'px)';
+      var dir=cap>0?1:-1;
+      if(!hint||hint._dir!==dir){ if(hint&&hint.parentNode) hint.parentNode.removeChild(hint); hint=mkHint(st.b,dir); hint._dir=dir; }
+      var p=Math.min(1,Math.abs(cap)/(MSG_DIST*0.7));
+      hint.style.opacity=String(p); hint.style.transform='scale('+(0.7+0.3*p)+')';
+      var hit=Math.abs(cap)>=MSG_DIST*0.7;
+      if(hit&&!hint.classList.contains('hit')) haptic(6);
+      hint.classList.toggle('hit',hit);
+    }
+  },{passive:true});
+  function finish(){
+    if(!st) return;
+    var s=st; st=null;
+    if(s.mode!=='msg'||!s.lock) return;
+    var fire=Math.abs(s.dx)>=MSG_DIST*0.7, txt=fire?msgText(s.b):'';
+    reset(s.b);
+    if(fire){ if(s.dx>0) doReply(txt); else doCopy(txt); }
+  }
+  document.addEventListener('touchend',finish,{passive:true});
+  document.addEventListener('touchcancel',function(){ if(st&&st.mode==='msg') reset(st.b); st=null; },{passive:true});
 })();
 </script>
 </body>
