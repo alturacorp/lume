@@ -2958,7 +2958,7 @@ body.light .lume-att-chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.07
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Voice model</div>
-          <div class="settings-row-desc">Kokoro (Bella) when available, system voice as fallback</div>
+          <div class="settings-row-desc">Kokoro voice (set in Conversation voice settings) when available, system voice as fallback</div>
         </div>
         <div style="font-size:11px;color:#2e2c2a;font-family:'Figtree',sans-serif;" id="voice-status">checking...</div>
       </div>
@@ -6478,7 +6478,7 @@ function openSettings(){
   if(el){ el.textContent='1.'+String(parseInt(localStorage.getItem('lume_convos')||'0')).padStart(2,'0'); }
   // voice status
   el=document.getElementById('voice-status');
-  if(el) el.textContent = _kokoroReady ? 'Kokoro (Bella) ready' : 'System voice';
+  if(el) el.textContent = _kokoroReady ? 'Kokoro ('+(window.lumeVoiceName?window.lumeVoiceName():'Lux')+') ready' : 'System voice';
   // light mode toggle state
   var togLight=document.getElementById('tog-light');
   if(togLight) togLight.className='tog'+(document.body.classList.contains('light')?' on':'');
@@ -7835,7 +7835,7 @@ function readMsgAloud(text){
     var idx = 0;
     var audioCtx2 = new (window.AudioContext||window.webkitAudioContext)();
     function next(){ if(idx>=sentences.length) return; var s=sentences[idx++];
-      _kokoroPipeline.generate(s,{voice:'af_bella'}).then(function(r){
+      _kokoroPipeline.generate(s,{voice:(window.lumeVoiceId?window.lumeVoiceId():'af_bella')}).then(function(r){
         var fa = r.audio instanceof Float32Array ? r.audio : new Float32Array(r.audio);
         var buf=audioCtx2.createBuffer(1,fa.length,r.sampling_rate||24000);
         buf.copyToChannel(fa,0);var src=audioCtx2.createBufferSource();
@@ -9952,7 +9952,7 @@ function _speakKokoro(text){
     if(!_listenActive||idx>=sentences.length){ onSpeechEnd(); return; }
     var s = sentences[idx++];
     showSubtitle(s); setListenStar('speaking'); setListenGlow(true); setListenStatus('speaking',false); startWave();
-    _kokoroPipeline.generate(s, { voice:'af_bella' })
+    _kokoroPipeline.generate(s, { voice:(window.lumeVoiceId?window.lumeVoiceId():'af_bella') })
       .then(function(result){
         if(!_listenActive){ onSpeechEnd(); return; }
         var audioData = result.audio || result;
@@ -12765,12 +12765,12 @@ body.light .msg-action-btn{color:#6e6a64}
   var el=document.createElement('div');el.id='lcv';el.dataset.s='idle';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Conversation with Lume');
   el.innerHTML='<div class="top"><span class="wm">Lume</span><span class="ct">Conversation</span><button class="cs" type="button" aria-label="Voice settings" aria-expanded="false" aria-controls="lcv-vs"><span class="ms" aria-hidden="true">tune</span></button><button class="cl" type="button" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button></div>'
    +'<div class="gate"></div>'
-   +'<div class="live"><div class="stage"><span class="star" role="button" tabindex="0" aria-label="Lume">&#10022;</span><div class="stat" role="status" aria-live="polite">ready</div><div class="sub" aria-hidden="true"></div></div><div class="tx" role="log" aria-live="off" aria-label="Conversation transcript"></div><div class="lume-sr al" role="status" aria-live="polite"></div>'
-   +'<div class="in"><textarea rows="1" placeholder="Type to Lume\u2026" aria-label="Message"></textarea><button class="mic" type="button" aria-label="Hands-free voice" aria-pressed="false"><span class="ms" aria-hidden="true">mic</span></button><button class="snd">Send</button></div></div>';
+   +'<div class="live"><div class="stage"><span class="star" role="button" tabindex="0" aria-label="Lume"><i class="o1"></i><i class="o2"></i><i class="o3"></i><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3.2l1.9 5.1 5.1 1.9-5.1 1.9L10 17.2l-1.9-5.1L3 10.2l5.1-1.9z"/><path d="M18.4 2.6l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/><path d="M18.4 15.6l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/></svg></span><div class="stat" role="status" aria-live="polite">ready</div><div class="sub" aria-hidden="true"></div></div><div class="tx" role="log" aria-live="off" aria-label="Conversation transcript"></div><div class="lume-sr al" role="status" aria-live="polite"></div>'
+   +'<div class="in"><textarea rows="1" placeholder="Or type to Lume\u2026" aria-label="Message"></textarea><button class="mic" type="button" aria-label="Hands-free voice" aria-pressed="false"><span class="ms" aria-hidden="true">mic</span></button><button class="snd">Send</button></div></div>';
   document.body.appendChild(el);
   function $(s){return el.querySelector(s);}
   function setS(s){
-    el.dataset.s=s;var st=s==='idle'?'ready':s,se=$('.stat');if(se.textContent!==st)se.textContent=st;   /* only touch the live region when the state really changes */
+    el.dataset.s=s;var st=s==='idle'?'ready':s,se=$('.stat');st=({ready:hf?'Tap to talk':'Ready',thinking:'Thinking',speaking:'Speaking'})[st]||st;if(se.textContent!==st)se.textContent=st;   /* only touch the live region when the state really changes */
     var b=$('.snd');b.textContent=s==='idle'?'Send':'Stop';b.classList.toggle('stop',s!=='idle');
     $('.star').setAttribute('aria-label',s==='idle'?(hf?'Start listening':'Lume'):'Stop');
     if(s==='idle'&&pendingWarm){pendingWarm=false;setTimeout(function(){if(el.dataset.s==='idle')warm();},300);}
@@ -12781,7 +12781,14 @@ body.light .msg-action-btn{color:#6e6a64}
 
   /* ---------- readiness gate: nothing starts until Kokoro is loaded ---------- */
   function gate(h,btns){el.classList.add('g');var g=$('.gate');g.innerHTML=h+'<div class="gb"></div>';var b=g.querySelector('.gb');(btns||[]).forEach(function(x){var e=document.createElement('button');e.textContent=x[0];if(x[2])e.className='go';e.onclick=x[1];b.appendChild(e);});}
-  function consent(){gate('<h3>Lume\u2019s voice</h3><p>Conversation mode needs Lume\u2019s voice, a one-time download of about 90 MB stored on this device. Lume won\u2019t start until it is ready.</p>',[['Download voice',start,1],['Not now',close]]);}
+  function consent(){
+    var cur=V();
+    var h='<h3>Choose Lume\u2019s voice</h3><p>Pick who you\u2019ll be talking to. Each one has its own manner. You can change this any time in voice settings.</p>'
+      +'<div class="vg" role="radiogroup" aria-label="Lume\u2019s voice">'+VOICES.map(function(v){return '<label class="vc'+(v[0]===cur?' sel':'')+'"><input type="radio" name="lcv-pick" value="'+v[0]+'"'+(v[0]===cur?' checked':'')+'><span class="vn">'+v[1]+'</span><span class="vt">'+v[5]+' \u00b7 '+v[2]+'</span><span class="vp">'+v[3]+'</span><span class="vl">\u201c'+v[4]+'\u201d</span></label>';}).join('')+'</div>'
+      +'<p class="vnote">Then a one-time download of about 90 MB, stored on this device. Lume won\u2019t start until it is ready. Voices other than Lux fetch a small extra file the first time they speak.</p>';
+    gate(h,[['Download voice',start,1],['Not now',close]]);
+    var g=$('.gate');g.querySelectorAll('input[name=lcv-pick]').forEach(function(r){r.onchange=function(){lsSet('lume_voice',r.value);fellNoted=false;g.querySelectorAll('.vc').forEach(function(c){c.classList.toggle('sel',c.contains(r)&&r.checked);});};});
+  }
   function failed(e){loading=false;gate('<h3>Couldn\u2019t load the voice</h3><p>Conversation mode can\u2019t start without Lume\u2019s voice ('+(e&&e.message==='stalled'?'the download stopped making progress':'it didn\u2019t load')+'). Your normal chat is unaffected.</p>',[['Try again',start,1],['Close',close]]);}
   function prog(f,l,t){var i=$('.pb i'),m=$('.pm');if(i)i.style.width=Math.round(f*100)+'%';if(m)m.textContent=t?Math.round(f*100)+'% \u00b7 '+(l/1048576).toFixed(0)+' of '+(t/1048576).toFixed(0)+' MB':'Starting\u2026';}
   function adopt(p){tts=p;engine={gen:function(t,o){o=o||{};var v=o.voice||V(),sp=o.speed||S();var t0=performance.now();return p.generate(t,{voice:v,speed:sp}).catch(function(e){if(v==='af_bella')throw e;return p.generate(t,{voice:'af_bella',speed:sp}).then(function(r){voiceFell();return r;});}).then(function(r){try{if(r&&r.ms===undefined)r.ms=Math.round(performance.now()-t0);}catch(x){}return r;});}};}
@@ -12839,11 +12846,22 @@ body.light .msg-action-btn{color:#6e6a64}
     return vp;
   }
   /* voice and speed (lume_voice, lume_voice_speed). Kokoro fetches a small voice file the first time a voice is used. */
-  var VOICES=[['af_bella','Bella','American, female'],['af_heart','Heart','American, female'],['af_nicole','Nicole','American, female'],['af_sarah','Sarah','American, female'],['am_adam','Adam','American, male'],['am_michael','Michael','American, male'],['bf_emma','Emma','British, female'],['bf_isabella','Isabella','British, female'],['bm_george','George','British, male']];
+  var VOICES=[
+    ['af_bella','Lux','American, female','Warm and bright. Quick to smile and easy to talk to, the voice most people start with.','Okay, I\u2019m all ears. Start anywhere.','Warm \u00b7 bright','warm, bright and encouraging'],
+    ['af_heart','Ember','American, female','Soft and unhurried, with a glow to it. Made for late nights and slow thinking.','Take your time. There\u2019s no rush here.','Soft \u00b7 unhurried','soft, unhurried and reassuring'],
+    ['af_nicole','Sable','American, female','Low, calm and close, almost a whisper. Good for winding down, or for a hard day.','Let\u2019s slow down together. Breathe first.','Hushed \u00b7 calm','hushed, calm and gentle'],
+    ['bf_isabella','Fable','British, female','A gentle storyteller. Curious, a little theatrical, and fond of a good tangent.','Now that\u2019s a story. Go on, I\u2019m listening.','Storyteller \u00b7 curious','curious, storyteller-ish and lightly playful'],
+    ['am_adam','Harbor','American, male','Steady and grounded. Plain-spoken, patient and hard to rattle.','Alright. Let\u2019s work out what matters first.','Steady \u00b7 grounded','steady, grounded and plain-spoken'],
+    ['am_michael','Marlow','American, male','Easy and conversational, like a friend who has time. Relaxed, with a dry sense of humour.','Pull up a chair. What\u2019s going on?','Easygoing \u00b7 friendly','relaxed, friendly and a little dry'],
+    ['bm_george','Quill','British, male','Measured and thoughtful, with a dry wit. Sounds like he has read the book you\u2019re talking about.','An interesting question. Shall we take it apart?','Measured \u00b7 dry wit','measured, thoughtful and dryly witty']
+  ];
+  function VR(id){for(var i=0;i<VOICES.length;i++)if(VOICES[i][0]===id)return VOICES[i];return VOICES[0];}
+  function VN(id){return VR(id||V())[1];}
+  function VM(){return '\n\nYour speaking voice today is '+VN()+': '+VR(V())[6]+'. Let that colour your tone a little, never what you say or what you value.';}
   var pendingWarm=false,pvId=0,pvSrc=null,fellNoted=false;
   function V(){var v=ls('lume_voice','af_bella');for(var i=0;i<VOICES.length;i++)if(VOICES[i][0]===v)return v;return 'af_bella';}
   function S(){var n=parseFloat(ls('lume_voice_speed','1'));return isFinite(n)?Math.min(1.3,Math.max(0.8,n)):1;}
-  function voiceFell(){if(fellNoted)return;fellNoted=true;lsSet('lume_voice','af_bella');note('That voice could not be loaded, so Lume switched back to Bella.');try{syncPanel();}catch(e){}}
+  function voiceFell(){if(fellNoted)return;fellNoted=true;lsSet('lume_voice','af_bella');note('That voice could not be loaded, so Lume switched back to '+VN('af_bella')+'.');try{syncPanel();}catch(e){}}
   function rewarm(){fillers=[];warmed=false;if(el.dataset.s==='idle')warm();else pendingWarm=true;}
   var FILL=['Hmm.','Let me think.','Okay.','Mm.'],fillers=[],lastFiller=-1,fillerTimer=null;
   function warm(){if(warmed||!engine)return;warmed=true;engine.gen('Hello there.').catch(function(){}).then(function(){return FILL.reduce(function(p,t){return p.then(function(){return engine.gen(t).then(function(r){if(r&&r.audio&&r.audio.length)fillers.push(r);},function(){});});},Promise.resolve());});}
@@ -12929,7 +12947,7 @@ body.light .msg-action-btn{color:#6e6a64}
      hands-free ON: the mic watches for you talking while Lume thinks or speaks; sustained speech stops her and starts listening.
      Recognition uses the browser's own speech service (SpeechRecognition); that audio goes to the browser vendor. */
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,listening=false,hf=false,micStream=null,an=null,vadTimer=null,vadId=0,hot=0,vbuf=null;
-  function setMic(){var b=$('.mic');b.classList.toggle('on',hf);b.classList.toggle('rec',listening);b.setAttribute('aria-pressed',hf?'true':'false');}
+  function setMic(){var b=$('.mic');b.classList.toggle('on',hf);b.classList.toggle('rec',listening);b.setAttribute('aria-pressed',hf?'true':'false');el.classList.toggle('lis',listening);el.classList.toggle('hf',hf);}
   function stopVad(){vadId++;clearInterval(vadTimer);vadTimer=null;hot=0;if(micStream){micStream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});micStream=null;}an=null;}
   function startVad(){
     if(!hf||micStream||vadTimer||listening||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!ctx)return;
@@ -12952,11 +12970,11 @@ body.light .msg-action-btn{color:#6e6a64}
     if(!SR||listening||!tts||el.dataset.s!=='idle')return;
     stopVad();  /* release the mic so recognition can use it */
     var r=new SR(),got='',sent=false;r.lang=document.documentElement.lang||'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
-    rec=r;listening=true;setMic();$('.stat').textContent='listening';
+    rec=r;listening=true;setMic();$('.stat').textContent='Listening';
     r.onresult=function(e){var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;got=t;$('textarea').value=t;if(e.results[e.results.length-1].isFinal&&!sent){sent=true;try{r.stop();}catch(x){}}};
     r.onerror=function(e){if(e&&(e.error==='not-allowed'||e.error==='service-not-allowed')){hf=false;note('Microphone access was blocked.');}};
     r.onend=function(){
-      listening=false;if(rec===r)rec=null;setMic();if(el.dataset.s==='idle')$('.stat').textContent='ready';
+      listening=false;if(rec===r)rec=null;setMic();if(el.dataset.s==='idle')$('.stat').textContent=hf?'Tap to talk':'Ready';
       var t=r.__drop?'':got.trim();
       if(t){$('textarea').value='';say(t);}else{$('textarea').value='';}
     };
@@ -12972,10 +12990,10 @@ body.light .msg-action-btn{color:#6e6a64}
 
   /* ---------- voice settings: voice, speed, screen wake lock, timings ---------- */
   var vs=document.createElement('div');vs.className='vs';vs.id='lcv-vs';vs.hidden=true;vs.setAttribute('role','group');vs.setAttribute('aria-label','Voice settings');
-  vs.innerHTML='<label for="lcv-voice">Voice</label><div class="vr"><select id="lcv-voice">'+VOICES.map(function(v){return '<option value="'+v[0]+'">'+v[1]+' ('+v[2]+')</option>';}).join('')+'</select><button type="button" class="hear" aria-label="Hear this voice"><span class="ms" aria-hidden="true">volume_up</span></button></div>'
+  vs.innerHTML='<label for="lcv-voice">Voice</label><div class="vr"><select id="lcv-voice">'+VOICES.map(function(v){return '<option value="'+v[0]+'">'+v[1]+' \u2014 '+v[5]+'</option>';}).join('')+'</select><button type="button" class="hear" aria-label="Hear this voice"><span class="ms" aria-hidden="true">volume_up</span></button></div><p class="hint vd" aria-live="polite"></p>'
     +'<label for="lcv-speed">Speed <output id="lcv-speedo" for="lcv-speed"></output></label><input type="range" id="lcv-speed" min="0.8" max="1.3" step="0.05">'
     +'<label class="tg" for="lcv-wl"><input type="checkbox" id="lcv-wl"> Keep the screen on while talking</label><p class="hint wlh" hidden>This browser can&rsquo;t keep the screen on.</p>'
-    +'<p class="hint">Voices other than Bella download a small extra file the first time you pick them.</p>'
+    +'<p class="hint">Voices other than Lux download a small extra file the first time you pick them.</p>'
     +'<p class="hint">Hands-free uses your browser&rsquo;s speech recognition, which may send what you say to the browser&rsquo;s maker (for example Google or Apple). Lume never records or stores your audio; only the words it hears are sent as your message.</p>'
     +'<details class="tmd"><summary>Voice timings</summary><table><caption class="lume-sr">Timings for the last spoken replies, in seconds</caption><thead><tr><th scope="col">Reply</th><th scope="col">Sentence</th><th scope="col">Voice</th><th scope="col">Total</th><th scope="col">Clip</th><th scope="col">Device</th></tr></thead><tbody></tbody></table>'
     +'<p class="hint">Reply: wait for Lume&rsquo;s first words. Sentence: until the first sentence was ready. Voice: until the first audio played. Total: send to sound. Clip: how long the voice took on the first clip.</p><button type="button" class="cpy">Copy as JSON</button></details>';
@@ -12983,7 +13001,8 @@ body.light .msg-action-btn{color:#6e6a64}
   var vsSel=vs.querySelector('select'),vsRng=vs.querySelector('input[type=range]'),vsWl=vs.querySelector('#lcv-wl'),vsOut=vs.querySelector('output'),pvT=null;
   function fmt(n){return n.toFixed(2).replace(/\.?0+$/,'');}
   function vsLabel(){var n=parseFloat(vsRng.value);vsOut.textContent=fmt(n)+'\u00d7';vsRng.setAttribute('aria-valuetext',fmt(n)+' times normal speed');}
-  function syncPanel(){vsSel.value=V();vsRng.value=S();vsLabel();var ok=!!navigator.wakeLock;vsWl.disabled=!ok;vsWl.checked=ok&&ls('lume_voice_wl','1')!=='0';vs.querySelector('.wlh').hidden=ok;}
+  function vdesc(){var v=VR(vsSel.value);vs.querySelector('.vd').textContent=v[2]+'. '+v[3];}
+  function syncPanel(){vsSel.value=V();vdesc();vsRng.value=S();vsLabel();var ok=!!navigator.wakeLock;vsWl.disabled=!ok;vsWl.checked=ok&&ls('lume_voice_wl','1')!=='0';vs.querySelector('.wlh').hidden=ok;}
   function vsOpen(on,quiet){
     if(on===vs.hidden){vs.hidden=!on;$('.cs').setAttribute('aria-expanded',on?'true':'false');
       if(on){syncPanel();renderTm();vsSel.focus();}else if(!quiet)$('.cs').focus();}
@@ -12993,14 +13012,14 @@ body.light .msg-action-btn{color:#6e6a64}
   function preview(){
     if(!engine||!ctx)return;
     stop();var id=++pvId,hb=vs.querySelector('.hear');hb.disabled=true;
-    engine.gen('Hi, I\u2019m Lume. This is how I sound.',{voice:vsSel.value,speed:parseFloat(vsRng.value)}).then(function(r){
+    engine.gen('Hi, I\u2019m Lume, and this is '+VN(vsSel.value)+'.',{voice:vsSel.value,speed:parseFloat(vsRng.value)}).then(function(r){
       hb.disabled=false;if(id!==pvId||!r||!r.audio||!r.audio.length)return;
       try{if(ctx.resume)ctx.resume();}catch(e){}
       var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
       var src=ctx.createBufferSource();src.buffer=b;src.connect(ctx.destination);pvSrc=src;src.onended=function(){if(pvSrc===src)pvSrc=null;};src.start();
     },function(){hb.disabled=false;note('The voice could not be played.');});
   }
-  vsSel.onchange=function(){lsSet('lume_voice',vsSel.value);fellNoted=false;rewarm();preview();};
+  vsSel.onchange=function(){lsSet('lume_voice',vsSel.value);vdesc();fellNoted=false;rewarm();preview();};
   vsRng.oninput=vsLabel;
   vsRng.onchange=function(){lsSet('lume_voice_speed',vsRng.value);rewarm();clearTimeout(pvT);pvT=setTimeout(preview,350);};
   vs.querySelector('.hear').onclick=preview;
@@ -13039,7 +13058,7 @@ body.light .msg-action-btn{color:#6e6a64}
     var acc='',buf='',model=ls('lume_model','auto');if(['auto','balanced','fast','deep'].indexOf(model)<0)model='auto';
     if(model==='auto')model='fast';
     var eff=model==='deep'?((window.lumePersonaEffort&&window.lumePersonaEffort())||'low'):'low';
-    var sys=(typeof window.lumeSystemPrompt==='function'?window.lumeSystemPrompt():'')+'\n\nThis is a spoken voice conversation. Answer the way a person talks: one to three short sentences, plain words, no lists, no markdown, no emoji unless asked.';
+    var sys=(typeof window.lumeSystemPrompt==='function'?window.lumeSystemPrompt():'')+'\n\nThis is a spoken voice conversation. Answer the way a person talks: one to three short sentences, plain words, no lists, no markdown, no emoji unless asked.'+VM();
     var hd=typeof getDeviceHeaders==='function'?getDeviceHeaders():{'Content-Type':'application/json'};
     ctl=typeof AbortController!=='undefined'?new AbortController():null;
     function fail(m,spoken){if(my!==turn)return;streamDone=true;note(m);setS('idle');if(spoken)enqueue(spoken);}
@@ -13076,11 +13095,106 @@ body.light .msg-action-btn{color:#6e6a64}
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('show')){if(!vs.hidden){vsOpen(false);return;}close();}});
   $('.star').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('.star').onclick();}});
   window.lumeConversation=open;
+  window.lumeVoiceId=V;window.lumeVoiceName=function(){return VN();};
   try{var cn=navigator.connection;if(ls('lume_voice_ok','')==='1'&&!(cn&&cn.saveData))setTimeout(function(){if(!tts&&!window.__kokoroPipeline)loadVoice().then(warm,function(){});},6000);}catch(e){}
   var anchor=document.querySelector('#sidebar .sb-nav-item.sb-secondary');
   if(anchor){var d=document.createElement('div');d.className='sb-nav-item sb-secondary';d.textContent='Conversation';d.onclick=open;anchor.parentNode.insertBefore(d,anchor);}
 })();
 </script>
+<style id="lume-conv-v2">
+/* Conversation, redesigned: voice-first. A living orb is the centre of the screen; the transcript is secondary. */
+#lcv{--cv-a:167,139,250;--cv-b:244,114,182;--cv-c:56,189,248;background:#0b0a0d;overflow:hidden}
+#lcv::before{content:"";position:absolute;inset:-20% -10% auto;height:90%;pointer-events:none;
+  background:radial-gradient(60% 55% at 50% 42%,rgba(var(--cv-a),.20),transparent 70%),radial-gradient(40% 40% at 72% 30%,rgba(var(--cv-b),.10),transparent 70%),radial-gradient(40% 40% at 28% 36%,rgba(var(--cv-c),.09),transparent 70%);
+  transition:opacity .6s,filter .6s;opacity:.85}
+#lcv[data-s=speaking]::before{opacity:1;filter:saturate(1.3) brightness(1.15)}
+#lcv.lis{--cv-a:56,189,248;--cv-b:167,139,250;--cv-c:74,222,128}
+#lcv>*{position:relative}
+/* top bar: quieter */
+#lcv .top{padding:16px 20px}
+#lcv .wm{font-size:17px;opacity:.9}
+#lcv .ct{font-size:11px;letter-spacing:.18em;color:#5d5953}
+#lcv .cs,#lcv .cl{color:#6b665f}
+/* centre stage */
+#lcv .live{align-items:center}
+#lcv .stage{flex:1 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;gap:0}
+#lcv .star{position:relative;width:clamp(150px,26vh,232px);height:clamp(150px,26vh,232px);border-radius:50%;display:grid;place-items:center;font-size:0;text-shadow:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+#lcv .star:hover{transform:scale(1.03)}
+#lcv .star i{position:absolute;inset:0;border-radius:50%;pointer-events:none}
+#lcv .star .o1{background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.55),rgba(var(--cv-a),.55) 28%,rgba(var(--cv-a),.16) 62%,transparent 72%);box-shadow:0 0 90px 8px rgba(var(--cv-a),.28),inset 0 0 40px rgba(255,255,255,.08);transition:box-shadow .6s}
+#lcv .star .o2{inset:-14%;border:1px solid rgba(var(--cv-a),.22);opacity:.7;animation:cvRing 6s ease-in-out infinite}
+#lcv .star .o3{inset:-30%;border:1px solid rgba(var(--cv-b),.12);opacity:.6;animation:cvRing 6s ease-in-out -3s infinite}
+#lcv .star .mk{position:relative;width:34%;height:34%;fill:#fff;filter:drop-shadow(0 0 14px rgba(var(--cv-a),.9));opacity:.95}
+@keyframes cvRing{0%,100%{transform:scale(.96);opacity:.25}50%{transform:scale(1.04);opacity:.75}}
+@keyframes cvBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes cvThink{to{transform:rotate(360deg)}}
+@keyframes cvSpeak{0%,100%{transform:scale(1)}30%{transform:scale(1.07)}60%{transform:scale(.98)}}
+#lcv[data-s=idle] .star .o1{animation:cvBreathe 5s ease-in-out infinite}
+#lcv[data-s=thinking] .star{animation:none}
+#lcv[data-s=thinking] .star .o1{background:conic-gradient(from 0deg,rgba(var(--cv-a),.55),rgba(var(--cv-b),.05) 35%,rgba(var(--cv-c),.5) 70%,rgba(var(--cv-a),.55));-webkit-mask:radial-gradient(circle,#000 58%,transparent 70%);mask:radial-gradient(circle,#000 58%,transparent 70%);animation:cvThink 2.4s linear infinite;box-shadow:none}
+#lcv[data-s=speaking] .star{animation:none}
+#lcv[data-s=speaking] .star .o1{animation:cvSpeak 1.1s ease-in-out infinite;box-shadow:0 0 130px 18px rgba(var(--cv-a),.42),inset 0 0 50px rgba(255,255,255,.12)}
+#lcv[data-s=speaking] .star .o2{animation-duration:2.2s}
+#lcv.lis .star .o1{animation:cvBreathe 1.8s ease-in-out infinite;box-shadow:0 0 110px 14px rgba(var(--cv-a),.4)}
+#lcv .stat{margin-top:clamp(36px,6vh,56px);font:500 11.5px Figtree,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#8d8a98}
+#lcv .stat::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:rgb(var(--cv-a));margin:0 9px 1px 0;box-shadow:0 0 10px rgb(var(--cv-a))}
+#lcv .sub{min-height:3.2em;max-width:620px;margin:18px auto 0;font:italic 400 clamp(19px,2.6vw,26px)/1.45 Lora,serif;color:#ece7f5;text-wrap:balance}
+/* transcript: quiet, faded at the top, tucked under the stage */
+#lcv .tx{box-sizing:border-box;flex:0 1 auto;max-height:26vh;min-height:0;margin:0 auto;padding:14px 22px 6px;width:100%;max-width:640px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(transparent,#000 28%);mask-image:linear-gradient(transparent,#000 28%)}
+#lcv .tx::-webkit-scrollbar{display:none}
+#lcv .tx:empty{display:none}
+#lcv .u{margin:10px 0 2px auto;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.05);border-radius:18px 18px 4px 18px;padding:8px 14px;font:400 14px/1.5 Figtree,sans-serif;color:#d6d1e0}
+#lcv .l{margin:6px 0 10px;font-size:14.5px;line-height:1.65;color:#a39eb0}
+#lcv .n{display:flex;align-items:center;gap:8px;width:fit-content;margin:10px auto;padding:7px 14px;border-radius:999px;background:rgba(232,176,74,.09);border:1px solid rgba(232,176,74,.22);font:400 12.5px Figtree,sans-serif;color:#e8b04a}
+#lcv .n::before{content:"!";display:grid;place-items:center;width:15px;height:15px;border-radius:50%;background:rgba(232,176,74,.2);font:600 10px Figtree,sans-serif}
+/* input dock: one floating pill instead of three loose controls */
+#lcv .in{max-width:640px;align-items:center;gap:6px;margin:6px auto 0;padding:7px 7px 7px 8px;width:calc(100% - 32px);position:relative;
+  background:rgba(24,22,28,.82);border:1px solid rgba(255,255,255,.09);border-radius:30px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.45)}
+#lcv .live{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+#lcv .in{padding-bottom:7px}
+#lcv textarea{flex:1;min-width:0;box-sizing:border-box;height:42px;max-height:120px;background:transparent;border:0;border-radius:0;padding:11px 8px 11px 14px;font:300 15px/20px Figtree,sans-serif;color:#f1ede6;overflow-y:auto;scrollbar-width:none;resize:none}
+#lcv textarea::-webkit-scrollbar{display:none}
+#lcv textarea::placeholder{color:#6d6878}
+#lcv textarea:focus-visible{outline:none}
+#lcv .in:focus-within{border-color:rgba(var(--cv-a),.45);box-shadow:0 10px 40px rgba(0,0,0,.45),0 0 0 4px rgba(var(--cv-a),.10)}
+#lcv .mic{width:42px;height:42px;padding:0;border-radius:50%;flex:none;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:0;color:#b9b4c6}
+#lcv .mic.ok{display:flex}
+#lcv .mic.on{background:rgba(var(--cv-a),.2);color:#e6dcff}
+#lcv .mic.rec{background:rgba(var(--cv-a),.5);color:#fff}
+#lcv .snd{flex:none;height:42px;min-width:42px;border-radius:21px;padding:0 20px;background:linear-gradient(135deg,#c4a8ff,#f472b6);color:#1a1020;font:600 13.5px Figtree,sans-serif;transition:transform .15s,filter .2s}
+#lcv .snd:hover{filter:brightness(1.08)}#lcv .snd:active{transform:scale(.96)}
+#lcv .snd.stop{background:rgba(255,255,255,.1);color:#ece7f5;border:0}
+/* first-run hint while nothing has been said */
+#lcv .tx:empty+.al,#lcv .live .hint0{display:none}
+@media (max-width:620px){#lcv .tx{max-height:22vh}#lcv .stat{margin-top:36px}#lcv .snd{padding:0 16px}}
+@media (prefers-reduced-motion:reduce){
+#lcv .star .o1,#lcv .star .o2,#lcv .star .o3,#lcv[data-s=thinking] .star .o1,#lcv[data-s=speaking] .star .o1,#lcv.lis .star .o1{animation:none!important}
+#lcv[data-s=thinking] .star .o1{-webkit-mask:none;mask:none;background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.4),rgba(var(--cv-a),.45) 40%,transparent 72%);opacity:.6}
+}
+</style>
+<style id="lume-voices-css">
+#lcv .gate{overflow-y:auto;justify-content:flex-start;padding:12px 20px 20px;gap:10px}
+#lcv .gate h3,#lcv .gate p{margin:0}
+#lcv .gate>:first-child{margin-top:auto}#lcv .gate>:last-child{margin-bottom:auto}
+#lcv .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;width:min(960px,100%);text-align:left}
+#lcv .vc{position:relative;display:flex;flex-direction:column;gap:3px;padding:13px 15px 13px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+#lcv .vc:hover{background:rgba(255,255,255,.06)}
+#lcv .vc input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+#lcv .vc.sel{background:linear-gradient(150deg,rgba(167,139,250,.18),rgba(244,114,182,.08));border-color:rgba(196,168,255,.6)}
+#lcv .vc.sel::after{content:"\2713";position:absolute;top:12px;right:14px;font:600 13px Figtree,sans-serif;color:#e6dcff}
+#lcv .vc:has(input:focus-visible){outline:2px solid #c9b6ff;outline-offset:2px}
+#lcv .vn{font:italic 500 22px Lora,serif;color:#f1ede6}
+#lcv .vt{font:500 10.5px Figtree,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8d8a98}
+#lcv .vp{font:300 13.5px/1.5 Figtree,sans-serif;color:#b7b2c2;margin-top:4px}
+#lcv .vl{font:italic 400 13.5px/1.45 Lora,serif;color:#d9d2ea;margin-top:6px}
+#lcv .vnote{max-width:520px;font:300 12.5px/1.6 Figtree,sans-serif;color:#7d7888}
+#lcv .vs .vd{margin:8px 0 0}
+#lcv .gate .gb{position:sticky;bottom:0;width:100%;padding:14px 0 6px;background:linear-gradient(rgba(11,10,13,0),#0b0a0d 38%)}
+#lcv .gate>.gb:last-child{margin-bottom:0}
+@media (max-width:620px){#lcv .vg{grid-template-columns:1fr 1fr}#lcv .vp{font-size:12.5px}#lcv .vl{display:none}}
+</style>
 <style id="lume-models">
 #model-btn{display:flex;align-items:center;gap:4px;flex-shrink:0;margin-right:4px;padding:5px 9px;border-radius:999px;background:transparent;border:0;color:#9a9489;font:400 13px/1 inherit;font-family:inherit;cursor:pointer;transition:background .2s,color .2s,transform .15s cubic-bezier(.34,1.56,.64,1)}
 #model-btn:hover{background:rgba(255,255,255,.06);color:#ece8e1}#model-btn:active{transform:scale(.95)}#model-btn:focus-visible{outline:2px solid #5b9dff;outline-offset:2px}
