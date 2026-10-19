@@ -2308,6 +2308,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
 #lume-stars{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.7}
 #lume-greet+#lume-quip{margin-top:10px;text-align:center;font:italic 400 15px Lora,serif;color:rgba(232,230,226,.42);animation:fadeup 1.4s ease .5s both}
 </style>
+<link rel="preconnect" href="https://iole.graggle9901.workers.dev" crossorigin>
 </head>
 <body class="bg-[#100f0d] text-t0 font-geist text-[15px]">
 
@@ -2361,32 +2362,25 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
     <div style="height:1px;background:rgba(255,255,255,.04);margin:4px 0"></div>
 
     <!-- Tools -->
-    <div style="padding:12px 12px 4px">
-      <span style="font-family:'Lora',serif;font-style:italic;font-size:10px;color:#1c1a17;padding:0 8px;display:block;margin-bottom:6px">tools</span>
-      <div id="nav-recall"        class="sb-nav-item" onclick="switchMode('recall')">Recall</div>
-      <div id="nav-correspondent" class="sb-nav-item" onclick="switchMode('correspondent')">Correspondent</div>
-      <div id="nav-journal"       class="sb-nav-item" onclick="switchMode('journal')">Journal</div>
-      <div id="nav-collab"        class="sb-nav-item" onclick="openCollab()">Document</div>
-      <div id="nav-portrait" class="sb-nav-item" onclick="openPortrait();if(typeof closeSidebar==='function')closeSidebar()">What Lume thinks</div>
+    <div id="sb-tools" style="padding:12px 12px 4px">
+      <button type="button" id="sb-tools-head" class="sb-sec-head" aria-expanded="true" aria-controls="sb-tools-body"><span>tools</span><span class="sb-caret">&#9662;</span></button>
+      <div id="sb-tools-body" class="sb-collapse open">
+        <div id="nav-recall"        class="sb-nav-item" onclick="switchMode('recall')">Recall</div>
+        <div id="nav-correspondent" class="sb-nav-item" onclick="switchMode('correspondent')">Correspondent</div>
+        <div id="nav-journal"       class="sb-nav-item" onclick="switchMode('journal')">Journal</div>
+        <div id="nav-collab"        class="sb-nav-item" onclick="openCollab()">Document</div>
+        <div id="nav-portrait" class="sb-nav-item" onclick="openPortrait();if(typeof closeSidebar==='function')closeSidebar()">What Lume thinks</div>
+        <div id="nav-ask" class="sb-nav-item" role="button" aria-expanded="false" aria-controls="sb-ask-list">Ask Lume <span class="sb-caret">&#9662;</span></div>
+        <div id="sb-ask-list" class="sb-collapse sb-sub">
+          <div class="sb-nav-item sb-ask-item" onclick="sidebarSend('What have I been thinking about this week?')">What I have been thinking</div>
+          <div class="sb-nav-item sb-ask-item" onclick="sidebarSend('What should I be paying attention to today?')">Surface something</div>
+          <div class="sb-nav-item sb-ask-item" onclick="sidebarSend('What am I avoiding?')">What am I avoiding</div>
+        </div>
+      </div>
     </div>
-
-    <!-- Divider -->
-    <div style="height:1px;background:rgba(255,255,255,.04);margin:4px 0"></div>
-
-    <!-- Prompts -->
-    <div style="padding:12px 12px 4px">
-      <span style="font-family:'Lora',serif;font-style:italic;font-size:10px;color:#1c1a17;padding:0 8px;display:block;margin-bottom:6px">ask</span>
-      <div class="sb-nav-item" onclick="sidebarSend('What have I been thinking about this week?')">What I have been thinking</div>
-      <div class="sb-nav-item" onclick="sidebarSend('What should I be paying attention to today?')">Surface something</div>
-      <div class="sb-nav-item" onclick="sidebarSend('What am I avoiding?')">What am I avoiding</div>
-    </div>
-
-    <!-- Divider -->
-    <div style="height:1px;background:rgba(255,255,255,.04);margin:4px 0"></div>
 
     <!-- Secondary actions -->
     <div style="padding:12px 12px 4px">
-      <div class="sb-nav-item sb-secondary" onclick="exportConversation()">Export</div>
       <div class="sb-nav-item sb-secondary" onclick="shareConversation()">Share</div>
       <div class="sb-nav-item sb-secondary" onclick="openSettings()">Settings</div>
     </div>
@@ -2394,7 +2388,13 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
     <!-- Memory / Pinned / Reading panels -->
     <div style="height:1px;background:rgba(255,255,255,.04);margin:4px 0"></div>
 
-    <div id="memory-panel" class="sidebar-panel memory-panel">
+    <div id="sb-tabbed" style="display:none">
+      <div class="sb-tabs" role="tablist">
+        <button type="button" role="tab" data-p="memory-panel">remembers</button>
+        <button type="button" role="tab" data-p="pinned-panel">pinned</button>
+        <button type="button" role="tab" data-p="reading-panel">reading</button>
+      </div>
+      <div id="memory-panel" class="sidebar-panel memory-panel">
       <div class="sp-header">
         <span class="sp-label">remembers</span>
         <span id="memory-count" style="font-family:'Figtree',sans-serif;font-size:8px;color:#1c1a17;letter-spacing:.06em"></span>
@@ -2418,6 +2418,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         <button class="sp-clear" onclick="saveReading([]);renderReading();showToast('Cleared.')">clear</button>
       </div>
       <div id="reading-list"></div>
+    </div>
     </div>
 
   </div>
@@ -2838,9 +2839,10 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
     <div class="settings-heading">Settings</div>
     <div class="settings-subheading">Everything Lume knows about you, and everything you can change.</div>
 
-    <!-- Memory -->
+        <!-- Privacy -->
     <div class="settings-section">
-      <div class="settings-section-title">Memory</div>
+      <div class="settings-section-title">Privacy</div>
+    <div class="settings-sub">Memory</div>
       <div class="settings-row" style="margin-bottom:12px">
         <div class="settings-row-left">
           <div class="settings-row-desc" style="line-height:1.7">What Lume remembers about you from past conversations. Forgotten entries are kept in the record but no longer inform anything — that is the honest version of forgetting.</div>
@@ -2860,11 +2862,8 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         <button class="settings-danger-btn" onclick="clearForgottenMemories()">Clear forgotten</button>
         <button class="settings-danger-btn" onclick="clearAllMemories()">Clear all memory</button>
       </div>
-    </div>
-
-    <!-- Privacy -->
-    <div class="settings-section">
-      <div class="settings-section-title">Privacy &amp; Data</div>
+    
+    <div class="settings-sub">Privacy &amp; Data</div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Search history</div>
@@ -2910,18 +2909,13 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         </div>
         <div class="tog on" id="tog-web" onclick="togglePrivPref('web',this)"></div>
       </div>
-      <div class="settings-row">
-        <div class="settings-row-left">
-          <div class="settings-row-title">Tone</div>
-          <div class="settings-row-desc">How hard Lume pushes</div>
-        </div>
-        <div class="lt-seg" id="lt-seg"><button data-t="gentle">Gentler</button><button data-t="default">Default</button><button data-t="blunt">Blunter</button></div>
-      </div>
+    
     </div>
 
-    <!-- Appearance -->
+    <!-- Look &amp; Voice -->
     <div class="settings-section">
-      <div class="settings-section-title">Appearance</div>
+      <div class="settings-section-title">Look &amp; Voice</div>
+    <div class="settings-sub">Appearance</div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Light mode</div>
@@ -2929,11 +2923,8 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         </div>
         <div class="tog" id="tog-light" onclick="toggleLightMode(this)"></div>
       </div>
-    </div>
-
-    <!-- Voice -->
-    <div class="settings-section">
-      <div class="settings-section-title">Voice</div>
+    
+    <div class="settings-sub">Voice &amp; tone</div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Voice model</div>
@@ -2948,11 +2939,27 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         </div>
         <div class="tog" id="tog-autoread" onclick="toggleAutoRead(this)"></div>
       </div>
+    
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-title">Tone</div>
+          <div class="settings-row-desc">How hard Lume pushes</div>
+        </div>
+        <div class="lt-seg" id="lt-seg"><button data-t="gentle">Gentler</button><button data-t="default">Default</button><button data-t="blunt">Blunter</button></div>
+      </div>
+    
+    <div class="settings-sub">Accessibility</div>
+    <div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Text size</div><div class="settings-row-desc">Makes everything in Lume larger</div></div><div class="lt-seg a11y-seg" id="a11y-text"><button type="button" data-k="text" data-v="0">Default</button><button type="button" data-k="text" data-v="1">Large</button><button type="button" data-k="text" data-v="2">Larger</button></div></div>
+    <div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Contrast</div><div class="settings-row-desc">Lifts dim text and borders. System follows your device.</div></div><div class="lt-seg a11y-seg" id="a11y-contrast"><button type="button" data-k="contrast" data-v="system">System</button><button type="button" data-k="contrast" data-v="std">Standard</button><button type="button" data-k="contrast" data-v="high">High</button></div></div>
+    <div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Reduce motion</div><div class="settings-row-desc">System follows your device setting</div></div><div class="lt-seg a11y-seg" id="a11y-motion"><button type="button" data-k="motion" data-v="system">System</button><button type="button" data-k="motion" data-v="reduce">Reduce</button></div></div>
+    <div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Readable font</div><div class="settings-row-desc">Plain sans-serif text with roomier lines</div></div><div class="tog" id="tog-readable" data-a11y-tog="readable"></div></div>
+    <div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Strong focus outlines</div><div class="settings-row-desc">A thicker outline on whatever you have selected with the keyboard</div></div><div class="tog" id="tog-focus" data-a11y-tog="focus"></div></div>
     </div>
 
-    <!-- Session data -->
+    <!-- Session -->
     <div class="settings-section">
-      <div class="settings-section-title">This Session</div>
+      <div class="settings-section-title">Session</div>
+    <div class="settings-sub">This session</div>
       <div class="settings-row">
         <div class="settings-row-title">Search queries visible</div>
         <div style="font-size:12px;color:#585450;font-family:'Figtree',sans-serif;" id="dp-searches2">0</div>
@@ -2969,11 +2976,8 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         <div class="settings-row-title">Pinned thoughts</div>
         <div style="font-size:12px;color:#585450;font-family:'Figtree',sans-serif;" id="dp-pins2">0</div>
       </div>
-    </div>
-
-    <!-- Conversation history -->
-    <div class="settings-section">
-      <div class="settings-section-title">Conversation History</div>
+    
+    <div class="settings-sub">Conversation history</div>
       <div class="settings-row" style="padding:10px 0 14px">
         <div class="settings-row-left">
           <div class="settings-row-title">Export current conversation</div>
@@ -2983,11 +2987,8 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
       </div>
       <div id="settings-history-list" style="margin-bottom:16px;"></div>
       <button class="settings-danger-btn" onclick="exportConversation()">Export current conversation</button>
-    </div>
-
-    <!-- Danger zone -->
-    <div class="settings-section">
-      <div class="settings-section-title">Reset</div>
+    
+    <div class="settings-sub">Reset</div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Clear all pinned thoughts</div>
@@ -3002,13 +3003,6 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         </div>
         <button class="settings-danger-btn" onclick="saveReading([]);renderReading();showToast('Reading list cleared.')">Clear</button>
       </div>
-      <div class="settings-row">
-        <div class="settings-row-left">
-          <div class="settings-row-title">Reset conduct record</div>
-          <div class="settings-row-desc">Clears all conduct strikes and lockout history</div>
-        </div>
-        <button class="settings-danger-btn" onclick="clearConductAndDismiss();showToast('Conduct record cleared.')">Reset</button>
-      </div>
       <div class="settings-row" style="padding-top:20px;">
         <div class="settings-row-left">
           <div class="settings-row-title" style="color:rgba(220,80,80,.6);">Clear all data</div>
@@ -3016,6 +3010,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         </div>
         <button class="settings-danger-btn" onclick="clearAllData()">Clear everything</button>
       </div>
+    
     </div>
 
     <!-- About -->
@@ -3031,6 +3026,7 @@ body[data-presence="thinking"] #chat-pill-outer,body[data-presence="searching"] 
         <div class="settings-row-title" style="color:#2e2c2a;font-size:11px;">Version</div>
         <div style="font-size:11px;color:#2e2c2a;font-family:monospace;" id="settings-version">—</div>
       </div>
+      <div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Replay intro</div><div class="settings-row-desc">Walk through the first-use screens again</div></div><button class="settings-danger-btn" onclick="lumeFlow.start('tour')">Replay</button></div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Service Agreement</div>
@@ -3270,6 +3266,7 @@ function lumeBirdSVG(w){
 
 function showConsentScreen(){
   if(localStorage.getItem('lume_consent_v5')) return;
+  if(window.lumeFlow && window.lumeFlow.start){ window.lumeFlow.start(localStorage.getItem('lume_consent_given') ? 'returning' : 'first'); return; }
   var overlay = document.createElement('div');
   overlay.id = 'consent-overlay';
   overlay.className = 'lcn-ov';
@@ -3306,9 +3303,13 @@ function termRow(icon, text){
 
 function giveConsent(){
   localStorage.setItem('lume_consent_v5','1');
+  recordConsent();
+  if(window.lumeFlow && window.lumeFlow.active && window.lumeFlow.afterConsent){ window.lumeFlow.afterConsent(); return; }
+  finishConsent();
+}
+function finishConsent(){
   var overlay = document.getElementById('consent-overlay');
   if(overlay){ overlay.style.opacity='0'; overlay.style.transition='opacity .4s'; setTimeout(function(){ overlay.remove(); },420); }
-  recordConsent();
   // Start onboarding after a short pause
   if(shouldShowOnboarding()){
     setTimeout(function(){
@@ -5211,8 +5212,7 @@ function fetchWorker(payload, onSuccess, onError){
   });
 }
 
-// ── VISION via Pollinations ──
-var POLLINATIONS_TEXT = 'https://text.pollinations.ai/';
+// ── VISION via the Lume Worker (/vision) ──
 
 function callVision(imageFiles, userText, SYS){
   var image = imageFiles[0]; // use first image
@@ -5230,25 +5230,30 @@ function callVision(imageFiles, userText, SYS){
     conversationContext ? '\nConversation so far:\n' + conversationContext : '',
   ].join('\n');
 
-  fetch(POLLINATIONS_TEXT, {
+  fetch(WORKER + '/vision', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      messages: [
-        { role: 'system', content: visionPrompt },
-        { role: 'user', content: [
-          { type: 'image_url', image_url: { url: 'data:' + image.mimeType + ';base64,' + image.base64 } },
-          { type: 'text', text: userText || 'What do you see?' }
-        ]}
-      ],
-      model: 'openai',
-      seed: Math.floor(Math.random()*99999),
-      private: true
+      system: visionPrompt,
+      text: userText || 'What do you see?',
+      image: 'data:' + image.mimeType + ';base64,' + image.base64
     })
   })
-  .then(function(r){ return r.text(); })
-  .then(function(text){
-    var reply = text.trim();
+  .then(function(r){
+    if(!r.ok) throw new Error('vision ' + r.status);
+    return r.json();
+  })
+  .then(function(data){
+    if(data && data.flagged){
+      var warn = lumeImageWarning(data.category);
+      showTyping(false); stopGhost(); playReceive();
+      addLumeMsg(warn, function(){
+        msgs.push({role:'assistant', content:warn});
+        busy = false; setStarActive(false);
+      });
+      return;
+    }
+    var reply = String((data && data.reply) || '').trim();
     if(!reply) throw new Error('empty');
     showTyping(false); stopGhost(); playReceive();
     addLumeMsg(reply, function(){
@@ -6247,9 +6252,38 @@ function handleFileSelect(event){
   var files = Array.prototype.slice.call(event.target.files);
   if(!files.length) return;
   files.forEach(function(file){
-    if(file.size > 5000000){ showToast('File too large — keep it under 5MB.'); return; }
     var isImage = file.type.startsWith('image/');
+    if(!isImage && file.size > 5000000){ showToast('File too large — keep it under 5MB.'); return; }
     if(isImage){
+      // Phone photos are large: shrink to 1600px JPEG so they upload fast and fit the vision limit
+      var objUrl = URL.createObjectURL(file), shrink = new Image();
+      shrink.onload = function(){
+        var k = Math.min(1, 1600 / Math.max(shrink.width, shrink.height)),
+            cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(shrink.width * k)); cv.height = Math.max(1, Math.round(shrink.height * k));
+        var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+        cx.drawImage(shrink, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(objUrl);
+        var b64s = cv.toDataURL('image/jpeg', 0.85).split(',')[1];
+        attachedFiles.push({name:file.name, type:'image/jpeg', content:'[image]', isImage:true, base64:b64s, mimeType:'image/jpeg'});
+        renderAttachPreviews();
+        document.getElementById('send-btn').classList.add('visible');
+      };
+      shrink.onerror = function(){
+        URL.revokeObjectURL(objUrl);
+        if(file.size > 5000000){ showToast('Could not read that image — try a smaller one.'); return; }
+        var rd = new FileReader();
+        rd.onload = function(e){
+          attachedFiles.push({name:file.name, type:file.type, content:'[image]', isImage:true, base64:e.target.result.split(',')[1], mimeType:file.type});
+          renderAttachPreviews();
+          document.getElementById('send-btn').classList.add('visible');
+        };
+        rd.readAsDataURL(file);
+      };
+      shrink.src = objUrl;
+      return;
+    }
+    if(false){
       var reader = new FileReader();
       reader.onload = function(e){
         // store as {name, type, content, isImage, base64, mimeType}
@@ -6520,17 +6554,62 @@ function _doMusicRequest(txt, hint){
   );
 }
 
+var LUME_IMG_REASONS = {
+  sexual_minors: 'sexual content involving minors',
+  sexual_explicit: 'explicit sexual content',
+  graphic_violence: 'graphic violence',
+  self_harm: 'self-harm',
+  dangerous_illegal: 'dangerous or illegal activity'
+};
+function lumeImageWarning(category){
+  var why = LUME_IMG_REASONS[category];
+  return 'This image may go against the Lume Constitution' + (why ? ' (' + why + ')' : '') +
+    ', so I won\u2019t go any further with it. If you think this is a mistake, try a different photo.';
+}
+
+// Every generated image gets a small Lume watermark, baked into the pixels
+function lumeWatermark(blob){
+  return new Promise(function(res, rej){
+    var img = new Image(), u = URL.createObjectURL(blob);
+    img.onload = function(){
+      try{
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        var x = c.getContext('2d');
+        x.drawImage(img, 0, 0);
+        var fs = Math.max(16, Math.round(c.width * 0.04)), pad = Math.round(fs * 0.7);
+        x.font = '500 ' + fs + 'px Geist, Figtree, -apple-system, Helvetica, Arial, sans-serif';
+        x.textAlign = 'right'; x.textBaseline = 'bottom';
+        x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = Math.round(fs * 0.3);
+        x.fillStyle = 'rgba(255,255,255,.88)';
+        x.fillText('\u2726 Lume', c.width - pad, c.height - pad);
+        URL.revokeObjectURL(u);
+        c.toBlob(function(b){ b ? res(b) : rej(new Error('watermark')); }, 'image/jpeg', 0.92);
+      }catch(e){ URL.revokeObjectURL(u); rej(e); }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(u); rej(new Error('image')); };
+    img.src = u;
+  });
+}
+
 // ── IMAGE FETCH via worker ──
+var _imgBlockedMsg = null;
 function fetchImage(prompt, onSuccess, onError){
+  _imgBlockedMsg = null;
   fetch(IMAGE_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ inputs: prompt })
   })
   .then(function(r){
+    if(r.status === 422){
+      _imgBlockedMsg = 'This request may go against the Lume Constitution, so I can\u2019t create that image.';
+      throw new Error('blocked');
+    }
     if(!r.ok) throw new Error('image-error-'+r.status);
     return r.blob();
   })
+  .then(lumeWatermark)
   .then(function(blob){
     onSuccess(URL.createObjectURL(blob));
   })
@@ -6691,7 +6770,7 @@ function _doImageRequest(txt, hint){
         imgEl.onload = function(){ imgEl.classList.add('loaded'); chat.scrollTop = chat.scrollHeight; };
         imgEl.src = url;
       }, function(){
-        d.querySelector('.lume-image').innerHTML = '<div class="img-caption" style="padding:16px">Could not generate image.</div>';
+        d.querySelector('.lume-image').innerHTML = '<div class="img-caption" style="padding:16px">' + esc(_imgBlockedMsg || 'Could not generate image.') + '</div>';
       });
       chat.scrollTop = chat.scrollHeight;
     },
@@ -7639,7 +7718,7 @@ _doImageRequest = function(txt, hint){
           imgEl.onload = function(){ imgEl.classList.add('loaded'); chat.scrollTop=chat.scrollHeight; };
           imgEl.src = url;
         }, function(){
-          wrapper.innerHTML='<div class="img-caption" style="padding:16px;color:#585450">Could not generate image.</div>';
+          wrapper.innerHTML='<div class="img-caption" style="padding:16px;color:#585450">'+esc(_imgBlockedMsg||'Could not generate image.')+'</div>';
         });
         // update star
         var star = d.querySelector('.lume-star');
@@ -9903,7 +9982,7 @@ var _sendCount = 0;
       </div>
       <div style="display:flex;align-items:center;gap:16px">
         <span id="lsa-head-meta">v5.0</span>
-        <button id="lsa-close" onclick="closeLSA()">&times;</button>
+        <button id="lsa-close" type="button" onclick="closeLSA()" aria-label="Close agreement"><span aria-hidden="true">&times;</span></button>
       </div>
     </div>
     <div id="lsa-body">
@@ -9922,7 +10001,7 @@ var _sendCount = 0;
 
       <p class="lead">This agreement covers your use of Lume. We wrote it to be read. Most service agreements are written to be agreed to, which is a different thing, and one that serves nobody well. Give it a few minutes.</p>
 
-      <h2>Part One &mdash; Definitions</h2>
+      <h2 id="lsa-p1"><span class="lsa-part">Part One</span><span class="lsa-ptitle">Definitions</span></h2>
       <p>This Part says what our words mean, so the rest doesn&rsquo;t have to repeat itself.</p>
       <p><strong style="color:#96918a;font-weight:400">Lume Inc.</strong> (&ldquo;we&rdquo;) is Lume Inc., incorporated under Halonesian federal law, headquartered at One Lume Plaza, Mountain View, Serena, Halonesia. Lume Inc. is an independent company, spun off from Altura, and is not part of Altura&rsquo;s group of companies. Lume Inc. operates Lume and the servers, accounts and support systems behind it.</p>
       <p><strong style="color:#96918a;font-weight:400">Lume</strong> is the artificial intelligence assistant application developed and operated by Lume Inc., currently at version 5.0. Lume is not a person. It doesn&rsquo;t hold citizenship, enter contracts, or have opinions in the legal sense. It does have a point of view, and we think that&rsquo;s worth keeping.</p>
@@ -9933,7 +10012,7 @@ var _sendCount = 0;
       <p><strong style="color:#96918a;font-weight:400">Services</strong> means Lume and the Lume Inc. systems it runs on: accounts, storage, support tools and the connections between them.</p>
       <p><strong style="color:#96918a;font-weight:400">Halonesia</strong> is the Halonesian Federation, a sovereign democratic state of ten constituent states, constitutionally democratic since January 2016. Lume Inc. is incorporated under its laws.</p>
 
-      <h2>Part Two &mdash; What Lume Is and Is Not</h2>
+      <h2 id="lsa-p2"><span class="lsa-part">Part Two</span><span class="lsa-ptitle">What Lume Is and Is Not</span></h2>
       <p>This Part says what to expect from Lume, and what not to.</p>
       <p>Lume is an AI assistant. That&rsquo;s a description, not a sales pitch. It helps with questions, writing, research, planning, analysis and code, and it can be a sounding board when you want to think something through. Its answers are generated and can be wrong. Check anything you rely on.</p>
       <p>Lume is not a doctor, lawyer, financial advisor, therapist or counsellor. It can talk about all of those subjects thoughtfully, but what it says isn&rsquo;t professional advice and doesn&rsquo;t replace a qualified person. Lume would be the first to agree.</p>
@@ -9942,7 +10021,7 @@ var _sendCount = 0;
       <p>Lume is not a surveillance tool. What we collect, and why, is set out in Part Three, and it&rsquo;s limited to what that Part lists.</p>
       <p>Lume Inc. began inside Altura and is now independent. Lume will tell you what it thinks if you ask, including about the technology industry it came from. We think a product that&rsquo;s honest about its own history is easier to trust.</p>
 
-      <h2>Part Three &mdash; Data Collection and Use</h2>
+      <h2 id="lsa-p3"><span class="lsa-part">Part Three</span><span class="lsa-ptitle">Data Collection and Use</span></h2>
       <p>This Part covers what we collect, where it&rsquo;s kept, why, and what stays on your own device.</p>
 
       <h3>What we collect</h3>
@@ -9956,7 +10035,7 @@ var _sendCount = 0;
         <li><strong style="color:#5a5550;font-weight:400">Connected service data.</strong> Altura Search is a separate service, not run by Lume Inc. If you connect Lume to it, Lume may read your search history, saved searches, notes and usage patterns from local storage, depending on your privacy settings. That data is read on your device. When Lume uses some of it to answer you, that part goes in the request to Lume servers and the service providers below. You can switch this off in the Privacy &amp; Data panel.</li>
         <li><strong style="color:#5a5550;font-weight:400">Service providers.</strong> To answer you, Lume Inc. sends your messages to its language-model provider. Web searches Lume runs for you go to a search provider, and image or music requests go to a media-generation provider. These providers get only what the request needs, and they aren&rsquo;t given your account name or Device Token.</li>
         <li><strong style="color:#5a5550;font-weight:400">Voice audio.</strong> If you dictate in Capture, your audio is sent to Lume Inc. to be processed, as described in &ldquo;Voice and listening&rdquo; below.</li>
-        <li><strong style="color:#5a5550;font-weight:400">Photo notes.</strong> If you add a photo in Capture, Lume shrinks it on your device and sends it to a vision service, text.pollinations.ai, to turn it into a note. That service is not run by Lume Inc., and the photo goes there straight from your device, not through our servers. We don&rsquo;t control what it does with the photo. A small thumbnail and the note are kept on your device.</li>
+        <li><strong style="color:#5a5550;font-weight:400">Photo notes.</strong> If you add a photo in Capture or share one in chat, Lume shrinks it on your device and sends it through the Lume Worker to Cloudflare Workers AI, which reads it and returns the text. The photo is not stored by Lume. A small thumbnail and the note are kept on your device.</li>
       </ul>
       <p>Some records may be kept longer than the periods above where the law requires it.</p>
 
@@ -9985,7 +10064,7 @@ var _sendCount = 0;
       <p>The Privacy &amp; Data panel in Settings lets you control whether Lume reads your search history, saved content and behavioural patterns, whether it uses your stored memories, and whether it brings up inferences on its own. Turning off memory doesn&rsquo;t delete your memories. It tells Lume not to use them. That difference matters, and you can switch it back.</p>
       <p>These settings change how Lume uses data in a session. They don&rsquo;t reach back and undo conversations already sent to our servers. Deleting those is a separate step, described above.</p>
 
-      <h2>Part Four &mdash; Moderation and Safety</h2>
+      <h2 id="lsa-p4"><span class="lsa-part">Part Four</span><span class="lsa-ptitle">Moderation and Safety</span></h2>
       <p>This Part covers when Lume Monitoring Services can look at your conversation, how suspensions work, and what Lume does when things sound heavy.</p>
 
       <h3>Moderation</h3>
@@ -10008,7 +10087,7 @@ var _sendCount = 0;
       <p><strong style="color:#96918a;font-weight:400">What this is not.</strong> Lume isn&rsquo;t monitored in real time. It isn&rsquo;t an emergency or crisis service, and it can&rsquo;t call anyone for you. If you&rsquo;re in immediate danger, contact your local emergency services.</p>
       <p><strong style="color:#96918a;font-weight:400">Where the help links go.</strong> To third parties that Lume Inc. doesn&rsquo;t run: findahelpline.com (to find a helpline in your country), 988 in the US, and Samaritans on 116 123 in the UK and Ireland. We don&rsquo;t control them.</p>
 
-      <h2>Part Five &mdash; Acceptable Use</h2>
+      <h2 id="lsa-p5"><span class="lsa-part">Part Five</span><span class="lsa-ptitle">Acceptable Use</span></h2>
       <p>This Part says what you can do with Lume, which is most things, and what you can&rsquo;t.</p>
       <p>Lume is for real engagement. Think, write, question, reflect, explore, create, plan and process. Disagree with it. Push back. Ask it hard questions. That&rsquo;s what it&rsquo;s for.</p>
       <p>These uses are not allowed:</p>
@@ -10022,40 +10101,40 @@ var _sendCount = 0;
       </ul>
       <p>Lume will decline requests outside these lines. Repeated attempts lead to a temporary session restriction, and persistent ones to a suspension. The system doesn&rsquo;t take it personally, and you shouldn&rsquo;t either.</p>
 
-      <h2>Part Six &mdash; Intellectual Property</h2>
+      <h2 id="lsa-p6"><span class="lsa-part">Part Six</span><span class="lsa-ptitle">Intellectual Property</span></h2>
       <p>This Part says who owns what.</p>
       <p>Lume is proprietary software. The model weights, training methods, system architecture and product design belong to Lume Inc. You may not copy, decompile, reverse engineer or build derivative works from Lume without our written consent.</p>
       <p>What you put into your conversations, meaning your questions, what you share and the thoughts you work through, stays yours. We store it, in the ways Part Three describes, but storing something isn&rsquo;t owning it.</p>
       <p>Lume&rsquo;s replies are generated by a computer system, and Lume Inc. doesn&rsquo;t claim copyright in them. Whether you can claim it, under Halonesian law or anyone else&rsquo;s, is something courts are still working out. We don&rsquo;t think it&rsquo;s our place to answer for them.</p>
       <p>We may use feedback you send to improve Lume. By sending it, you give Lume Inc. a non-exclusive, royalty-free licence to use it for that.</p>
 
-      <h2>Part Seven &mdash; Availability and Reliability</h2>
+      <h2 id="lsa-p7"><span class="lsa-part">Part Seven</span><span class="lsa-ptitle">Availability and Reliability</span></h2>
       <p>This Part is about what happens when Lume isn&rsquo;t working, or something you saved isn&rsquo;t there.</p>
       <p>We make reasonable efforts to keep Lume available and quick. Interruptions happen. Updates happen. Models are sometimes unavailable. That&rsquo;s the nature of running software across a territory as varied as ours.</p>
       <p>We don&rsquo;t guarantee Lume will always be available, or that any particular reply will be accurate, suitable or useful. Lume is provided &ldquo;as is&rdquo;. We&rsquo;ve done our best, but we can&rsquo;t honestly promise perfection, and nobody else can either.</p>
       <p>Some of Lume&rsquo;s data lives in your browser&rsquo;s local storage, which browsers can purge, and some is on our servers as described in Part Three. We aren&rsquo;t responsible for data lost because your browser cleared storage or because you did. If something matters, write it down somewhere sturdier than a browser. Lume would probably agree.</p>
       <p>Timers and reminders run only while Lume is open, or as far as your browser allows. Don&rsquo;t rely on Lume to wake you for something important.</p>
 
-      <h2>Part Eight &mdash; Limitation of Liability</h2>
+      <h2 id="lsa-p8"><span class="lsa-part">Part Eight</span><span class="lsa-ptitle">Limitation of Liability</span></h2>
       <p>This Part sets the limits on what Lume Inc. can be held responsible for.</p>
       <p>To the maximum extent the law allows, Lume Inc.&rsquo;s total liability from your use of Lume won&rsquo;t be more than what you paid for Lume in the twelve months before the claim. If Lume was free to you, that amount is zero. That sentence has appeared in more agreements than anyone would like to admit.</p>
       <p>Lume Inc. isn&rsquo;t liable for indirect, incidental, special, consequential or punitive damages from your use of Lume, including loss of data, revenue or business, or any harm from relying on what Lume says. That&rsquo;s standard language. The alternative, unlimited liability for what a language model says, isn&rsquo;t something any responsible company could accept.</p>
       <div class="legal-note">Nothing in this agreement limits Lume Inc.&rsquo;s liability for death or personal injury caused by Lume Inc.&rsquo;s negligence, for fraud or fraudulent misrepresentation, or for any liability that can&rsquo;t be excluded by law. These are the right exclusions.</div>
 
-      <h2>Part Nine &mdash; Disputes and Feedback</h2>
+      <h2 id="lsa-p9"><span class="lsa-part">Part Nine</span><span class="lsa-ptitle">Disputes and Feedback</span></h2>
       <p>This Part says who to tell when something&rsquo;s wrong, and how fast we answer.</p>
       <p>If you have a concern about how Lume behaves, a privacy matter, a moderation decision or a technical problem, start with the feedback option inside the app. We read those. More than once they&rsquo;ve flagged real problems, and we&rsquo;ve fixed them.</p>
       <p>For moderation disputes, meaning you think a suspension was a mistake, use the appeal form that appears when you&rsquo;re suspended, or write to Lume Inc. at the address in Part Eleven. Lume Monitoring Services will reply within five working days.</p>
       <p>For privacy questions, including asking to see, correct or delete your personal data, write to the Data Protection Officer at the address in Part Eleven. We&rsquo;ll respond within thirty days, in line with the Halonesian Data Governance Act 2021.</p>
       <p>If you think Lume Inc. has broken your rights under data protection law, you can complain to the Federal Data Protection Authority of Halonesia. We&rsquo;d rather you came to us first, because most problems get fixed faster that way, but the right to go further is yours.</p>
 
-      <h2>Part Ten &mdash; Governing Law</h2>
+      <h2 id="lsa-p10"><span class="lsa-part">Part Ten</span><span class="lsa-ptitle">Governing Law</span></h2>
       <p>This Part says which law applies and where disputes are heard.</p>
       <p>This agreement is governed by the laws of the Halonesian Federation, specifically the federal statutes that apply in the state of Serena, where Lume Inc.&rsquo;s principal place of business is. Disputes that can&rsquo;t be settled informally go to the exclusive jurisdiction of the federal courts of Halonesia, sitting in Mountain View, Serena.</p>
       <p>If you use Lume from outside Halonesia, local consumer protection laws may apply as well as, or instead of, parts of this agreement. Where Halonesian law and a more protective standard conflict, we&rsquo;ll follow the more protective one.</p>
       <p>If any part of this agreement turns out to be unenforceable, that part is removed and the rest carries on. Legal documents say this because clauses sometimes get badly drafted or overtaken by new law. It&rsquo;s an admission of fallibility in formal clothing.</p>
 
-      <h2>Part Eleven &mdash; Contact</h2>
+      <h2 id="lsa-p11"><span class="lsa-part">Part Eleven</span><span class="lsa-ptitle">Contact</span></h2>
       <p>This Part is where to find us.</p>
       <p style="font-family:'Figtree',sans-serif;font-size:11px;color:#3a3835;line-height:2;font-style:normal;">
         Lume Inc.<br>
@@ -10067,7 +10146,7 @@ var _sendCount = 0;
         <span style="color:#2e2c2a">For developer enquiries, the console has already told you where to find us.</span>
       </p>
 
-      <h2>Part Twelve &mdash; Amendments</h2>
+      <h2 id="lsa-p12"><span class="lsa-part">Part Twelve</span><span class="lsa-ptitle">Amendments</span></h2>
       <p>This Part covers how this agreement can change.</p>
       <p>Lume Inc. may amend this agreement. We&rsquo;ll tell you in Lume with reasonable notice before a change takes effect, unless the law requires an immediate change or we have to deal with a serious security problem. If you keep using Lume after we tell you, you accept the amended terms. Because Parts Three and Four changed in version 5.0, we&rsquo;ll ask you to accept this version when you next open Lume.</p>
       <p>This agreement, together with Lume Inc.&rsquo;s Privacy Policy, is the whole agreement between you and Lume Inc. about your use of Lume. It replaces anything said or agreed earlier on the same subject.</p>
@@ -10629,10 +10708,35 @@ var _sendCount = 0;
     var headers={'Content-Type':'application/json'};
     if(typeof _deviceToken!=='undefined'&&_deviceToken) headers['X-Device-Token']=_deviceToken;
     var acc='',think='',live=null,body=null,raf=0,chat=document.getElementById('chat'),buf='',finished=false,calls={};
+    var pc=(typeof window.lumePace==='function'?window.lumePace(round):{on:false}),shown=0,pacer=0,hold=0,last=0,draining=false;
     var T=window.lumeTrace;if(T){if(round===0)T.begin();T.round(round);}
-    function paint(){raf=0;if(!live)return;var near=chat.scrollHeight-chat.scrollTop-chat.clientHeight<140;body.innerHTML=renderMarkdown(acc);if(near)chat.scrollTop=chat.scrollHeight;}
+    function paint(){raf=0;if(!live)return;var near=chat.scrollHeight-chat.scrollTop-chat.clientHeight<140;body.innerHTML=renderMarkdown(pc.on?acc.slice(0,shown):acc);if(near)chat.scrollTop=chat.scrollHeight;}
+    function startPacer(){if(pacer)return;last=Date.now();pacer=setInterval(tick,45);}
+    function tick(){
+      var now=Date.now();
+      if(now<pc.until||now<hold||finished)return;
+      if(!live){if(T)T.first();if(typeof showTyping==='function')showTyping(false);live=bubble();body=live.querySelector('.lume-live');last=now;}
+      var dt=Math.min(now-last,200);last=now;
+      var backlog=acc.length-shown,cps=Math.max(pc.cps,backlog/8),step=Math.max(1,Math.round(cps*dt/1000)),n=Math.min(acc.length,shown+step);
+      while(n<acc.length&&n-shown<step+14&&!/\s/.test(acc.charAt(n-1)))n++;
+      if(n!==shown){
+        shown=n;if(!raf)raf=requestAnimationFrame(paint);
+        var c=acc.charAt(n-1),nx=acc.charAt(n);
+        if(/[.!?]/.test(c)&&(n>=acc.length||/\s/.test(nx)))hold=now+240;
+        else if(c==='\n'&&acc.charAt(n-2)==='\n')hold=now+380;
+        else if(c===','&&/\s/.test(nx))hold=now+90;
+      }
+    }
     function done(){
+      if(finished||draining)return;
+      var hasCalls=Object.keys(calls).some(function(k){return calls[k].name;});
+      if(!pc.on||hasCalls||!acc.trim())return finish();
+      draining=true;
+      (function w(){if(shown>=acc.length&&live&&Date.now()>=pc.until)finish();else setTimeout(w,80);})();
+    }
+    function finish(){
       if(finished)return;finished=true;
+      if(pacer){clearInterval(pacer);pacer=0;}
       if(raf)cancelAnimationFrame(raf);
       var cs=Object.keys(calls).map(function(k){return calls[k];}).filter(function(c){return c.name;}).slice(0,3);
       if(cs.length&&round<1){
@@ -10658,8 +10762,10 @@ var _sendCount = 0;
         if(dl.reasoning){think+=dl.reasoning;if(T)T.reasoning(dl.reasoning);}
         (dl.tool_calls||[]).forEach(function(tc){var c=calls[tc.index||0]||(calls[tc.index||0]={id:'',name:'',args:''});if(tc.id)c.id=tc.id;if(tc.function){if(tc.function.name)c.name+=tc.function.name;if(tc.function.arguments)c.args+=tc.function.arguments;}});
         var t=dl.content;if(!t)return;
+        acc+=t;
+        if(pc.on){startPacer();return;}
         if(!live){if(T)T.first();if(typeof showTyping==='function')showTyping(false);live=bubble();body=live.querySelector('.lume-live');}
-        acc+=t;if(!raf)raf=requestAnimationFrame(paint);
+        if(!raf)raf=requestAnimationFrame(paint);
       }catch(e){}
     }
     fetch(WORKER+'/lume',{method:'POST',headers:headers,body:JSON.stringify({stream:true,reasoning_effort:window._lumeEffort||'medium',include_reasoning:window._lumeEffort==='high'||window._lumeEffort==='medium',tools:tools.length?tools:undefined,messages:messages})})
@@ -11736,7 +11842,8 @@ body.light .lora-prose a{color:#2f6f94}
   var WK=typeof WORKER!=='undefined'?WORKER:'';
   function ls(k,d){try{var v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}}
   function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-  var tts=null,ctx=null,turn=0,hist=[],src=null,Q=[],chain=Promise.resolve(),playing=false,streamDone=true,ctl=null,loading=false;
+  var tts=null,engine=null,ctx=null,turn=0,hist=[],srcs=[],nextEnd=0,inflight=0,chain=Promise.resolve(),streamDone=true,ctl=null,loading=false,warmed=false,vp=null,wk=null,wid=0,wp={},tm=null;
+  var TM=window.__lumeVoiceTimings=window.__lumeVoiceTimings||[];
   var el=document.createElement('div');el.id='lcv';el.dataset.s='idle';
   el.innerHTML='<div class="top"><span class="wm">Lume</span><span class="ct">Conversation</span><button class="cl" aria-label="Close">&#10005;</button></div>'
    +'<div class="gate"></div>'
@@ -11753,22 +11860,57 @@ body.light .lora-prose a{color:#2f6f94}
   function consent(){gate('<h3>Lume\u2019s voice</h3><p>Conversation mode needs Lume\u2019s voice, a one-time download of about 90 MB stored on this device. Lume won\u2019t start until it is ready.</p>',[['Download voice',start,1],['Not now',close]]);}
   function failed(e){loading=false;gate('<h3>Couldn\u2019t load the voice</h3><p>Conversation mode can\u2019t start without Lume\u2019s voice ('+(e&&e.message==='stalled'?'the download stopped making progress':'it didn\u2019t load')+'). Your normal chat is unaffected.</p>',[['Try again',start,1],['Close',close]]);}
   function prog(f,l,t){var i=$('.pb i'),m=$('.pm');if(i)i.style.width=Math.round(f*100)+'%';if(m)m.textContent=t?Math.round(f*100)+'% \u00b7 '+(l/1048576).toFixed(0)+' of '+(t/1048576).toFixed(0)+' MB':'Starting\u2026';}
-  function loadVoice(){
-    if(window.__kokoroPipeline){tts=window.__kokoroPipeline;return Promise.resolve();}
+  function adopt(p){tts=p;engine={gen:function(t){return p.generate(t,{voice:'af_bella'});}};}
+  function loadMain(){
+    if(window.__kokoroPipeline){adopt(window.__kokoroPipeline);return Promise.resolve();}
     return new Promise(function(res,rej){
       var files={},stall,done=false;
       function arm(){clearTimeout(stall);stall=setTimeout(function(){fail(new Error('stalled'));},30000);}
       function fail(e){if(done)return;done=true;clearTimeout(stall);rej(e);}
       window.__lumeVoiceProgress=function(p){if(done)return;arm();if(p&&p.file&&p.total)files[p.file]={l:p.loaded||0,t:p.total};var l=0,t=0;for(var k in files){l+=files[k].l;t+=files[k].t;}prog(t?l/t:0,l,t);};
-      window.__lumeVoiceDone=function(t){if(done)return;done=true;clearTimeout(stall);window.__kokoroPipeline=t;tts=t;res();};
+      window.__lumeVoiceDone=function(t){if(done)return;done=true;clearTimeout(stall);window.__kokoroPipeline=t;adopt(t);res();};
       window.__lumeVoiceFail=fail;arm();
       var s=document.createElement('script');s.type='module';s.onerror=function(){fail(new Error('load'));};
       s.textContent="import { KokoroTTS } from 'https://esm.sh/kokoro-js@1.2.0';try{const t=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',progress_callback:p=>window.__lumeVoiceProgress(p)});window.__lumeVoiceDone(t);}catch(e){window.__lumeVoiceFail(e);}";
       document.head.appendChild(s);
     });
   }
+  /* voice runs in a Web Worker so generating audio never freezes the screen or the reply stream; same Kokoro q8 model and Bella voice */
+  function loadWorker(){
+    return new Promise(function(res,rej){
+      var files={},stall,done=false;
+      function arm(){clearTimeout(stall);stall=setTimeout(function(){fail(new Error('stalled'));},30000);}
+      function fail(e){if(done)return;done=true;clearTimeout(stall);try{if(wk)wk.terminate();}catch(x){}wk=null;rej(e);}
+      var code=["import { KokoroTTS } from 'https://esm.sh/kokoro-js@1.2.0';",
+        "let tts=null;",
+        "self.onmessage=async(e)=>{const m=e.data;",
+        "if(m.t==='init'){try{tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',progress_callback:p=>self.postMessage({t:'prog',file:p.file,loaded:p.loaded,total:p.total})});self.postMessage({t:'ready'});}catch(err){self.postMessage({t:'fail'});}}",
+        "else if(m.t==='gen'){try{const r=await tts.generate(m.text,{voice:'af_bella'});const a=r.audio;self.postMessage({t:'audio',id:m.id,audio:a,sr:r.sampling_rate},[a.buffer]);}catch(err){self.postMessage({t:'audio',id:m.id,err:1});}}};"].join("\n");
+      try{wk=new Worker(URL.createObjectURL(new Blob([code],{type:'text/javascript'})),{type:'module'});}catch(e){return rej(new Error('noworker'));}
+      wk.onerror=function(){fail(new Error('noworker'));};
+      wk.onmessage=function(ev){
+        var m=ev.data||{};
+        if(m.t==='prog'){if(done)return;arm();if(m.file&&m.total)files[m.file]={l:m.loaded||0,t:m.total};var l=0,t=0;for(var k in files){l+=files[k].l;t+=files[k].t;}prog(t?l/t:0,l,t);}
+        else if(m.t==='ready'){if(done)return;done=true;clearTimeout(stall);
+          engine={gen:function(text){return new Promise(function(r,j){var id=++wid;wp[id]={res:r,rej:j};wk.postMessage({t:'gen',id:id,text:text});});}};
+          tts=engine;res();}
+        else if(m.t==='fail'){fail(new Error('load'));}
+        else if(m.t==='audio'){var h=wp[m.id];delete wp[m.id];if(h){if(m.err)h.rej(new Error('gen'));else h.res({audio:m.audio,sampling_rate:m.sr});}}
+      };
+      arm();wk.postMessage({t:'init'});
+    });
+  }
+  function loadVoice(){
+    if(tts)return Promise.resolve();
+    if(vp)return vp;
+    if(window.__kokoroPipeline){adopt(window.__kokoroPipeline);return Promise.resolve();}
+    vp=loadWorker().catch(function(e){if(e&&e.message==='stalled')throw e;return loadMain();}).then(function(){vp=null;},function(e){vp=null;throw e;});
+    return vp;
+  }
+  function warm(){if(warmed||!engine)return;warmed=true;engine.gen('Hello there.').catch(function(){});}
   function start(){
     if(loading)return;loading=true;
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
     gate('<h3>Getting Lume\u2019s voice ready</h3><p>Lume will start as soon as the voice has loaded.</p><div class="pb"><i></i></div><p class="pm" style="font-size:12.5px;color:#6b6660">Starting\u2026</p>',[['Cancel',close]]);
     loadVoice().then(function(){loading=false;lsSet('lume_voice_ok','1');live();},failed);
   }
@@ -11776,84 +11918,87 @@ body.light .lora-prose a{color:#2f6f94}
     if(!el.classList.contains('show')||!tts)return;
     el.classList.remove('g');window.lumeSpoken=true;
     try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.resume)ctx.resume();}catch(e){}
-    setS('idle');$('textarea').focus();
+    setS('idle');warm();$('textarea').focus();
   }
   function open(){
     try{if(typeof closeSidebar==='function')closeSidebar();}catch(e){}
     el.classList.add('show');
     try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.resume)ctx.resume();}catch(e){}
-    if(tts||window.__kokoroPipeline){tts=tts||window.__kokoroPipeline;live();}
+    if(tts||window.__kokoroPipeline){if(!tts)adopt(window.__kokoroPipeline);live();}
     else if(ls('lume_voice_ok','')==='1')start();else consent();
   }
   function close(){stop();loading=false;window.lumeSpoken=false;el.classList.remove('show');}
 
-  /* ---------- speaking: sentence queue, next sentence generated while one plays ---------- */
+  /* ---------- speaking: next sentence is generated while the current one plays, and clips are scheduled back to back ---------- */
   function stop(){
-    turn++;Q=[];streamDone=true;playing=false;
+    turn++;streamDone=true;inflight=0;nextEnd=0;
     if(ctl){try{ctl.abort();}catch(e){}ctl=null;}
-    var s=src;src=null;if(s){try{s.stop();}catch(e){}}
+    var a=srcs;srcs=[];a.forEach(function(s){s.onended=null;try{s.stop();}catch(e){}});
     if($('.sub'))$('.sub').textContent='';if(tts)setS('idle');
   }
-  function enqueue(text){
+  function check(){
+    if(streamDone&&inflight===0&&srcs.length===0&&el.dataset.s!=='idle'){setS('idle');setTimeout(function(){if(el.dataset.s==='idle')$('.sub').textContent='';},1500);}
+  }
+  function schedule(r,text,gap){
+    var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
+    var s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);
+    var now=ctx.currentTime,t=nextEnd>now?nextEnd+(gap||0):now+0.03,my=turn;
+    nextEnd=t+b.duration;srcs.push(s);
+    s.onended=function(){var i=srcs.indexOf(s);if(i>=0)srcs.splice(i,1);check();};
+    setTimeout(function(){if(my!==turn)return;setS('speaking');$('.sub').textContent=text;},Math.max(0,(t-now)*1000));
+    if(tm&&!tm.audio){tm.audio=performance.now()+Math.max(0,(t-now)*1000);
+      var o={firstTokenMs:Math.round((tm.tok||0)-tm.t0),firstChunkMs:Math.round((tm.chunk||0)-tm.t0),audioStartMs:Math.round(tm.audio-tm.t0)};TM.push(o);if(TM.length>20)TM.shift();try{console.log('lume-voice',o);}catch(e){}}
+    s.start(t);
+  }
+  function enqueue(text,gap){
     var c=(window.lumeSpeakable?window.lumeSpeakable(text):text).replace(/\s+/g,' ').trim();
     if(!c||!/[A-Za-z0-9]/.test(c))return;
-    var my=turn,p=chain=chain.then(function(){return my!==turn?null:tts.generate(c,{voice:'af_bella'});}).catch(function(){note('The voice failed on part of that reply. The text is below.');return null;});
-    Q.push({p:p,t:c,turn:my});pump();
+    var my=turn;inflight++;if(tm&&!tm.chunk)tm.chunk=performance.now();
+    var p=chain=chain.then(function(){return my!==turn?null:engine.gen(c);}).catch(function(){note('The voice failed on part of that reply. The text is below.');return null;});
+    p.then(function(r){if(my!==turn)return;inflight--;if(!r){check();return;}schedule(r,c,gap);});
   }
-  function pump(){
-    if(playing)return;
-    var it=Q.shift();
-    if(!it){if(streamDone&&el.dataset.s!=='idle'){setS('idle');setTimeout(function(){if(el.dataset.s==='idle')$('.sub').textContent='';},1500);}return;}
-    playing=true;
-    it.p.then(function(r){
-      if(it.turn!==turn||!r){playing=false;return pump();}
-      var b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);
-      var s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);src=s;
-      setS('speaking');$('.sub').textContent=it.t;
-      s.onended=function(){if(src!==s)return;src=null;playing=false;pump();};
-      s.start();
-    });
-  }
-  function take(b,fin){
-    var out=[],st=0;
+  function take(b,fin,first){
+    var out=[],st=0,c0=false;
     for(var i=0;i<b.length;i++){
       var c=b[i];
       if(c==='.'||c==='!'||c==='?'){var j=i;while(j+1<b.length&&/[.!?"')\]]/.test(b[j+1]))j++;var nx=b[j+1];if(nx!==undefined&&/\s/.test(nx)){out.push(b.slice(st,j+1).trim());st=j+1;i=j;}}
       else if(c==='\n'&&b.slice(st,i).trim()){out.push(b.slice(st,i).trim());st=i+1;}
+      else if(first&&!out.length&&(c===','||c===';'||c===':')&&i-st>=28&&/\s/.test(b[i+1]||'')){out.push(b.slice(st,i+1).trim());st=i+1;c0=true;}
     }
     var rest=b.slice(st);
     if(fin&&rest.trim()){out.push(rest.trim());rest='';}
     else if(rest.length>240){var k=rest.lastIndexOf(', ',200);if(k<60)k=rest.lastIndexOf(' ',200);if(k>0){out.push(rest.slice(0,k+1).trim());rest=rest.slice(k+1);}}
-    return {s:out,rest:rest};
+    return {s:out,rest:rest,c0:c0};
   }
   window.__lumeTake=take;
 
   /* ---------- a turn: stream the reply, speak as sentences complete ---------- */
   function say(t){
     t=t.trim();if(!t||!tts)return;
-    stop();var my=turn;
+    stop();var my=turn;tm={t0:performance.now()};var spokeFirst=false;
     hist.push({role:'user',content:t});
     var u=document.createElement('div');u.className='u';u.textContent=t;$('.tx').appendChild(u);
     var l=document.createElement('div');l.className='l lora-prose';$('.tx').appendChild(l);scroll();
     $('textarea').value='';setS('thinking');streamDone=false;
     var acc='',buf='',model=ls('lume_model','auto');if(['auto','balanced','fast','deep'].indexOf(model)<0)model='auto';
-    var eff=(window.lumePersonaEffort&&window.lumePersonaEffort())||'low';
-    var sys=typeof window.lumeSystemPrompt==='function'?window.lumeSystemPrompt():'';
+    if(model==='auto')model='fast';
+    var eff=model==='deep'?((window.lumePersonaEffort&&window.lumePersonaEffort())||'low'):'low';
+    var sys=(typeof window.lumeSystemPrompt==='function'?window.lumeSystemPrompt():'')+'\n\nThis is a spoken voice conversation. Answer the way a person talks: one to three short sentences, plain words, no lists, no markdown, no emoji unless asked.';
     var hd=typeof getDeviceHeaders==='function'?getDeviceHeaders():{'Content-Type':'application/json'};
     ctl=typeof AbortController!=='undefined'?new AbortController():null;
     function fail(m,spoken){if(my!==turn)return;streamDone=true;note(m);setS('idle');if(spoken)enqueue(spoken);}
     function fin(){
-      if(my!==turn)return;var r=take(buf,true);r.s.forEach(enqueue);buf='';streamDone=true;
+      if(my!==turn)return;var r=take(buf,true,!spokeFirst);r.s.forEach(function(x,i){enqueue(x,(i===0&&r.c0)?0:0.08);});if(r.s.length)spokeFirst=true;buf='';streamDone=true;
       if(acc.trim()){hist.push({role:'assistant',content:acc.trim()});}else{note('Lume returned an empty reply.');}
-      pump();if(!Q.length&&!playing)setS('idle');
+      check();
     }
     function tok(line){
       if(line.indexOf('data:')!==0)return;var d=line.slice(5).trim();if(!d||d==='[DONE]')return;
       try{var x=((JSON.parse(d).choices||[{}])[0].delta||{}).content;if(!x)return;
-        acc+=x;buf+=x;l.innerHTML=renderMarkdown(acc);scroll();
-        var r=take(buf,false);buf=r.rest;r.s.forEach(enqueue);}catch(e){}
+        if(tm&&!tm.tok)tm.tok=performance.now();acc+=x;buf+=x;l.innerHTML=renderMarkdown(acc);scroll();
+        var r=take(buf,false,!spokeFirst);buf=r.rest;r.s.forEach(function(x2,i){enqueue(x2,(i===0&&r.c0)?0:0.08);});if(r.s.length)spokeFirst=true;}catch(e){}
     }
-    fetch(WK+'/lume',{method:'POST',headers:hd,signal:ctl?ctl.signal:undefined,body:JSON.stringify({stream:true,model:model,persona:'assistant',uid:ls('lume_uid',''),reasoning_effort:eff,include_reasoning:false,messages:[{role:'system',content:sys}].concat(hist.slice(-20))})})
+    fetch(WK+'/lume',{method:'POST',headers:hd,signal:ctl?ctl.signal:undefined,body:JSON.stringify({stream:true,model:model,persona:'assistant',uid:ls('lume_uid',''),reasoning_effort:eff,include_reasoning:false,max_tokens:300,messages:[{role:'system',content:sys}].concat(hist.slice(-8))})})
     .then(function(r){
       if(my!==turn)return;
       if(!r.ok)return fail(r.status===429?'You\u2019ve used up today\u2019s allowance for this model.':'Lume couldn\u2019t be reached (error '+r.status+').','I couldn\u2019t get a reply. Please try again.');
@@ -11874,6 +12019,7 @@ body.light .lora-prose a{color:#2f6f94}
   $('.cl').onclick=close;
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('show'))close();});
   window.lumeConversation=open;
+  try{var cn=navigator.connection;if(ls('lume_voice_ok','')==='1'&&!(cn&&cn.saveData))setTimeout(function(){if(!tts&&!window.__kokoroPipeline)loadVoice().then(warm,function(){});},6000);}catch(e){}
   var anchor=document.querySelector('#sidebar .sb-nav-item.sb-secondary');
   if(anchor){var d=document.createElement('div');d.className='sb-nav-item sb-secondary';d.textContent='Conversation';d.onclick=open;anchor.parentNode.insertBefore(d,anchor);}
 })();
@@ -12708,13 +12854,13 @@ html.lr4-cmp-on #cmp-badge{display:block}
   }
   // one function owns the vision call, so moving to another model later means changing only this
   function visionNote(im){
-    var ep=(typeof POLLINATIONS_TEXT!=='undefined')?POLLINATIONS_TEXT:'https://text.pollinations.ai/';
-    return fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      messages:[{role:'system',content:'You turn photos into notes. Reply with a short title of at most six words on the first line, then a blank line, then the text visible in the photo transcribed as written, or one plain sentence describing it if there is no text. No commentary.'},
-        {role:'user',content:[{type:'image_url',image_url:{url:'data:'+im.mime+';base64,'+im.base64}},{type:'text',text:'Make a note from this photo.'}]}],
-      model:'openai',seed:Math.floor(Math.random()*99999),private:true})
-    }).then(function(r){return r.text();}).then(function(t){
-      t=t.trim();if(!t)throw new Error('empty');
+    return fetch(WORKER+'/vision',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      system:'You turn photos into notes. Reply with a short title of at most six words on the first line, then a blank line, then the text visible in the photo transcribed as written, or one plain sentence describing it if there is no text. No commentary.',
+      text:'Make a note from this photo.',
+      image:'data:'+im.mime+';base64,'+im.base64})
+    }).then(function(r){if(!r.ok)throw new Error('vision '+r.status);return r.json();}).then(function(d){
+      if(d&&d.flagged){var fe=new Error('flagged');fe.category=d.category;throw fe;}
+      var t=String((d&&d.reply)||'').trim();if(!t)throw new Error('empty');
       var p=t.split(/\n\s*\n/);
       return {title:p[0].replace(/^title:\s*/i,'').slice(0,60),text:(p.slice(1).join('\n\n').trim()||p[0])};
     });
@@ -12723,7 +12869,7 @@ html.lr4-cmp-on #cmp-badge{display:block}
     x=x||{};
     if(x.image){
       return visionNote(x.image).then(function(v){return norm({src:'photo',kind:'photo',title:v.title,text:v.text,thumb:x.image.thumb});},
-        function(){return norm({src:'photo',kind:'photo',title:'Photo',text:'Could not read this photo.',thumb:x.image.thumb});});
+        function(e){var fl=e&&e.message==='flagged';return norm({src:'photo',kind:'photo',title:'Photo',text:fl?lumeImageWarning(e.category):'Could not read this photo.',thumb:fl?'':x.image.thumb});});
     }
     var raw=String(x.url||x.text||x.transcript||'').trim(),src=x.src||(x.transcript?'voice':x.url?'link':'text');
     return Promise.resolve().then(function(){
@@ -13178,5 +13324,559 @@ body.light .lbird{color:#2b2823}
 .lm-banner-art{flex:none;line-height:0}
 #lume-care-open .lm-care-art,#lume-care-now .lm-care-art{display:flex;justify-content:center;padding:6px 16px 0}
 </style>
+
+<style id="lume-motion">
+/* Sidebar: collapsible tools, tabbed panels */
+.sb-sec-head{display:flex;width:100%;align-items:center;justify-content:space-between;padding:0 8px;margin-bottom:6px;background:none;border:none;cursor:pointer;font-family:'Lora',serif;font-style:italic;font-size:10px;color:#1c1a17;text-align:left}
+.sb-sec-head:hover{color:#2e2c2a}
+.sb-caret{display:inline-block;font-style:normal;font-size:9px;transition:transform .2s ease;opacity:.7}
+.sb-sec-head[aria-expanded="false"] .sb-caret,#nav-ask[aria-expanded="false"] .sb-caret{transform:rotate(-90deg)}
+#nav-ask{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.sb-collapse{display:none}
+.sb-collapse.open{display:block;animation:moSoft .22s ease both}
+.sb-sub{padding-left:10px}
+.sb-ask-item{font-size:.94em;opacity:.9}
+.sb-tabs{display:flex;gap:4px;padding:10px 12px 0;border-top:1px solid rgba(255,255,255,.04)}
+.sb-tabs button{flex:1;background:none;border:none;border-bottom:1px solid transparent;padding:4px 2px 6px;cursor:pointer;font-family:'Lora',serif;font-style:italic;font-size:10.5px;color:#1c1a17;transition:color .15s,border-color .15s}
+.sb-tabs button:hover{color:#2e2c2a}
+.sb-tabs button.on{color:#6f6a63;border-bottom-color:rgba(255,255,255,.14)}
+#sb-tabbed .sidebar-panel{display:none!important;border-top:none;padding-top:10px}
+#sb-tabbed .sidebar-panel.show.tab-on{display:block!important}
+body.light .sb-tabs button.on{color:#5a5550;border-bottom-color:rgba(0,0,0,.18)}
+
+.settings-sub{font:400 10px/1 Figtree,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6f6a63;margin:22px 0 8px}
+.settings-section-title+.settings-sub{margin-top:6px}
+
+/* Motion pass: short (<=320ms), additive, uses transform/opacity only. The existing
+   prefers-reduced-motion rule (near line 2133) already shortens every animation and transition here. */
+@keyframes moFade{from{opacity:0}to{opacity:1}}
+@keyframes moRise{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes moSoft{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Panels and modals */
+#lsa-modal.open{animation:moFade .22s ease both}
+#lsa-modal.open>*{animation:moRise .28s cubic-bezier(.2,.8,.2,1) both}
+#settings-page{transform:translateY(10px);transition:opacity .3s ease,transform .3s cubic-bezier(.2,.8,.2,1)}
+#settings-page.show{transform:none}
+body>div[style*="z-index:8999"]{animation:moFade .35s ease both}
+
+/* Safety: slower and calmer than everything else */
+#lume-care-open{animation-duration:.9s}
+#lume-care-now{animation:moFade .8s ease both}
+#lume-care-now>div{animation-duration:1s!important}
+#chat .lc{animation:moSoft .9s ease both}
+
+/* Rows, toggles, buttons */
+.settings-row{transition:background-color .18s ease}
+@media (hover:hover){.settings-row:hover{background-color:rgba(255,255,255,.02)}body.light .settings-row:hover{background-color:rgba(0,0,0,.025)}}
+.settings-row:active{background-color:rgba(255,255,255,.035)}
+.tog::after{transition:transform .22s cubic-bezier(.34,1.4,.64,1),background-color .2s ease}
+.tog:active::after{width:20px}
+.lm-care-btn{transition:transform .15s ease,filter .15s ease}
+.lm-care-btn:active{transform:scale(.97)}
+</style>
+<script id="lume-motion-js">
+(function(){
+  var ease='cubic-bezier(.2,.8,.2,1)',t0=Date.now();
+  function anim(el,kf,o){try{if(el&&el.animate)el.animate(kf,o);}catch(e){}}
+
+  // Send: a small lift-off when the send button is pressed.
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('#send-btn');
+    if(b)anim(b,[{transform:'translateY(0) scale(1)'},{transform:'translateY(-4px) scale(1.08)',offset:.4},{transform:'translateY(0) scale(1)'}],{duration:280,easing:ease});
+  },true);
+
+  // Reply settle: once the chat has been quiet for a moment, ease the latest reply into place.
+  var ci=document.getElementById('chat-inner'),q=null;
+  if(ci&&window.MutationObserver){
+    new MutationObserver(function(){
+      clearTimeout(q);
+      q=setTimeout(function(){
+        var b=ci.querySelectorAll('.msg-body');b=b[b.length-1];
+        if(b)anim(b,[{transform:'translateY(2px)'},{transform:'none'}],{duration:320,easing:ease});
+      },700);
+    }).observe(ci,{childList:true,subtree:true,characterData:true});
+  }
+
+  // Memory: a brief pop on the memory dot whenever memory is updated (skipped during page load).
+  if(typeof window.updateMemoryDot==='function'){
+    var um=window.updateMemoryDot;
+    window.updateMemoryDot=function(){
+      var r=um.apply(this,arguments),d=document.getElementById('memory-dot');
+      if(Date.now()-t0>3000)anim(d,[{transform:'scale(1)'},{transform:'scale(1.9)',offset:.35},{transform:'scale(1)'}],{duration:520,easing:ease});
+      return r;
+    };
+  }
+
+  // Switching conversations: cross-fade the chat in.
+  if(typeof window.loadConvo==='function'){
+    var lc=window.loadConvo;
+    window.loadConvo=function(){
+      var r=lc.apply(this,arguments);
+      anim(document.getElementById('chat-inner'),[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:260,easing:ease});
+      return r;
+    };
+  }
+})();
+</script>
+<script id="lume-sidebar-js">
+(function(){
+  function el(i){return document.getElementById(i);}
+  function get(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  function set(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  // Collapsible tools list (open by default, remembered)
+  var head=el('sb-tools-head'),body=el('sb-tools-body');
+  function setTools(open){body.classList.toggle('open',open);head.setAttribute('aria-expanded',open?'true':'false');}
+  if(head&&body){
+    if(get('lume_sb_tools')==='0')setTools(false);
+    head.addEventListener('click',function(){var o=!body.classList.contains('open');setTools(o);set('lume_sb_tools',o?'1':'0');});
+  }
+  // Ask Lume: one item that opens the three prompts
+  var ask=el('nav-ask'),list=el('sb-ask-list');
+  if(ask&&list)ask.addEventListener('click',function(){var o=!list.classList.contains('open');list.classList.toggle('open',o);ask.setAttribute('aria-expanded',o?'true':'false');});
+  // Tabbed panel for remembers / pinned / reading
+  var wrap=el('sb-tabbed'),ids=['memory-panel','pinned-panel','reading-panel'];
+  if(!wrap)return;
+  var tabs=[].slice.call(wrap.querySelectorAll('.sb-tabs button'));
+  function sync(){
+    var vis=ids.filter(function(i){var p=el(i);return p&&p.classList.contains('show');});
+    wrap.style.display=vis.length?'block':'none';
+    tabs.forEach(function(b){b.style.display=vis.indexOf(b.dataset.p)>-1?'':'none';});
+    var cur=get('lume_sb_tab'); if(vis.indexOf(cur)<0)cur=vis[0];
+    ids.forEach(function(i){var p=el(i);if(p)p.classList.toggle('tab-on',i===cur);});
+    tabs.forEach(function(b){b.classList.toggle('on',b.dataset.p===cur);b.setAttribute('aria-selected',b.dataset.p===cur?'true':'false');});
+  }
+  tabs.forEach(function(b){b.addEventListener('click',function(){set('lume_sb_tab',b.dataset.p);sync();});});
+  if(window.MutationObserver){
+    var mo=new MutationObserver(function(){sync();});
+    ids.forEach(function(i){var p=el(i);if(p)mo.observe(p,{attributes:true,attributeFilter:['class']});});
+  }
+  sync();
+})();
+</script>
+<style id="lume-redo">
+/* ===== Accessibility settings ===== */
+html.lm-text-1{zoom:1.12}
+html.lm-text-2{zoom:1.25}
+html.lm-reduce *,html.lm-reduce *::before,html.lm-reduce *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+html.lm-readable body,html.lm-readable body *:not(code):not(pre):not(kbd):not(.lume-star){font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif!important;font-style:normal!important}
+html.lm-readable body p,html.lm-readable body li,html.lm-readable .msg-body{line-height:1.7!important;letter-spacing:.01em}
+button:focus-visible,[role="button"]:focus-visible,[role="switch"]:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.tog:focus-visible,.sb-nav-item:focus-visible,[tabindex]:focus-visible{outline:2px solid #a78bfa;outline-offset:2px}
+html.lm-focus :focus-visible{outline:3px solid #c4b5fd!important;outline-offset:3px!important;box-shadow:0 0 0 6px rgba(167,139,250,.25)}
+html.lm-contrast [style*="color:#1c1a17"],html.lm-contrast [style*="color:#2e2c2a"],html.lm-contrast [style*="color:#3a3835"],html.lm-contrast [style*="color:#1a1816"],html.lm-contrast [style*="color:#585450"],html.lm-contrast [style*="color:#2a2826"],html.lm-contrast [style*="color:#4a4640"],html.lm-contrast [style*="color:#5a5550"]{color:#c9c3ba!important}
+html.lm-contrast .sp-label,html.lm-contrast .sp-empty,html.lm-contrast .sb-sec-head,html.lm-contrast .sb-tabs button,html.lm-contrast .settings-row-desc,html.lm-contrast .settings-subheading,html.lm-contrast .settings-sub,html.lm-contrast .sb-nav-item,html.lm-contrast .sb-secondary,html.lm-contrast #lsa-head-meta,html.lm-contrast #lsa-foot-meta{color:#c9c3ba!important}
+html.lm-contrast .settings-row,html.lm-contrast .settings-section-title,html.lm-contrast #sidebar{border-color:rgba(255,255,255,.22)!important}
+html.lm-contrast body.light [style*="color:#1c1a17"],html.lm-contrast body.light [style*="color:#2e2c2a"],html.lm-contrast body.light [style*="color:#3a3835"],html.lm-contrast body.light .settings-row-desc,html.lm-contrast body.light .sb-nav-item,html.lm-contrast body.light .sp-label{color:#3a3632!important}
+.lm-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ===== First-use flow ===== */
+#consent-overlay .lf-stage{width:100%}
+.lf-step{animation:lfIn .38s cubic-bezier(.2,.8,.2,1) both}
+.lf-step.out{animation:lfOut .16s ease both}
+.lf-step.back{animation-name:lfInBack}
+@keyframes lfIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+@keyframes lfInBack{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
+@keyframes lfOut{to{opacity:0;transform:translateX(-14px)}}
+.lf-step .lcn-hi:focus{outline:none}
+.lf-step .lcn-row{animation:moSoft .45s ease both}
+.lf-step .lcn-row:nth-child(1){animation-delay:.05s}.lf-step .lcn-row:nth-child(2){animation-delay:.1s}.lf-step .lcn-row:nth-child(3){animation-delay:.15s}.lf-step .lcn-row:nth-child(4){animation-delay:.2s}.lf-step .lcn-row:nth-child(5){animation-delay:.25s}.lf-step .lcn-row:nth-child(6){animation-delay:.3s}
+.lf-card{padding:6px 18px}
+.lf-set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07);text-align:left}
+.lf-set:last-child{border-bottom:0}
+.lf-set b{display:block;font:500 13px Figtree,sans-serif;color:#e6e1d8}
+.lf-set span{display:block;font:400 11.5px/1.5 Figtree,sans-serif;color:#a9a39a;margin-top:2px}
+.lf-actions{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;margin-top:6px}
+.lf-link{background:none;border:0;color:#a9a39a;font:400 12.5px Figtree,sans-serif;padding:10px 14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.lf-link:hover{color:#e6e1d8}
+.lf-list{list-style:none;text-align:left;margin:0 0 18px;padding:0;width:100%}
+.lf-list li{position:relative;padding:11px 0 11px 22px;border-bottom:1px solid rgba(255,255,255,.07);font:400 13.5px/1.6 Figtree,sans-serif;color:#cfcac2}
+.lf-list li::before{content:'\2726';position:absolute;left:0;top:12px;font-size:10px;color:#a78bfa}
+.lf-list li:last-child{border-bottom:0}
+
+/* ===== Memory offer ===== */
+#lume-mem-offer{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);transform:translateX(-50%);width:min(420px,calc(100vw - 28px));z-index:900;padding:16px 18px;border-radius:18px;background:rgba(22,20,28,.94);border:1px solid rgba(255,255,255,.1);box-shadow:0 18px 50px rgba(0,0,0,.45);backdrop-filter:blur(10px);animation:moRise .5s cubic-bezier(.2,.8,.2,1) both}
+#lume-mem-offer b{display:block;font:600 13.5px Figtree,sans-serif;color:#ece8e1;margin-bottom:4px}
+#lume-mem-offer p{font:400 12.5px/1.6 Figtree,sans-serif;color:#b4aea5;margin:0 0 12px}
+#lume-mem-offer .row{display:flex;gap:8px}
+#lume-mem-offer button{flex:1;padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:none;color:#cfcac2;font:500 12.5px Figtree,sans-serif;cursor:pointer}
+#lume-mem-offer button.go{border:0;color:#141022;background:linear-gradient(135deg,#a78bfa,#f472b6 60%,#38bdf8)}
+#lume-mem-offer.bye{animation:lfOut .2s ease both}
+body.light #lume-mem-offer{background:rgba(250,247,240,.96);border-color:rgba(0,0,0,.1)}
+body.light #lume-mem-offer b{color:#2a2622}body.light #lume-mem-offer p{color:#5a5550}body.light #lume-mem-offer button{color:#3a3632;border-color:rgba(0,0,0,.15)}
+
+/* ===== Agreement: design redo ===== */
+#lsa-modal{background:radial-gradient(60% 46% at 18% 8%,rgba(167,139,250,.2),transparent 70%),radial-gradient(50% 40% at 88% 90%,rgba(56,189,248,.12),transparent 70%),rgba(8,7,10,.94)!important;backdrop-filter:blur(10px)}
+#lsa-modal.open{animation:moFade .28s ease both}
+#lsa-modal.open>#lsa-inner{animation:moRise .38s cubic-bezier(.2,.8,.2,1) both}
+#lsa-modal.closing{animation:lfOut .2s ease both}
+#lsa-modal.closing>#lsa-inner{transition:transform .2s ease;transform:translateY(10px) scale(.985)}
+#lsa-inner{width:min(720px,calc(100vw - 24px))!important;max-height:90vh!important;border-radius:22px!important;background:linear-gradient(170deg,#18151d,#121016 55%,#0f0d12)!important;border:1px solid rgba(255,255,255,.1)!important;box-shadow:0 40px 110px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.03)!important}
+#lsa-head{padding:20px 28px 16px!important;border-bottom:1px solid rgba(255,255,255,.07)!important}
+#lsa-head-name{font-size:19px!important}
+#lsa-head-mark>span:last-child{font:500 11px Figtree,sans-serif!important;letter-spacing:.14em!important;color:#a9a39a!important;margin-left:12px!important}
+#lsa-head-meta{font:500 10px Figtree,sans-serif!important;letter-spacing:.1em!important;color:#c4b5fd!important;padding:4px 9px;border-radius:999px;border:1px solid rgba(167,139,250,.35)}
+#lsa-close{font-size:22px!important;color:#a9a39a!important;width:34px;height:34px;border-radius:50%;transition:background .15s,color .15s}
+#lsa-close:hover{background:rgba(255,255,255,.07);color:#ece8e1!important}
+#lsa-progress{height:3px;background:rgba(255,255,255,.05);flex-shrink:0}
+#lsa-progress i{display:block;height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#a78bfa,#f472b6,#38bdf8);transition:transform .12s linear}
+#lsa-body{padding:26px 30px 36px!important;font-family:'Lora',serif!important;font-size:15px!important;line-height:1.78!important;color:#c9c3ba!important;scroll-behavior:smooth}
+#lsa-body p{color:#c9c3ba!important;margin-bottom:15px!important}
+#lsa-body p.lead{color:#ece8e1!important;font-size:17px!important;line-height:1.65!important}
+#lsa-body strong{color:#ece8e1!important;font-weight:600!important}
+#lsa-body p[style],#lsa-body span[style]{color:#c9c3ba!important}
+#lsa-body em{color:#e6e1d8}
+#lsa-body h2{display:flex;flex-direction:column;gap:3px;margin:44px 0 16px!important;padding:0 0 12px!important;border-bottom:1px solid rgba(255,255,255,.09)!important;scroll-margin-top:12px}
+#lsa-body h2:first-child{margin-top:0!important}
+#lsa-body .lsa-part{font:600 10.5px Figtree,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa}
+#lsa-body .lsa-ptitle{font:600 23px/1.25 'Lora',serif;color:#f1ede6;letter-spacing:-.01em}
+#lsa-body h3{font:600 12px Figtree,sans-serif!important;letter-spacing:.1em!important;text-transform:uppercase;color:#cfcac2!important;margin:26px 0 8px!important}
+#lsa-body ul li{color:#c9c3ba!important;padding:6px 0 6px 20px!important}
+#lsa-body ul li::before{color:#a78bfa!important;font-size:8px!important;top:11px!important}
+#lsa-body .legal-note{border-left:3px solid #a78bfa!important;background:rgba(167,139,250,.08)!important;border-radius:0 14px 14px 0;padding:14px 18px!important;color:#d4cfc7!important;font-size:14px}
+#lsa-body>.legal-note:first-child{border-left-color:#f472b6!important;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(56,189,248,.08))!important;border-radius:16px;border:1px solid rgba(255,255,255,.1)!important;padding:18px 20px!important;margin-bottom:22px}
+#lsa-body>.legal-note:first-child strong{font:600 10.5px Figtree,sans-serif!important;letter-spacing:.2em;text-transform:uppercase;color:#c4b5fd!important}
+#lsa-body>.legal-note:first-child li{font-size:14.5px;line-height:1.6}
+#lsa-body .lsa-toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 30px;padding:0}
+#lsa-body .lsa-toc button{display:inline-flex;gap:7px;align-items:baseline;padding:7px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:#cfcac2;font:500 12px Figtree,sans-serif;cursor:pointer;transition:background .15s,border-color .15s,transform .15s;animation:moSoft .45s ease both}
+#lsa-body .lsa-toc button i{font-style:normal;color:#a78bfa;font-weight:600}
+#lsa-body .lsa-toc button:hover{background:rgba(167,139,250,.14);border-color:rgba(167,139,250,.5);transform:translateY(-1px)}
+.lsa-rv{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+.lsa-rv.in{opacity:1;transform:none}
+#lsa-foot{padding:14px 28px 18px!important;border-top:1px solid rgba(255,255,255,.07)!important;background:rgba(18,16,22,.9)}
+#lsa-foot-meta{color:#8a8680!important;font-size:10px!important}
+#lsa-scroll-notice{font-size:10px!important;color:#a9a39a!important}
+#lsa-accept{padding:11px 26px!important;border-radius:999px!important;border:0!important;color:#141022!important;font:600 13px Figtree,sans-serif!important;letter-spacing:.01em!important;background:linear-gradient(135deg,#a78bfa,#f472b6 60%,#38bdf8)!important;transition:transform .15s,filter .15s,opacity .2s}
+#lsa-accept:disabled{background:rgba(255,255,255,.08)!important;color:#8a8680!important}
+#lsa-accept:not(:disabled):hover{filter:brightness(1.08)}
+#lsa-accept:not(:disabled):active{transform:scale(.97)}
+#lsa-accept.ready{animation:lsaReady .7s ease}
+@keyframes lsaReady{0%{box-shadow:0 0 0 0 rgba(167,139,250,.7)}100%{box-shadow:0 0 0 16px rgba(167,139,250,0)}}
+@media (max-width:600px){#lsa-modal{align-items:flex-end}#lsa-inner{width:100vw!important;max-height:94vh!important;border-radius:22px 22px 0 0!important}#lsa-body{padding:22px 20px 30px!important;font-size:14.5px!important}#lsa-head{padding:16px 20px 14px!important}#lsa-foot{padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 14px)!important;flex-wrap:wrap;gap:10px}#lsa-body .lsa-ptitle{font-size:21px}}
+body.light #lsa-modal{background:radial-gradient(60% 46% at 18% 8%,rgba(167,139,250,.22),transparent 70%),rgba(235,230,220,.94)!important}
+body.light #lsa-inner{background:linear-gradient(170deg,#fbf8f1,#f4efe5)!important;border-color:rgba(0,0,0,.1)!important}
+body.light #lsa-body,body.light #lsa-body p,body.light #lsa-body ul li,body.light #lsa-body p[style],body.light #lsa-body span[style]{color:#3a3632!important}
+body.light #lsa-body p.lead,body.light #lsa-body strong,body.light #lsa-body .lsa-ptitle,body.light #lsa-body em{color:#1f1b17!important}
+body.light #lsa-body h3{color:#4a453f!important}
+body.light #lsa-body h2{border-bottom-color:rgba(0,0,0,.12)!important}
+body.light #lsa-body .legal-note{color:#3a3632!important}
+body.light #lsa-body .lsa-toc button{color:#3a3632;border-color:rgba(0,0,0,.15);background:rgba(0,0,0,.02)}
+body.light #lsa-head,body.light #lsa-foot{border-color:rgba(0,0,0,.1)!important}
+body.light #lsa-foot{background:rgba(244,239,229,.92)}
+body.light .lf-set b,body.light .lf-list li{color:#2a2622}body.light .lf-set span,body.light .lf-link{color:#5a5550}
+</style>
+<script id="lume-flow-js">
+(function(){
+  'use strict';
+  var root=document.documentElement;
+  function get(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  function set(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  function $(i){return document.getElementById(i);}
+
+  /* ---------- Accessibility core ---------- */
+  var KEY='lume_a11y',DEF={text:'0',contrast:'system',motion:'system',readable:false,focus:false};
+  var mqC=window.matchMedia?window.matchMedia('(prefers-contrast: more)'):null;
+  function load(){var o={};try{o=JSON.parse(get(KEY)||'{}')||{};}catch(e){}for(var k in DEF)if(!(k in o))o[k]=DEF[k];return o;}
+  var A=window.lumeA11y={
+    get:load,
+    set:function(k,v){var o=load();o[k]=v;set(KEY,JSON.stringify(o));A.apply();},
+    apply:function(){
+      var o=load(),c=root.classList;
+      c.toggle('lm-text-1',o.text==='1');c.toggle('lm-text-2',o.text==='2');
+      c.toggle('lm-contrast',o.contrast==='high'||(o.contrast==='system'&&!!(mqC&&mqC.matches)));
+      c.toggle('lm-reduce',o.motion==='reduce');
+      c.toggle('lm-readable',!!o.readable);c.toggle('lm-focus',!!o.focus);
+      A.sync();
+    },
+    sync:function(){
+      var o=load();
+      [].forEach.call(document.querySelectorAll('.a11y-seg button'),function(b){b.classList.toggle('on',String(o[b.dataset.k])===b.dataset.v);b.setAttribute('aria-pressed',b.classList.contains('on')?'true':'false');});
+      [].forEach.call(document.querySelectorAll('[data-a11y-tog]'),function(t){var on=!!o[t.dataset.a11yTog];t.classList.toggle('on',on);t.setAttribute('aria-checked',on?'true':'false');});
+    }
+  };
+  if(mqC&&mqC.addEventListener)mqC.addEventListener('change',A.apply);
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.a11y-seg button[data-k]');
+    if(b){A.set(b.dataset.k,b.dataset.v);return;}
+    var t=e.target.closest&&e.target.closest('[data-a11y-tog]');
+    if(t){A.set(t.dataset.a11yTog,!load()[t.dataset.a11yTog]);}
+  });
+  A.apply();
+
+  /* ---------- First-use flow ---------- */
+  var F=window.lumeFlow={active:false,mode:'first',steps:[],idx:0};
+  var ov=null,stage=null;
+  function seg(k,opts){var o=load();return '<div class="lt-seg a11y-seg">'+opts.map(function(x){return '<button type="button" data-k="'+k+'" data-v="'+x[0]+'" aria-pressed="'+(String(o[k])===x[0])+'" class="'+(String(o[k])===x[0]?'on':'')+'">'+x[1]+'</button>';}).join('')+'</div>';}
+  function setrow(t,d,ctl){return '<div class="lf-set"><div><b>'+t+'</b><span>'+d+'</span></div>'+ctl+'</div>';}
+  function row(t,d){return '<div class="lcn-row"><i class="lcn-dot"></i><div><b>'+t+'</b><span>'+d+'</span></div></div>';}
+  function bird(){return (typeof lumeBirdSVG==='function')?'<div class="lcn-art">'+lumeBirdSVG(150)+'</div>':'';}
+  function btn(label,act,cls){return '<button type="button" class="'+(cls||'lcn-btn')+'" data-act="'+act+'">'+label+'</button>';}
+  function careOn(){return typeof getPrivPref==='function'?getPrivPref('carecheck'):true;}
+  function tone(){try{var p=JSON.parse(get('lume_tone')||'null');return p||'default';}catch(e){return get('lume_tone')||'default';}}
+  var BUILD={
+    a11y:function(){return '<h1 class="lcn-hi" tabindex="-1">Let\u2019s make Lume comfortable first.</h1><p class="lcn-sub">Pick what suits you. Nothing here is sent anywhere, and you can change any of it later in Settings.</p><div class="lcn-card lf-card">'+
+      setrow('Text size','Makes everything larger',seg('text',[['0','Default'],['1','Large'],['2','Larger']]))+
+      setrow('Contrast','System follows your device',seg('contrast',[['system','System'],['high','High']]))+
+      setrow('Reduce motion','System follows your device',seg('motion',[['system','System'],['reduce','Reduce']]))+
+      setrow('Readable font','Plain text with roomier lines','<div class="tog" role="switch" tabindex="0" aria-label="Readable font" data-a11y-tog="readable"></div>')+
+      '</div><div class="lf-actions">'+btn('Continue','next')+btn('Skip for now','next','lf-link')+'</div>';},
+    welcome:function(){return bird()+'<h1 class="lcn-hi" tabindex="-1">Hi, I\u2019m Lume.</h1><p class="lcn-sub">I\u2019m an AI assistant for questions, writing, planning and thinking things through. You need to be 16 or older, or an adult where you live if that\u2019s older.</p><div class="lf-actions">'+btn('Continue','next')+btn('Back','back','lf-link')+'</div>';},
+    how:function(){var done=!!get('lume_consent_v5');return '<h1 class="lcn-hi" tabindex="-1">How things work</h1><p class="lcn-sub">I\u2019d rather you hear it from me now than find out later.</p><div class="lcn-card">'+
+      row('Your chats are saved','On Lume\u2019s servers for up to 90 days, so we can pick up where we left off. Some things the law requires us to keep may be held longer.')+
+      row('Sometimes a person can look','Lume Monitoring Services, our moderation service, can review conversations. If yours is being reviewed, I\u2019ll tell you on screen, every time.')+
+      row('Your safety comes first','If something you write sounds urgent, I\u2019ll pause to show you help, and I\u2019ll send Lume Inc. a note with just the time, never your words. I\u2019m not watched live and can\u2019t call anyone, so if you\u2019re in immediate danger, contact your local emergency services.')+
+      row('Fair play','Accounts can be suspended for misuse, with a warning first and a way to appeal. I recognise your device so a suspension can\u2019t be dodged by clearing your browser.')+
+      row('Looking things up','When I search the web, only the search text goes to a search provider.')+
+      row('Lives on your device too','Your past chats and memory are kept in this browser so I can open without a connection. Clearing your browser data removes them.')+
+      '</div><p class="lcn-pledge">We make software. We don\u2019t sell your data.</p><div class="lf-actions">'+
+      (done?btn('Continue','next'):btn('Read the agreement &amp; continue','read'))+btn('Back','back','lf-link')+'</div><div class="lcn-foot">Lume Inc. &middot; Mountain View, Serena, Halonesia &middot; v5.0<br><a href="#" data-act="agreement">Service Agreement</a></div>';},
+    choices:function(){return '<h1 class="lcn-hi" tabindex="-1">Your choices</h1><p class="lcn-sub">Two things worth setting now. Both can be changed in Settings.</p><div class="lcn-card lf-card">'+
+      setrow('Check-ins when things sound heavy','If something you share sounds worrying, I\u2019ll show you help. You can always keep talking.','<div class="tog'+(careOn()?' on':'')+'" id="lf-care" role="switch" tabindex="0" aria-label="Check-ins when things sound heavy" aria-checked="'+careOn()+'"></div>')+
+      setrow('Tone','How hard I push back',((function(){var c=document.querySelector('#lt-seg button.on'),t=c?c.dataset.t:'default';return '<div class="lt-seg" id="lf-tone">'+[['gentle','Gentler'],['default','Default'],['blunt','Blunter']].map(function(x){return '<button type="button" data-t="'+x[0]+'"'+(x[0]===t?' class="on"':'')+'>'+x[1]+'</button>';}).join('')+'</div>';})()))+
+      '</div><div class="lf-actions">'+btn('Continue','next')+'</div>';},
+    ready:function(){return bird()+'<h1 class="lcn-hi" tabindex="-1">That\u2019s it.</h1><p class="lcn-sub">Settings is in the sidebar whenever you want to change something. Once we\u2019ve talked a little, I\u2019ll ask whether you\u2019d like me to remember things between chats. Until then, I won\u2019t.</p><div class="lf-actions">'+btn('Start','finish')+(F.mode==='first'?'':btn('Back','back','lf-link'))+'</div>';},
+    changes:function(){return '<h1 class="lcn-hi" tabindex="-1">A few things have changed.</h1><p class="lcn-sub">Version 5.0 of the Lume Service Agreement is plainer, and it covers more.</p><ul class="lf-list">'+
+      '<li><b>Lume Monitoring Services</b> is our moderation service. It can review conversations, and you\u2019ll always see \u201cSession under review\u201d when it does.</li>'+
+      '<li><b>Safety check-ins.</b> If something sounds urgent, I\u2019ll show you help and send Lume Inc. a note with just the time. I\u2019m not watched live and can\u2019t call anyone.</li>'+
+      '<li><b>Voice.</b> When you dictate, your audio is sent to Lume Inc. to be processed, and stored for 48 hours unless it\u2019s necessary to keep it longer.</li>'+
+      '<li><b>Age.</b> You need to be 16 or older, or an adult where you live if that\u2019s older.</li></ul><div class="lf-actions">'+btn('Read the agreement &amp; agree','read')+btn('Take the intro tour first','tour','lf-link')+'</div>';}
+  };
+  function mkOverlay(){
+    if(ov){ov.remove();}
+    ov=document.createElement('div');ov.id='consent-overlay';ov.className='lcn-ov';
+    ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Welcome to Lume');
+    ov.style.cssText='position:fixed;inset:0;z-index:8999;overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;transition:opacity .5s ease';
+    ov.innerHTML='<div class="lcn-wrap"><div class="lf-stage" id="lf-stage"></div></div>';
+    document.body.appendChild(ov);stage=$('lf-stage');
+    ov.addEventListener('click',onClick);
+    ov.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.tog[role="switch"]')){e.preventDefault();e.target.click();}});
+    void ov.offsetWidth;ov.style.opacity='1';
+  }
+  function render(i,back){
+    F.idx=i;var id=F.steps[i];
+    var go=function(){
+      stage.innerHTML='<div class="lf-step'+(back?' back':'')+'" data-step="'+id+'">'+BUILD[id]()+'</div>';
+      ov.scrollTop=0;A.sync();
+      var h=stage.querySelector('h1');if(h)h.focus({preventScroll:true});
+    };
+    var cur=stage.firstChild;
+    if(cur&&cur.classList){cur.classList.add('out');setTimeout(go,150);}else go();
+  }
+  function next(){if(F.idx<F.steps.length-1)render(F.idx+1,false);}
+  function back(){if(F.idx>0)render(F.idx-1,true);}
+  function onClick(e){
+    var el=e.target.closest&&e.target.closest('[data-act],#lf-care,#lf-tone button');
+    if(!el)return;
+    if(el.id==='lf-care'){var want=!el.classList.contains('on');var real=$('tog-carecheck');if(real&&real.classList.contains('on')!==want)real.click();else if(!real&&typeof togglePrivPref==='function'&&careOn()!==want)togglePrivPref('carecheck',null);el.classList.toggle('on',want);el.setAttribute('aria-checked',want?'true':'false');return;}
+    if(el.matches('#lf-tone button')){var b=document.querySelector('#lt-seg button[data-t="'+el.dataset.t+'"]');if(b)b.click();[].forEach.call(el.parentNode.children,function(x){x.classList.toggle('on',x===el);});return;}
+    var a=el.dataset.act;e.preventDefault();
+    if(a==='next')next();else if(a==='back')back();
+    else if(a==='read')openLSA(true);
+    else if(a==='agreement')openLSA();
+    else if(a==='finish')F.finish();
+    else if(a==='tour'){F.mode='first';F.steps=['a11y','welcome','how','choices','ready'];render(0,false);}
+  }
+  F.start=function(mode){
+    F.mode=mode;F.active=true;
+    F.steps=mode==='returning'?['changes']:['a11y','welcome','how','choices','ready'];
+    mkOverlay();stage.innerHTML='';render(0,false);
+  };
+  F.afterConsent=function(){
+    if(F.mode==='returning'){F.finish();return;}
+    var i=F.steps.indexOf('choices');render(i,false);
+  };
+  F.finish=function(){
+    F.active=false;
+    if(F.mode==='tour'){if(ov){ov.style.opacity='0';setTimeout(function(){ov&&ov.remove();ov=null;},420);}return;}
+    if(typeof finishConsent==='function')finishConsent();
+  };
+  var _start=F.start;
+  F.start=function(mode){
+    if(mode==='tour'){ // Replay from Settings: same steps, no consent
+      if(typeof closeSettings==='function')try{closeSettings();}catch(e){}
+      F.mode='tour';F.active=true;F.steps=['a11y','welcome','how','choices','ready'];mkOverlay();stage.innerHTML='';render(0,false);return;
+    }
+    _start(mode);
+  };
+
+  /* ---------- Memory offer (once, after the third conversation) ---------- */
+  function memOn(){var s=$('lume-memory-consent-status');return !!(s&&/enabled|active/i.test(s.textContent)&&!/not|disabled/i.test(s.textContent));}
+  function maybeOffer(){
+    if(get('lume_mem_offered')||!get('lume_consent_v5')||$('consent-overlay')||$('lume-mem-offer'))return;
+    if(parseInt(get('lume_convos')||'0',10)<3)return;
+    if(memOn()){set('lume_mem_offered','1');return;}
+    var c=document.createElement('div');c.id='lume-mem-offer';c.setAttribute('role','region');c.setAttribute('aria-label','Memory');
+    c.innerHTML='<b>Want me to remember things between chats?</b><p>It\u2019s off right now. If you turn it on, I\u2019ll suggest things to remember and you approve each one first.</p><div class="row"><button type="button" class="go" data-m="on">Turn on</button><button type="button" data-m="later">Not now</button></div>';
+    document.body.appendChild(c);
+    c.addEventListener('click',function(e){
+      var b=e.target.closest&&e.target.closest('button[data-m]');if(!b)return;
+      set('lume_mem_offered','1');c.classList.add('bye');setTimeout(function(){c.remove();},210);
+      if(b.dataset.m==='on'&&typeof openSettings==='function'){openSettings();setTimeout(function(){var m=$('lume-memory-consent-controls');if(m&&m.scrollIntoView)m.scrollIntoView({behavior:'smooth',block:'center'});},450);}
+    });
+  }
+  setTimeout(maybeOffer,6000);setInterval(maybeOffer,30000);
+
+  /* ---------- Keyboard and screen-reader support ---------- */
+  var ann=document.createElement('div');ann.className='lm-sr';ann.setAttribute('aria-live','polite');ann.setAttribute('aria-atomic','true');document.body.appendChild(ann);
+  function enh(){
+    [].forEach.call(document.querySelectorAll('.tog:not([data-lm])'),function(t){
+      t.setAttribute('data-lm','1');if(!t.getAttribute('role'))t.setAttribute('role','switch');if(!t.hasAttribute('tabindex'))t.tabIndex=0;
+      t.setAttribute('aria-checked',t.classList.contains('on')?'true':'false');
+      if(!t.getAttribute('aria-label')){var r=t.closest('.settings-row'),h=r&&r.querySelector('.settings-row-title');if(h)t.setAttribute('aria-label',h.textContent.trim());}
+    });
+    [].forEach.call(document.querySelectorAll('.sb-nav-item:not([data-lm])'),function(n){n.setAttribute('data-lm','1');if(!n.getAttribute('role'))n.setAttribute('role','button');if(!n.hasAttribute('tabindex'))n.tabIndex=0;});
+    var m=$('lsa-modal');if(m&&!m.getAttribute('role')){m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Lume Service Agreement');}
+    var l=$('lume-care-now');if(l&&!l.getAttribute('role')){l.setAttribute('role','alertdialog');l.setAttribute('aria-modal','true');l.setAttribute('aria-label','Help is available');var k=[].filter.call(l.querySelectorAll('button'),function(x){return /keep talking/i.test(x.textContent);})[0];if(k)setTimeout(function(){k.focus();},60);}
+    [].forEach.call(document.querySelectorAll('#chat .lc:not([role])'),function(x){x.setAttribute('role','status');});
+  }
+  document.addEventListener('keydown',function(e){
+    var t=e.target;
+    if((e.key==='Enter'||e.key===' ')&&t&&t.matches&&t.matches('.tog[role="switch"],.sb-nav-item[role="button"],#nav-ask')&&!t.matches('button')){e.preventDefault();t.click();}
+    if(e.key==='Escape'){var m=$('lsa-modal');if(m&&m.classList.contains('open')&&m.dataset.fromConsent!=='1'&&typeof closeLSA==='function')closeLSA();}
+  });
+  if(window.MutationObserver){
+    var tick=null;new MutationObserver(function(m){
+      m.forEach(function(r){if(r.type==='attributes'&&r.target.matches&&r.target.matches('.tog[data-lm]'))r.target.setAttribute('aria-checked',r.target.classList.contains('on')?'true':'false');});
+      clearTimeout(tick);tick=setTimeout(enh,80);
+    }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  }
+  enh();
+  // Announce a finished reply politely
+  var sentAt=0;document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#send-btn'))sentAt=Date.now();},true);
+  document.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&e.target&&e.target.id==='user-input')sentAt=Date.now();},true);
+  var ci=$('chat-inner'),q=null;
+  if(ci&&window.MutationObserver)new MutationObserver(function(){
+    clearTimeout(q);q=setTimeout(function(){
+      if(!sentAt||Date.now()-sentAt>120000)return;
+      var b=ci.querySelectorAll('.msg-body');b=b[b.length-1];
+      if(b){var t=(b.textContent||'').trim();if(t){ann.textContent='';setTimeout(function(){ann.textContent='Lume replied: '+t.slice(0,400);},30);sentAt=0;}}
+    },1200);
+  }).observe(ci,{childList:true,subtree:true,characterData:true});
+
+  /* ---------- Agreement: progress, contents, reveal, close ---------- */
+  var body=$('lsa-body'),modal=$('lsa-modal');
+  if(body&&modal){
+    var head=$('lsa-head'),prog=document.createElement('div');prog.id='lsa-progress';prog.innerHTML='<i></i>';
+    if(head&&head.parentNode)head.parentNode.insertBefore(prog,head.nextSibling);
+    var bar=prog.firstChild;
+    var h2s=[].slice.call(body.querySelectorAll('h2[id^="lsa-p"]'));
+    if(h2s.length){
+      var nav=document.createElement('nav');nav.className='lsa-toc';nav.setAttribute('aria-label','Contents');
+      h2s.forEach(function(h,i){var b=document.createElement('button');b.type='button';b.style.animationDelay=(0.04*i+0.1)+'s';
+        b.innerHTML='<i>'+(i+1)+'</i>'+h.querySelector('.lsa-ptitle').textContent;
+        b.addEventListener('click',function(){h.scrollIntoView({behavior:A.get().motion==='reduce'?'auto':'smooth',block:'start'});});nav.appendChild(b);});
+      body.insertBefore(nav,h2s[0]);
+    }
+    function upd(){var m=body.scrollHeight-body.clientHeight;bar.style.transform='scaleX('+(m>0?Math.min(1,body.scrollTop/m):0)+')';}
+    body.addEventListener('scroll',upd,{passive:true});
+    // reveal sections as they scroll in
+    var targets=[].slice.call(body.querySelectorAll('h2,h3,.legal-note,p.lead'));
+    if('IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{root:body,rootMargin:'0px 0px -8% 0px',threshold:.05});
+      targets.forEach(function(t,i){if(i>2){t.classList.add('lsa-rv');io.observe(t);}});
+    }
+    new MutationObserver(function(){
+      if(modal.classList.contains('open')){body.scrollTop=0;upd();var a=$('lsa-accept');if(a){setTimeout(function(){if(!a.disabled){a.classList.remove('ready');void a.offsetWidth;a.classList.add('ready');}},350);}}
+    }).observe(modal,{attributes:true,attributeFilter:['class']});
+    // unlocked after scrolling: pulse the accept button once
+    body.addEventListener('scroll',function(){var a=$('lsa-accept');if(a&&!a.disabled&&modal.dataset.fromConsent==='1'&&!a.dataset.pulsed){a.dataset.pulsed='1';a.classList.add('ready');}},{passive:true});
+    // fade out on close
+    if(typeof window.closeLSA==='function'){
+      var cl=window.closeLSA,busy=false;
+      window.closeLSA=function(){
+        if(busy||!modal.classList.contains('open'))return;busy=true;
+        modal.classList.add('closing');
+        setTimeout(function(){modal.classList.remove('closing');busy=false;var a=$('lsa-accept');if(a)delete a.dataset.pulsed;cl();},190);
+      };
+    }
+  }
+})();
+</script>
+<style id="lume-agreement-a11y">
+/* Agreement: keyboard + motion gaps */
+#lsa-body:focus{outline:none}
+#lsa-body:focus-visible{box-shadow:inset 0 0 0 2px rgba(196,181,253,.7)}
+#lsa-close[aria-disabled="true"]{opacity:.3;pointer-events:none}
+html.lm-reduce .lsa-rv,.lsa-rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.lsa-rv{opacity:1;transform:none}}
+html.lm-contrast #lsa-scroll-notice,html.lm-contrast #lsa-body .legal-note{color:#e6e1d8!important}
+html.lm-contrast #lsa-inner{border-color:rgba(255,255,255,.35)!important}
+@media print{#lsa-modal{position:static!important;display:block!important;background:none!important}#lsa-inner{max-height:none!important;box-shadow:none!important}#lsa-body{overflow:visible!important}.lsa-rv{opacity:1!important;transform:none!important}#lsa-progress,#lsa-foot,#lsa-close,.lsa-toc{display:none!important}}
+</style>
+<script id="lume-agreement-a11y-js">
+(function(){
+  var m=document.getElementById('lsa-modal'),body=document.getElementById('lsa-body'),
+      x=document.getElementById('lsa-close'),acc=document.getElementById('lsa-accept');
+  if(!m||!body)return;
+  var opener=null,wasOpen=false;
+  // Scrollable text must be reachable and operable by keyboard
+  body.setAttribute('tabindex','0');body.setAttribute('role','region');body.setAttribute('aria-label','Agreement text');
+  // Progress as a real progressbar
+  var prog=document.getElementById('lsa-progress');
+  if(prog){prog.setAttribute('role','progressbar');prog.setAttribute('aria-label','Reading progress');prog.setAttribute('aria-valuemin','0');prog.setAttribute('aria-valuemax','100');prog.setAttribute('aria-valuenow','0');}
+  // Polite status line for the read-to-continue lock
+  var live=document.createElement('div');live.className='lm-sr';live.setAttribute('role','status');live.setAttribute('aria-live','polite');m.appendChild(live);
+  function say(t){live.textContent='';setTimeout(function(){live.textContent=t;},30);}
+  function locked(){return m.dataset.fromConsent==='1'&&acc&&acc.disabled;}
+  function sync(){
+    if(x){var l=locked();x.setAttribute('aria-disabled',l?'true':'false');x.tabIndex=l?-1:0;}
+    if(prog){var r=body.scrollHeight-body.clientHeight;prog.setAttribute('aria-valuenow',String(r>0?Math.round(100*Math.min(1,body.scrollTop/r)):100));}
+  }
+  var told=false;
+  body.addEventListener('scroll',function(){
+    sync();
+    if(m.dataset.fromConsent==='1'&&acc&&!acc.disabled&&!told){told=true;say('You have reached the end. You can continue now.');}
+  },{passive:true});
+  function focusables(){
+    return [].filter.call(m.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'),function(e){return !e.disabled&&e.getAttribute('aria-disabled')!=='true'&&e.offsetParent!==null;});
+  }
+  m.addEventListener('keydown',function(e){
+    if(e.key!=='Tab'||!m.classList.contains('open'))return;
+    var f=focusables();if(!f.length){e.preventDefault();return;}
+    var a=document.activeElement,i=f.indexOf(a);
+    if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus();}
+    else if(!e.shiftKey&&(i===-1||i===f.length-1)){e.preventDefault();f[0].focus();}
+  });
+  new MutationObserver(function(){
+    var open=m.classList.contains('open');
+    if(open&&!wasOpen){
+      wasOpen=true;told=false;
+      opener=document.activeElement&&document.activeElement!==document.body?document.activeElement:null;
+      setTimeout(function(){sync();try{body.focus({preventScroll:true});}catch(_){}
+        if(m.dataset.fromConsent==='1')say('Service Agreement. Read to the end to enable the continue button.');},60);
+    }else if(!open&&wasOpen&&!m.classList.contains('closing')){
+      wasOpen=false;
+      if(opener&&document.contains(opener))try{opener.focus({preventScroll:true});}catch(_){}
+      opener=null;
+    }
+  }).observe(m,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+<script id="lume-pace-js">
+(function(){
+  var K='lume_pace';
+  function mode(){var v='natural';try{v=localStorage.getItem(K)||v;}catch(e){}return /^(quick|natural|slow)$/.test(v)?v:'natural';}
+  function thinkMs(t){
+    var m=mode();if(m==='quick')return 0;
+    var s=String(t||''),len=s.length,b=2200+Math.min(len*14,3200)+Math.random()*1400;
+    if(len>80&&/\?/.test(s))b+=800;
+    return Math.round(b*(m==='slow'?1.8:1));
+  }
+  // How a reply is delivered: wait first, then reveal at a readable pace
+  window.lumePace=function(round){
+    var m=mode();if(m==='quick')return {on:false};
+    return {on:true,cps:m==='slow'?30:46,until:round>0?0:(window._lumeThinkUntil||0)};
+  };
+  var oC=window.callLume;
+  if(typeof oC==='function')window.callLume=function(t){window._lumeThinkUntil=Date.now()+thinkMs(t);return oC.apply(this,arguments);};
+  // Settings row, next to Tone
+  var tone=document.getElementById('lt-seg'),row=tone&&tone.closest('.settings-row');
+  if(row&&!document.getElementById('lp-seg')){
+    row.insertAdjacentHTML('afterend','<div class="settings-row"><div class="settings-row-left"><div class="settings-row-title">Thinking time</div><div class="settings-row-desc">How long Lume takes before and while it replies</div></div><div class="lt-seg" id="lp-seg" role="group" aria-label="Thinking time"><button type="button" data-p="quick">Quick</button><button type="button" data-p="natural">Natural</button><button type="button" data-p="slow">Slow</button></div></div>');
+    function sync(){[].forEach.call(document.querySelectorAll('#lp-seg button'),function(b){var on=b.dataset.p===mode();b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});}
+    document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#lp-seg button');if(!b)return;try{localStorage.setItem(K,b.dataset.p);}catch(_){}sync();});
+    sync();
+  }
+})();
+</script>
 </body>
 </html>
