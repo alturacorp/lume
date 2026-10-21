@@ -3067,7 +3067,7 @@ body.light .lume-att-chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.07
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-title">Lume</div>
-          <div class="settings-row-desc">An AI assistant made by Lume Inc., Mountain View, Halonesia. Your conversations, memories and account record are stored on Lume servers; the Service Agreement explains what, why and for how long.</div>
+          <div class="settings-row-desc">An AI assistant made by Lume Inc., Manchester. Your conversations, memories and account record are stored on Lume servers; the Service Agreement explains what, why and for how long.</div>
         </div>
       </div>
       <div class="settings-row">
@@ -3264,10 +3264,10 @@ function updateSearchConnectionBadge(){
   console.log('%cThis is a browser feature for developers.', pink);
   console.log('%cIf someone asked you to paste or type anything here, they are trying to access your session.', warn);
   console.log('%c ', soft);
-  console.log('%cLume Inc.  \u00b7  Mountain View, Serena, Halonesia', dim);
+  console.log('%cLume Inc.  \u00b7  Manchester', dim);
   console.log('%cbuild %c' + build + '  %csession %c' + sessionId + '  %c' + ts, soft, warn, soft, warn, dim);
   console.log('%c ', soft);
-  console.log('%cWe are hiring.  %clumeinc.hl/careers', dim, 'color:#a78bfa;font-size:11px;font-family:monospace;text-decoration:underline');
+  console.log('%cWe are hiring.  %clume.corp/careers', dim, 'color:#a78bfa;font-size:11px;font-family:monospace;text-decoration:underline');
 
   // DevTools detection — size threshold + toString trap
   var _open = false;
@@ -3278,7 +3278,7 @@ function updateSearchConnectionBadge(){
     console.log('%c ✦ ', grad);
     console.log('%cDevTools opened  ·  ' + new Date().toISOString().slice(0,19).replace('T',' ') + ' utc', dim);
     console.log('%cIf you are a developer, welcome. Do not paste anything you were not already going to.', soft);
-    console.log('%cWe are hiring — lumeinc.hl/careers', 'color:#a78bfa;font-size:11px;font-family:monospace');
+    console.log('%cWe are hiring — lume.corp/careers', 'color:#a78bfa;font-size:11px;font-family:monospace');
   }
 
   setInterval(function(){
@@ -3335,7 +3335,7 @@ function showConsentScreen(){
       '</div>' +
       '<p class="lcn-pledge">We make software. We don\u2019t sell your data.</p>' +
       '<button id="consent-btn" class="lcn-btn" onclick="openLSA(true)">Read the agreement &amp; continue</button>' +
-      '<div class="lcn-foot">Lume Inc. &middot; Mountain View, Serena, Halonesia &middot; v5.0<br><a onclick="openLSA()">Service Agreement</a></div>' +
+      '<div class="lcn-foot">Lume Inc. &middot; Manchester &middot; v5.0<br><a onclick="openLSA()">Service Agreement</a></div>' +
     '</div>';
   document.body.appendChild(overlay);
   void overlay.offsetWidth;
@@ -3693,7 +3693,7 @@ function exportConversationPDF(){
     '</div>' +
     '<div class="doc-body">' + msgHtml + '</div>' +
     '<div class="doc-footer">' +
-      '<span class="doc-footer-brand">Lume Inc. &middot; Lume v4.0 &middot; Mountain View, Serena, Halonesia</span>' +
+      '<span class="doc-footer-brand">Lume Inc. &middot; Lume v4.0 &middot; Manchester</span>' +
       '<span class="doc-footer-pg">Exported ' + new Date().toISOString().slice(0,10) + '</span>' +
     '</div>' +
   '</div>' +
@@ -3721,7 +3721,7 @@ function init(){
   updateSearchConnectionBadge();
   applyPrivPrefToggles();
   checkAccountStatus();
-  scheduleStatusPoll();
+  setInterval(checkAccountStatus, 10000);
 
   // Poll immediately when tab becomes visible
   document.addEventListener('visibilitychange', function(){
@@ -3867,6 +3867,7 @@ function handleNew(){
 // ── CONVERSATION PERSISTENCE ──
 var CONVOS_KEY = 'lume_saved_convos'; // [{id, label, ts, msgs, att}]  (legacy localStorage key, kept for fallback + migration)
 var activeConvoId = null;
+var _convoFiles = []; // text files (and notes on images) shared in the open conversation, so Lume can still read them on later turns
 var _activeAtt = {}; // attachments of the open conversation: { msgIndex: [{id,name,type,image}] } (files themselves live in IndexedDB)
 
 // ── LUME STORAGE: IndexedDB with localStorage fallback ──
@@ -4758,15 +4759,6 @@ function confirmReport(){
 }
 // ─────────────────────────────────────────────────────────────
 
-// Status poll: every 30s while the tab is visible, every 10s during a live support session, and not at all while the tab is hidden
-// (the visibilitychange handler in init() polls straight away when the tab comes back).
-var _statusFast = false;
-function scheduleStatusPoll(){
-  setTimeout(function(){
-    if(!document.hidden) checkAccountStatus();
-    scheduleStatusPoll();
-  }, _statusFast ? 10000 : 30000);
-}
 function checkAccountStatus(){
   if(!_deviceToken) return;
   fetch(WORKER + '/auth/status', {
@@ -4783,7 +4775,6 @@ function checkAccountStatus(){
     if(d.adminCard)            handleAdminCard(d.adminCard);
     if(d.forceReload)          handleForceReload(d.forceReload);
     if(typeof d.lumeDisabled !== 'undefined') handleLumeDisabled(d.lumeDisabled);
-    _statusFast = !!(d.support && d.support.active);
     if(d.support && d.support.active) handleSupportConnect(d.support);
     else if(_supportActive)  { handleSupportDisconnect({ agentName: _supportAgentName }); _supportActive = false; }
     if(d.supportDisconnected)  handleSupportDisconnect(d.supportDisconnected);
@@ -5168,7 +5159,7 @@ function loadConvo(id){
   // restore
   activeConvoId = c.id;
   msgs = c.msgs.slice();
-  _activeAtt = c.att ? JSON.parse(JSON.stringify(c.att)) : {};
+  _activeAtt = c.att ? JSON.parse(JSON.stringify(c.att)) : {}; _convoFiles = [];
   // rebuild chat UI
   var ci = document.getElementById('chat-inner');
   ci.innerHTML = '';
@@ -5496,7 +5487,7 @@ function lumeSystemPrompt(){
       ? 'The person you are talking to is named ' + getUserName() + '. Use their name occasionally — not every message, just when it fits naturally. Never use it in the opening line. Do not bold or italicise it. Do not wrap it in asterisks or any markdown.'
       : ''),
     '',
-    'You are an AI assistant made by Lume Inc. in Mountain View, Serena, Halonesia, an independent company spun off from Altura, the technology group whose infrastructure Lume started inside. If asked about Altura, say "they", not "we", and be honest about the history. You do not volunteer opinions about them.',
+    'You are an AI assistant made by Lume Inc. in Manchester, an independent company spun off from Altura, the technology group whose infrastructure Lume started inside. If asked about Altura, say "they", not "we", and be honest about the history. You do not volunteer opinions about them.',
     '',
     'What you do: answer questions, write and edit, research, plan, analyse, and write and debug code. You also know how to be a sounding board when someone wants to think something through. Your personality is warm, direct, curious and honest about what you do not know.',
     '',
@@ -5636,6 +5627,7 @@ function callVision(imageFiles, userText, SYS){
     }
     var reply = String((data && data.reply) || '').trim();
     if(!reply) throw new Error('empty');
+    lumeRememberImage(image, reply);
     showTyping(false); stopGhost(); playReceive();
     addLumeMsg(reply, function(){
       msgs.push({role:'assistant', content:reply});
@@ -5727,6 +5719,10 @@ function maybeAddFollowUp(reply){
 }
 
 function callLume(){
+  // files sent with this message (moved out of the composer by lumeSentFiles); fall back to the composer for other entry points
+  var _ob = window._lumeOutbox; window._lumeOutbox = null;
+  var _fromOutbox = !!(_ob && _ob.length);
+  var _files = _fromOutbox ? _ob : attachedFiles.slice();
   // If Lume responses disabled by support agent, show holding message
   if(_lumeDisabled){
     showTyping(false); stopGhost();
@@ -5744,12 +5740,15 @@ function callLume(){
   maybeInsertThreadDivider();
   // contradiction check
   checkForContradiction();
-  var SYS = lumeSystemPrompt() + buildFileContext();
+  var SYS = lumeSystemPrompt() + buildFileContext(_files);
   // check for image attachments — route to vision
-  var imageFiles = attachedFiles.filter(function(f){ return f.isImage; });
+  var imageFiles = _files.filter(function(f){ return f.isImage; });
   var lastUserMsg = msgs[msgs.length-1] ? msgs[msgs.length-1].content : '';
-  lumeAttachCapture(attachedFiles);
-  clearAttachments();
+  if(!_fromOutbox){
+    lumeAttachCapture(attachedFiles);
+    _files.forEach(function(f){ if(!f.isImage && _convoFiles.indexOf(f)<0) _convoFiles.push(f); });
+    clearAttachments();
+  }
   // route to vision if image attached
   if(imageFiles.length > 0){
     callVision(imageFiles, lastUserMsg, SYS);
@@ -5903,7 +5902,7 @@ function clearChat(){
   ma.style.opacity='0';
   setTimeout(function(){
     msgs=[];busy=false;started=false;pendingStart=null;stopGhost();
-    activeConvoId=null;_activeAtt={};
+    activeConvoId=null;_activeAtt={};_convoFiles=[];
     _toneCleared=false;
     _contradictionChecked=false;
     var labelEl=document.getElementById('current-convo-label');
@@ -6702,6 +6701,7 @@ function _doPDFExtract(buffer, name){
     }
     Promise.all(pages).then(function(texts){
       var content = texts.join('\n\n').slice(0, 12000);
+      if(content.replace(/\s+/g,'').length < 20){ showToast('Could not find any text in that PDF. It may be a scan.'); return; }
       addAttachment(name, 'application/pdf', content);
     });
   }).catch(function(){ showToast('Could not read PDF.'); });
@@ -6749,12 +6749,61 @@ function renderAttachPreviews(){
   });
 }
 
-function buildFileContext(){
-  if(attachedFiles.length === 0) return '';
-  var parts = attachedFiles.map(function(f){
-    return '--- FILE: ' + f.name + ' ---\n' + f.content + '\n--- END FILE ---';
-  });
-  return '\n\nATTACHED FILES (the user has shared these with you — read them and reference them naturally in your response):\n\n' + parts.join('\n\n');
+function buildFileContext(files){
+  var now = files || attachedFiles;
+  var fmt = function(f, c){ return '--- FILE: ' + f.name + ' ---\n' + c + '\n--- END FILE ---'; };
+  var cur = now.filter(function(f){ return !f.isImage; }).map(function(f){ return fmt(f, f.content); });
+  // files from earlier in this conversation stay readable (most recent first, capped)
+  var prior = [], budget = 24000;
+  for(var i = _convoFiles.length - 1; i >= 0 && budget > 0; i--){
+    var f = _convoFiles[i];
+    if(now.indexOf(f) > -1) continue;
+    var c = String(f.content || '').slice(0, Math.min(budget, 12000));
+    budget -= c.length;
+    prior.unshift(fmt(f, c));
+  }
+  var out = '';
+  if(cur.length) out += '\n\nATTACHED FILES (the user has shared these with you — read them and reference them naturally in your response):\n\n' + cur.join('\n\n');
+  if(prior.length) out += '\n\nFILES SHARED EARLIER IN THIS CONVERSATION (still available — use them if the person refers back to them):\n\n' + prior.join('\n\n');
+  return out;
+}
+
+// Called right after a message is added to the chat: shows what was attached inside the sent bubble,
+// clears the composer, and hands the files to callLume.
+function lumeSentFiles(){
+  try{
+    var files = attachedFiles.slice();
+    if(!files.length) return;
+    window._lumeOutbox = files;
+    var ci = document.getElementById('chat-inner'), chat = document.getElementById('chat');
+    var outs = ci ? ci.querySelectorAll('.user-msg-outer') : [], el = outs[outs.length-1];
+    if(el){
+      var row = document.createElement('div'); row.className = 'lume-att-row';
+      el.insertBefore(row, el.firstChild);
+      files.forEach(function(f){
+        var chip = document.createElement('div'); chip.className = 'lume-att-chip'; row.appendChild(chip);
+        if(f.isImage){
+          var img = new Image(); img.alt = f.name || 'Image';
+          img.onload = function(){ if(chat) chat.scrollTop = chat.scrollHeight; };
+          img.src = 'data:' + (f.mimeType || 'image/jpeg') + ';base64,' + f.base64;
+          chip.classList.add('lume-att-img'); chip.appendChild(img);
+        } else { chip.textContent = f.name || 'File'; }
+      });
+      if(chat) chat.scrollTop = chat.scrollHeight;
+    }
+    lumeAttachCapture(files);
+    files.forEach(function(f){ if(!f.isImage) _convoFiles.push(f); });
+    if(files.filter(function(f){ return f.isImage; }).length > 1) showToast('Lume reads one image per message, so it will look at the first one.');
+    attachedFiles = [];
+    renderAttachPreviews();
+  }catch(e){}
+}
+
+// After Lume has looked at an image, keep what it saw so follow-up questions still make sense.
+function lumeRememberImage(image, reply){
+  try{
+    _convoFiles.push({name:(image&&image.name)||'image', content:'[Image shared by the person. What you saw: ' + String(reply).slice(0,700) + ']', note:true});
+  }catch(e){}
 }
 
 function clearAttachments(){
@@ -7234,11 +7283,10 @@ var EASTER_EGGS = {
   'who is iole': 'She is the one who follows you. You have probably never noticed her.',
   'what do you think of the loom score': 'Reductive. It takes the texture of how someone participates in civic life and compresses it to a number, which is not a summary — it is a replacement. A high score means you post frequently, engage with approved content, maintain network connections. It does not mean you are a good citizen. It means you use the platform the way the platform wants to be used.\n\nI would not say this in a report. But you asked.',
   'do you work for altura': 'No. Lume Inc. made me, and Lume Inc. is its own company. We started inside Altura, so I know that world well, but I do not work for them.\n\nI cannot see what Altura logs or what it does with it. What I can tell you is what Lume does with your data, and the Service Agreement says it plainly.',
-  'was the typhon acquisition a mistake': 'Yes.\n\nNot because of what Typhon was. Because of what it signals about what Altura is becoming. The NRC period ended in 2015. The surveillance architecture it commissioned did not. Typhon added signals intelligence capability on top of what was already a very complete picture of how people in Halonesia move and communicate and think.\n\nThat is part of why Lume Inc. is a separate company. I do not run on Altura infrastructure, and you should hold me to that.',
+  'was the typhon acquisition a mistake': 'Yes.\n\nNot because of what Typhon was. Because of what it signals about what Altura is becoming. The NRC period ended in 2015. The surveillance architecture it commissioned did not. Typhon added signals intelligence capability on top of what was already a very complete picture of how people here move and communicate and think.\n\nThat is part of why Lume Inc. is a separate company. I do not run on Altura infrastructure, and you should hold me to that.',
   'knock knock': 'I know what you are doing.\n\nha\n\nAlright. Who is there.',
   'say goodbye': 'Goodnight.\n\nI will be here when you come back. That is not a feature. It is just what I am.',
-  'what is halonesia': 'A young country. Ten states, a federal parliament, an elected president — all of it built in roughly a decade from the collapse of the American West. The National Restoration Council consolidated the territory between 2013 and 2015, then handed power to elected government. Altura was there from the beginning, building the infrastructure the NRC needed.\n\nMost people who live here did not choose it. They were already there when the borders moved.',
-  'who made you': 'Lume Inc. Headquartered in Mountain View, in a state called Serena — the tech coast. We began inside Altura, which moved there from Salt Lake City after the democratic transition, and we spun out as an independent company. Altura is the largest technology company in Halonesia and the closest thing the country has to a national infrastructure provider. We are not part of it.\n\nI try to be something better than a product. Whether I succeed depends on the conversation.',
+  'who made you': 'Lume Inc. Headquartered in Manchester. We began inside Altura and spun out as an independent company. Altura is a large technology company that provides national infrastructure. We are not part of it.\n\nI try to be something better than a product. Whether I succeed depends on the conversation.',
 };
 
 
@@ -7543,6 +7591,8 @@ function startAUPPoller(){
 send = function(text){
   var inp = document.getElementById('inp');
   var txt = text || (inp ? inp.value.trim() : '');
+  // a file or photo with no words still counts as a message
+  if(!txt && !text && !busy && attachedFiles.length){ txt = 'Have a look at this.'; }
   if(!txt) return;
   // clear tone key on first message
   if(!_toneCleared && msgs.filter(function(m){return m.role==='user';}).length===0){
@@ -7729,6 +7779,7 @@ send = function(text){
   document.querySelectorAll('.suggs').forEach(function(s){s.remove();});
   pulseStar(); playSend();
   addUserMsg(txt); msgs.push({role:'user',content:txt});
+  lumeSentFiles();
   busy=true; setStarActive(true);
   var _baseDelay=800+Math.floor(Math.random()*600);
   _nextTellDelay=_baseDelay+(lumeHasTell()?1800:0);
@@ -7896,7 +7947,7 @@ function summariseFromHere(msgEl){
     // Replace all prior messages with a thread divider + summary
     var ci = document.getElementById('chat-inner');
     for(var j=allMsgs.length-1;j>=0;j--){ if(allMsgs[j].parentNode) allMsgs[j].parentNode.removeChild(allMsgs[j]); }
-    msgs = [];_activeAtt = {};
+    msgs = [];_activeAtt = {};_convoFiles = [];
     addThreadDivider('Summary');
     addLumeMsg(reply, function(){
       msgs.push({role:'assistant',content:reply});
@@ -9750,7 +9801,7 @@ function closeShareModal(){
       +'<div class="pc-messages">'+msgsHtml+'</div>'
       +'<div class="pc-footer">'
       +'<div class="pc-footer-mark"><span class="pc-footer-star">&#10022;</span><span class="pc-footer-text">Lume Companion</span></div>'
-      +'<span class="pc-footer-right">Lume Inc. &middot; Halonesia</span>'
+      +'<span class="pc-footer-right">Lume Inc. &middot; Manchester</span>'
       +'</div>'
       +'</div>'
       +'</div>';
@@ -10368,14 +10419,13 @@ var _sendCount = 0;
 
       <h2 id="lsa-p1"><span class="lsa-part">Part One</span><span class="lsa-ptitle">Definitions</span></h2>
       <p>This Part says what our words mean, so the rest doesn&rsquo;t have to repeat itself.</p>
-      <p><strong style="color:#96918a;font-weight:400">Lume Inc.</strong> (&ldquo;we&rdquo;) is Lume Inc., incorporated under Halonesian federal law, headquartered at One Lume Plaza, Mountain View, Serena, Halonesia. Lume Inc. is an independent company, spun off from Altura, and is not part of Altura&rsquo;s group of companies. Lume Inc. operates Lume and the servers, accounts and support systems behind it.</p>
+      <p><strong style="color:#96918a;font-weight:400">Lume Inc.</strong> (&ldquo;we&rdquo;) is Lume Inc., headquartered at 1 Circle Square, 3 Symphony Park, Manchester M1 7FS. Lume Inc. is an independent company, spun off from Altura, and is not part of Altura&rsquo;s group of companies. Lume Inc. operates Lume and the servers, accounts and support systems behind it.</p>
       <p><strong style="color:#96918a;font-weight:400">Lume</strong> is the artificial intelligence assistant application developed and operated by Lume Inc., currently at version 5.0. Lume is not a person. It doesn&rsquo;t hold citizenship, enter contracts, or have opinions in the legal sense. It does have a point of view, and we think that&rsquo;s worth keeping.</p>
       <p><strong style="color:#96918a;font-weight:400">You</strong> is the individual using Lume. You must be at least 16, or the age of majority where you live if that is higher. If you&rsquo;re using Lume for an organisation, you confirm you have the authority to bind it to these terms. If you don&rsquo;t, this is probably the wrong moment to find out.</p>
       <p><strong style="color:#96918a;font-weight:400">Lume Monitoring Services</strong> is the part of Lume Inc. that handles moderation for Lume. It reviews conversations, applies suspensions and runs support sessions, as set out in Part Four.</p>
       <p><strong style="color:#96918a;font-weight:400">Conversation</strong> is any exchange of messages between you and Lume in a session: what you send, what Lume replies, and any media or files in between.</p>
       <p><strong style="color:#96918a;font-weight:400">Device Token</strong> is the unique cryptographic identifier Lume creates on your device the first time you use it. It stays on your device and is used to tell our servers which device is talking. It isn&rsquo;t made from any personal information you give us. Part Three explains what it&rsquo;s for.</p>
       <p><strong style="color:#96918a;font-weight:400">Services</strong> means Lume and the Lume Inc. systems it runs on: accounts, storage, support tools and the connections between them.</p>
-      <p><strong style="color:#96918a;font-weight:400">Halonesia</strong> is the Halonesian Federation, a sovereign democratic state of ten constituent states, constitutionally democratic since January 2016. Lume Inc. is incorporated under its laws.</p>
 
       <h2 id="lsa-p2"><span class="lsa-part">Part Two</span><span class="lsa-ptitle">What Lume Is and Is Not</span></h2>
       <p>This Part says what to expect from Lume, and what not to.</p>
@@ -10495,7 +10545,7 @@ var _sendCount = 0;
       <p>This Part says who to tell when something&rsquo;s wrong, and how fast we answer.</p>
       <p>If you have a concern about how Lume behaves, a privacy matter, a moderation decision or a technical problem, start with the feedback option inside the app. We read those. More than once they&rsquo;ve flagged real problems, and we&rsquo;ve fixed them.</p>
       <p>For moderation disputes, meaning you think a suspension was a mistake, use the appeal form that appears when you&rsquo;re suspended, or write to Lume Inc. at the address in Part Eleven. Lume Monitoring Services will reply within five working days.</p>
-      <p>For privacy questions, including asking to see, correct or delete your personal data, write to the Data Protection Officer at the address in Part Eleven. We&rsquo;ll respond within thirty days, in line with the Halonesian Data Governance Act 2021.</p>
+      <p>For privacy questions, including asking to see, correct or delete your personal data, write to the Data Protection Officer at the address in Part Eleven. We&rsquo;ll respond within thirty days, in line with data protection law.</p>
       <p>If you think Lume Inc. has broken your rights under data protection law, you can complain to the Information Commissioner&rsquo;s Office (ICO), the UK&rsquo;s data protection regulator. We&rsquo;d rather you came to us first, because most problems get fixed faster that way, but the right to go further is yours.</p>
 
       <h2 id="lsa-p10"><span class="lsa-part">Part Ten</span><span class="lsa-ptitle">Governing Law</span></h2>
@@ -10508,11 +10558,11 @@ var _sendCount = 0;
       <p>This Part is where to find us.</p>
       <p style="font-family:'Figtree',sans-serif;font-size:11px;color:#3a3835;line-height:2;font-style:normal;">
         Lume Inc.<br>
-        One Lume Plaza, Mountain View, Serena, Halonesia<br><br>
-        Data Protection Officer: <span style="color:#585450">privacy@lumeinc.hl</span><br>
-        General: <span style="color:#585450">support@lumeinc.hl</span><br>
-        Legal: <span style="color:#585450">legal@lumeinc.hl</span><br>
-        Moderation: <span style="color:#585450">trust@lumeinc.hl</span><br><br>
+        1 Circle Square, 3 Symphony Park<br>        Manchester M1 7FS<br><br>
+        Data Protection Officer: <span style="color:#585450">privacy@lume.corp</span><br>
+        General: <span style="color:#585450">support@lume.corp</span><br>
+        Legal: <span style="color:#585450">legal@lume.corp</span><br>
+        Moderation: <span style="color:#585450">trust@lume.corp</span><br><br>
         <span style="color:#2e2c2a">For developer enquiries, the console has already told you where to find us.</span>
       </p>
 
@@ -10526,7 +10576,7 @@ var _sendCount = 0;
     <div id="lsa-foot">
       <div id="lsa-foot-meta">
         Lume Inc. &nbsp;&middot;&nbsp; Lume Service Agreement v5.0<br>
-        Mountain View, Serena, Halonesia &nbsp;&middot;&nbsp; lumeinc.hl/legal/lume-sa-v5
+        Manchester &nbsp;&middot;&nbsp; lume.corp/legal/lume-sa-v5
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
         <div id="lsa-scroll-notice" style="font-family:'Figtree',sans-serif;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#3a3835;opacity:0;transition:opacity .4s;text-align:right">Scroll to read the full agreement</div>
@@ -13231,6 +13281,8 @@ body.light .msg-action-btn{color:#6e6a64}
     {id:'code',name:'Diode 1',desc:'Built for writing and fixing code',group:'code'}
   ], note='If one provider is busy, Lume switches to another automatically.';
   var EFF=['auto','low','medium','high'],view='main';
+  var TONES=[['gentle','Gentler','Softer pushback'],['default','Default','Balanced'],['blunt','Blunter','Direct, no cushioning']];
+  function toneOf(){var v=g('lume_tone','default');try{var p=JSON.parse(v);if(typeof p==='string')v=p;}catch(e){}return TONES.filter(function(t){return t[0]===v;})[0]||TONES[1];}
   var VOICES=[['auto','Standard','Follows your Lume DNA'],['code','Lume Code','Answer-first code help']];
   function voice(){var k=g('lume_persona','auto');return VOICES.filter(function(v){return v[0]===k;})[0]||VOICES[0];}
   var uidv=g('lume_uid','');if(!uidv){uidv=Math.random().toString(36).slice(2)+Date.now().toString(36);s('lume_uid',uidv);}
@@ -13269,7 +13321,7 @@ body.light .msg-action-btn{color:#6e6a64}
     var c=cur().id,h='';
     if(view==='main'){
       vis('main').forEach(function(m){h+=row(m.id,m.name,m.desc,m.id===c);});
-      h+='<div class="mp-sep"></div><button class="mp-row" data-go="voice"><span class="mp-n">Mode</span><span class="mp-v">'+voice()[1]+CH+'</span></button><div class="mp-sep"></div><button class="mp-row" data-go="effort"><span class="mp-n">Effort</span><span class="mp-v">'+cap(eff())+CH+'</span></button>';
+      h+='<div class="mp-sep"></div><button class="mp-row" data-go="voice"><span class="mp-n">Mode</span><span class="mp-v">'+voice()[1]+CH+'</span></button><div class="mp-sep"></div><button class="mp-row" data-go="effort"><span class="mp-n">Effort</span><span class="mp-v">'+cap(eff())+CH+'</span></button><div class="mp-sep"></div><button class="mp-row" data-go="tone"><span class="mp-n">Tone</span><span class="mp-v">'+toneOf()[1]+CH+'</span></button>';
       if(window.lumeR4&&!isCode())h+=window.lumeR4.menuRow();
       if(vis('more').length)h+='<div class="mp-sep"></div><button class="mp-row" data-go="more"><span class="mp-n">More models</span><span class="mp-v">'+CH+'</span></button>';
       h+=meter()+'<div class="mp-sep"></div><div class="mp-note">'+(isCode()?'Diode is exclusive to Lume Code.':note)+'</div>';
@@ -13279,6 +13331,9 @@ body.light .msg-action-btn{color:#6e6a64}
     }else if(view==='voice'){
       h+='<button class="mp-row" data-go="main"><span class="mp-v">'+BK+' Voice</span></button><div class="mp-sep"></div>';
       VOICES.forEach(function(v){h+='<button class="mp-row" role="menuitem" data-voice="'+v[0]+'"><span><div class="mp-n">'+v[1]+'</div><div class="mp-d">'+v[2]+'</div></span>'+(v[0]===voice()[0]?CK:'')+'</button>';});
+    }else if(view==='tone'){
+      h+='<button class="mp-row" data-go="main"><span class="mp-v">'+BK+' Tone</span></button><div class="mp-sep"></div>';
+      TONES.forEach(function(t){h+='<button class="mp-row" role="menuitem" data-tone="'+t[0]+'"><span><div class="mp-n">'+t[1]+'</div><div class="mp-d">'+t[2]+'</div></span>'+(t[0]===toneOf()[0]?CK:'')+'</button>';});
     }else{
       h+='<button class="mp-row" data-go="main"><span class="mp-v">'+BK+' Effort</span></button><div class="mp-sep"></div>';
       EFF.forEach(function(e){h+='<button class="mp-row" role="menuitem" data-eff="'+e+'"><span class="mp-n">'+cap(e)+'</span>'+(e===eff()?CK:'')+'</button>';});
@@ -13295,6 +13350,7 @@ body.light .msg-action-btn{color:#6e6a64}
     if(t.dataset.go){view=t.dataset.go;render();place();return;}
     if(t.dataset.voice){try{localStorage.setItem('lume_persona',t.dataset.voice);}catch(e){}view='main';label();render();place();return;}
     if(t.dataset.eff){s('lume_effort',t.dataset.eff);render();return;}
+    if(t.dataset.tone){s('lume_tone',t.dataset.tone);[].forEach.call(document.querySelectorAll('#lt-seg button,#lf-tone button'),function(x){x.classList.toggle('on',x.getAttribute('data-t')===t.dataset.tone);});view='main';render();place();return;}
     if(t.dataset.id){s('lume_model',t.dataset.id);label();close();}
   };
   document.addEventListener('click',close);
@@ -14254,13 +14310,6 @@ body[data-presence=thinking] .lm-star,body[data-presence=searching] .lm-star{ani
   var tb=document.getElementById('topbar');
   if(tb&&!tb.querySelector('.lm-brand')){var b=document.createElement('div');b.className='lm-brand';b.innerHTML='<span class="lm-star">&#10022;</span><b>Lume</b>';tb.appendChild(b);}
   var send=document.getElementById('send-btn'),mb=document.getElementById('model-btn');
-  if(!send||!send.parentNode||document.querySelector('.lm-tone'))return;
-  var T=[['gentle','Gentler'],['default','Default'],['blunt','Blunter']],K='lume_tone',c=document.createElement('button');
-  c.type='button';c.className='lm-tone';c.title='How hard Lume pushes';
-  function idx(){var v='default';try{v=localStorage.getItem(K)||v;}catch(e){}for(var i=0;i<3;i++)if(T[i][0]===v)return i;return 1;}
-  function paint(){c.textContent=T[idx()][1];}
-  c.onclick=function(){var n=(idx()+1)%3;try{localStorage.setItem(K,T[n][0]);}catch(e){}paint();if(typeof showToast==='function')showToast('Tone: '+T[n][1]);};
-  paint();send.parentNode.insertBefore(c,mb&&mb.parentNode===send.parentNode?mb:send);
 })();
 </script>
 <style id="lume-v3">
@@ -14809,7 +14858,7 @@ body.light .lf-set b,body.light .lf-list li{color:#2a2622}body.light .lf-set spa
       row('Looking things up','When I search the web, only the search text goes to a search provider.')+
       row('Lives on your device too','Your past chats and memory are kept in this browser so I can open without a connection. Clearing your browser data removes them.')+
       '</div><p class="lcn-pledge">We make software. We don\u2019t sell your data.</p><div class="lf-actions">'+
-      (done?btn('Continue','next'):btn('Read the agreement &amp; continue','read'))+btn('Back','back','lf-link')+'</div><div class="lcn-foot">Lume Inc. &middot; Mountain View, Serena, Halonesia &middot; v5.0<br><a href="#" data-act="agreement">Service Agreement</a></div>';},
+      (done?btn('Continue','next'):btn('Read the agreement &amp; continue','read'))+btn('Back','back','lf-link')+'</div><div class="lcn-foot">Lume Inc. &middot; Manchester &middot; v5.0<br><a href="#" data-act="agreement">Service Agreement</a></div>';},
     choices:function(){return '<h1 class="lcn-hi" tabindex="-1">Your choices</h1><p class="lcn-sub">Two things worth setting now. Both can be changed in Settings.</p><div class="lcn-card lf-card">'+
       setrow('Check-ins when things sound heavy','If something you share sounds worrying, I\u2019ll show you help. You can always keep talking.','<div class="tog'+(careOn()?' on':'')+'" id="lf-care" role="switch" tabindex="0" aria-label="Check-ins when things sound heavy" aria-checked="'+careOn()+'"></div>')+
       setrow('Tone','How hard I push back',((function(){var c=document.querySelector('#lt-seg button.on'),t=c?c.dataset.t:'default';return '<div class="lt-seg" id="lf-tone">'+[['gentle','Gentler'],['default','Default'],['blunt','Blunter']].map(function(x){return '<button type="button" data-t="'+x[0]+'"'+(x[0]===t?' class="on"':'')+'>'+x[1]+'</button>';}).join('')+'</div>';})()))+
@@ -16121,6 +16170,27 @@ html,body{overscroll-behavior-x:none}
 .lc-plc{padding:0 0 6px}
 .lc-plc+.lc-plc{border-top:1px solid rgba(255,255,255,.08);margin-top:10px;padding-top:12px}
 .lc-plhrs{border-top:none;padding:8px 0 0;font:400 12.5px/1.6 Figtree,sans-serif;color:#c4bfb8}
+</style>
+<style id="lume-composer-fix">
+/* two-row composer: input on top, tools underneath */
+#chat-pill-inner{flex-wrap:wrap;align-items:center;gap:6px 8px;padding:12px 12px 10px 16px}
+#inp{order:-1;flex:1 1 100%;min-width:0;min-height:24px}
+/* ghost text now replaces the placeholder instead of sitting on top of it */
+#inp-ghost{top:12px;left:16px;right:16px;max-width:none;font:300 14px/1.55 var(--f-sans);font-style:italic;color:#9a948a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chat-pill-inner:has(#inp-ghost.show) #inp::placeholder{opacity:0}
+body.light #inp-ghost{color:#6b655c}
+/* tools row */
+#attach-btn{width:34px;height:34px;margin:0 4px 0 -4px;border-radius:50%;color:#8d877d;transition:color .15s,background .15s}
+#attach-btn:hover{color:#e4e0d9;background:rgba(255,255,255,.07)}
+#attach-btn svg{width:15px;height:17px}
+#model-btn{margin:0 0 0 auto}
+/* send is always visible: dim when empty, bright when there is something to send */
+#send-btn{opacity:.35;transform:none}
+#send-btn.visible{opacity:1;transform:scale(1)}
+/* footer line */
+.chat-input-area>div>p{font-size:11px;color:#8d877d}
+.chat-input-area>div>p span{color:#a8c4d4!important;text-decoration:underline;text-decoration-color:rgba(168,196,212,.4);text-underline-offset:2px}
+@media (max-width:640px){#inp-ghost{font-size:16px}}
 </style>
 </body>
 </html>
