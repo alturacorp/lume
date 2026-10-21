@@ -5603,7 +5603,7 @@ function callVision(imageFiles, userText, SYS){
 
   fetch(WORKER + '/vision', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: getDeviceHeaders(),
     body: JSON.stringify({
       system: visionPrompt,
       text: userText || 'What do you see?',
@@ -14025,7 +14025,7 @@ html.lr4-cmp-on #cmp-badge{display:block}
   }
   // one function owns the vision call, so moving to another model later means changing only this
   function visionNote(im){
-    return fetch(WORKER+'/vision',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    return fetch(WORKER+'/vision',{method:'POST',headers:getDeviceHeaders(),body:JSON.stringify({
       system:'You turn photos into notes. Reply with a short title of at most six words on the first line, then a blank line, then the text visible in the photo transcribed as written, or one plain sentence describing it if there is no text. No commentary.',
       text:'Make a note from this photo.',
       image:'data:'+im.mime+';base64,'+im.base64})
