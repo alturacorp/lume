@@ -2464,8 +2464,8 @@ body.light .lume-att-chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.07
   </div>
   <div class="flex items-center gap-3">
     <button onclick="openSettings()" style="font-family:'Figtree',sans-serif;font-size:10px;letter-spacing:.1em;color:#2e2c2a;border:none;background:none;cursor:pointer;transition:color .15s;text-transform:uppercase" onmouseover="this.style.color='#585450'" onmouseout="this.style.color='#2e2c2a'">Settings</button>
-    <button id="listen-btn" onclick="enterListenMode()" title="Listen mode">
-      <span class="btn-star">&#10022;</span><span class="btn-label">Listen</span>
+    <button id="listen-btn" onclick="window.lumeConversation&&window.lumeConversation()" title="Open Lume Live">
+      <span class="btn-star">&#10022;</span><span class="btn-label">Live</span>
     </button>
     <button onclick="handleNew()" style="font-family:'Figtree',sans-serif;font-size:16px;color:#2e2c2a;border:none;background:none;cursor:pointer;transition:color .15s;line-height:1" onmouseover="this.style.color='#585450'" onmouseout="this.style.color='#2e2c2a'" title="New conversation">&#10022;</button>
   </div>
@@ -5166,7 +5166,7 @@ function loadConvo(id){
   addDateDiv('Restored');
   msgs.forEach(function(m,i){
     if(m.role==='user'){ addUserMsg(m.content); lumeDB.showAttachments(c.att,i); }
-    else if(m.role==='assistant') addLumeMsgInstant(m.content);
+    else if(m.role==='assistant') { if(m.image && /^data:image\/(?:jpeg|png|webp);base64,/.test(m.image)) lumeRenderGeneratedImage(m.content.replace(/^Generated image: /,''),m.image); else addLumeMsgInstant(m.content); }
   });
   document.getElementById('current-convo-label').textContent = c.label.slice(0,22)+(c.label.length>22?'…':'');
   renderSavedConvos();
@@ -6901,7 +6901,7 @@ function isImageRequest(txt){
   var t = txt.toLowerCase().trim();
   var triggers = [
     'make an image','generate an image','generate a picture','generate a photo',
-    'show me','draw something','draw a','make a picture','make a photo',
+    'draw something','draw a','make a picture','make a photo',
     'create an image','create a picture','make me an image','make me a picture',
     'visualise','visualize','what does that look like','paint something',
     'generate me','create me a','make me a','draw me a','show me a',
@@ -7012,22 +7012,24 @@ function fetchImage(prompt, onSuccess, onError){
   _imgBlockedMsg = null;
   fetch(IMAGE_ENDPOINT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getDeviceHeaders(),
     body: JSON.stringify({ inputs: prompt })
   })
   .then(function(r){
     if(r.status === 422){
-      _imgBlockedMsg = 'This request may go against the Lume Constitution, so I can\u2019t create that image.';
+      _imgBlockedMsg = 'This image request could not be fulfilled.';
       throw new Error('blocked');
     }
-    if(!r.ok) throw new Error('image-error-'+r.status);
+    if(!r.ok) return r.json().catch(function(){return {};}).then(function(d){
+      throw new Error(d.error || 'image-error-'+r.status);
+    });
+    var ct = r.headers.get('content-type') || '';
+    if(!ct.startsWith('image/')) throw new Error('Expected image, received '+ct);
     return r.blob();
   })
   .then(lumeWatermark)
-  .then(function(blob){
-    onSuccess(URL.createObjectURL(blob));
-  })
-  .catch(function(){ onError(); });
+  .then(function(blob){ onSuccess(blob); })
+  .catch(function(e){ onError(e); });
 }
 
 function generateMusic(desc, playerId){
@@ -7133,68 +7135,52 @@ function handleImageRequest(txt){
   });
 }
 
+function lumeRenderGeneratedImage(caption, dataUrl){
+  var ci=document.getElementById('chat-inner');
+  var d=document.createElement('div'); d.className='mb-9';
+  var wrap=document.createElement('div'); wrap.className='flex items-start gap-4';
+  var star=document.createElement('span'); star.className='lume-star msg-star';
+  star.style.cssText='font-size:17px;margin-top:4px;flex-shrink:0'; star.textContent='✦';
+  var col=document.createElement('div'); col.className='flex-1 min-w-0';
+  var heading=document.createElement('div'); heading.className='text-[11px] font-medium text-t1 mb-2'; heading.textContent='Lume';
+  var frame=document.createElement('div'); frame.className='lume-image';
+  var img=document.createElement('img'); img.alt=caption || 'Lume generated image';
+  img.onload=function(){img.classList.add('loaded');var chat=document.getElementById('chat');if(chat)chat.scrollTop=chat.scrollHeight;};
+  img.src=dataUrl;
+  var note=document.createElement('div');note.className='img-caption';note.textContent=caption || 'Generated image';
+  frame.appendChild(img);frame.appendChild(note);col.appendChild(heading);col.appendChild(frame);
+  wrap.appendChild(star);wrap.appendChild(col);d.appendChild(wrap);ci.appendChild(d);
+  return d;
+}
+
 function _doImageRequest(txt, hint){
-  var inp = document.getElementById('inp');
+  var inp=document.getElementById('inp');
   if(inp){inp.value='';inp.style.height='';document.getElementById('send-btn').classList.remove('visible');}
   document.querySelectorAll('.suggs').forEach(function(s){s.remove();});
-  pulseStar(); playSend();
-  addUserMsg(txt); msgs.push({role:'user', content:txt});
-  busy = true; setStarActive(true); showTyping(true);
-
-  var hintLine = hint ? '\nThe user wants something that feels: ' + hint + '. Let this shape both the visual prompt and the caption.' : '';
-  var descSYS = [
-    'You are Lume. The person has asked you to make an image.',
-    'Write two things, separated by a newline:',
-    'Line 1: A visual prompt for an image generator. Descriptive, specific, atmospheric. 10-20 words. No people unless asked.',
-    'Line 2: One short caption line in your voice — what you were going for. 8 words or fewer.',
-    'Nothing else. Just those two lines.',
-    hintLine,
-  ].join('\n');
-
-  fetchWorker(
-    {messages:[{role:'system',content:descSYS}].concat(msgs.slice(-6))},
-    function(reply){
-      showTyping(false); playReceive();
-      var lines = reply.trim().split('\n').filter(Boolean);
-      var prompt = lines[0] || 'dark minimal abstract atmospheric';
-      var caption = lines[1] || 'something';
-      if(hint) prompt = prompt + ', ' + hint;
-
-      var ci = document.getElementById('chat-inner');
-      var chat = document.getElementById('chat');
-      var imgId = 'img-' + Date.now();
-      var d = document.createElement('div'); d.className = 'mb-9';
-      d.innerHTML = '<div class="flex items-start gap-4">'
-        + '<span class="lume-star msg-star" style="font-size:17px;margin-top:4px;flex-shrink:0">&#10022;</span>'
-        + '<div class="flex-1 min-w-0">'
-        + '<div class="flex items-baseline gap-2 mb-2 msg-meta"><span class="text-[11px] font-medium text-t1 tracking-[.02em]">Lume</span><span class="text-[10px] text-t3 font-light">'+nowFmt()+'</span></div>'
-        + '<div class="lume-msg-block">'
-        + '<div class="lume-image" id="'+imgId+'">'
-        + '<img src="" alt="" />'
-        + '<div class="img-caption">'+esc(caption)+'</div>'
-        + '</div>'
-        + '</div>'
-        + '</div></div>';
-      ci.appendChild(d);
-      msgs.push({role:'assistant', content:caption});
-      busy = false; setStarActive(false);
-
-      var imgEl = d.querySelector('img');
-      fetchImage(prompt, function(url){
-        imgEl.onload = function(){ imgEl.classList.add('loaded'); chat.scrollTop = chat.scrollHeight; };
-        imgEl.src = url;
-      }, function(){
-        d.querySelector('.lume-image').innerHTML = '<div class="img-caption" style="padding:16px">' + esc(_imgBlockedMsg || 'Could not generate image.') + '</div>';
-      });
-      chat.scrollTop = chat.scrollHeight;
-    },
-    function(){
-      showTyping(false);
-      addLumeMsg('Could not generate an image right now.', function(){
-        busy = false; setStarActive(false);
-      });
-    }
-  );
+  pulseStar();playSend();
+  addUserMsg(txt);msgs.push({role:'user',content:txt});
+  busy=true;setStarActive(true);showTyping(true);
+  // Generate directly. The conversational model cannot veto a supported image tool.
+  var prompt=txt+(hint ? '. Style: '+hint : '');
+  fetchImage(prompt,function(blob){
+    var reader=new FileReader();
+    reader.onload=function(){
+      var dataUrl=String(reader.result || '');
+      showTyping(false);playReceive();
+      lumeRenderGeneratedImage(txt,dataUrl);
+      msgs.push({role:'assistant',content:'Generated image: '+txt,image:dataUrl});
+      updateConvoLabel();saveCurrentConvo();
+      busy=false;setStarActive(false);
+    };
+    reader.onerror=function(){
+      showTyping(false);addLumeMsg('The image was generated but could not be displayed.',function(){busy=false;setStarActive(false);});
+    };
+    reader.readAsDataURL(blob);
+  },function(error){
+    showTyping(false);
+    var why=_imgBlockedMsg || 'Could not generate the image. '+String((error&&error.message)||'Try again later.');
+    addLumeMsg(why,function(){msgs.push({role:'assistant',content:why});saveCurrentConvo();busy=false;setStarActive(false);});
+  });
 }
 
 function showToast(msg){
@@ -8088,67 +8074,7 @@ function addThreadDivider(label){
 // hook into callLume to trigger thread divider
 // ── IMPROVED GENERATION FEEDBACK ──
 // Image: immediate dark rectangle with shimmer, then fade in
-var _origDoImageRequest = _doImageRequest;
-_doImageRequest = function(txt, hint){
-  var inp = document.getElementById('inp');
-  if(inp){inp.value='';inp.style.height='';document.getElementById('send-btn').classList.remove('visible');}
-  document.querySelectorAll('.suggs').forEach(function(s){s.remove();});
-  pulseStar(); playSend();
-  addUserMsg(txt); msgs.push({role:'user', content:txt});
-  busy = true; setStarActive(true);
-
-  var descSYS = 'Respond with exactly two lines. Line 1: image generation prompt, 10-20 words, specific and atmospheric, no people unless asked. Line 2: caption, 8 words max. Nothing else.';
-  var imgUserPrompt = 'Make an image' + (hint ? ' that feels '+hint : '') + '.';
-
-  // Immediately render placeholder card
-  var imgId = 'img-' + Date.now();
-  var ci = document.getElementById('chat-inner');
-  var chat = document.getElementById('chat');
-  var d = document.createElement('div'); d.className = 'mb-9';
-  d.innerHTML = '<div class="flex items-start gap-4">'
-    +'<span class="lume-star msg-star thinking" style="font-size:17px;margin-top:4px;flex-shrink:0">&#10022;</span>'
-    +'<div class="flex-1 min-w-0">'
-    +'<div class="flex items-baseline gap-2 mb-2 msg-meta"><span class="text-[11px] font-medium text-t1 tracking-[.02em]">Lume</span><span class="text-[10px] text-t3 font-light">'+nowFmt()+'</span></div>'
-    +'<div class="lume-msg-block">'
-    +'<div class="img-generating" id="'+imgId+'-gen"><div class="img-gen-label">generating image...</div></div>'
-    +'</div></div></div>';
-  ci.appendChild(d); chat.scrollTop=chat.scrollHeight;
-
-  fetchWorker({messages:[{role:'system',content:descSYS},{role:'user',content:imgUserPrompt}]},
-    function(reply){
-      playReceive();
-      var lines = reply.trim().split('\n').filter(Boolean);
-      var prompt = lines[0] || 'dark minimal abstract atmospheric';
-      var caption = lines[1] || 'something';
-      if(hint) prompt = prompt + ', ' + hint;
-      msgs.push({role:'assistant', content:caption});
-      busy = false; setStarActive(false);
-
-      // replace placeholder with real image
-      var genEl = document.getElementById(imgId+'-gen');
-      if(genEl){
-        var wrapper = genEl.parentNode;
-        wrapper.innerHTML = '<div class="lume-image" id="'+imgId+'"><img src="" alt="" /><div class="img-caption">'+esc(caption)+'</div></div>';
-        var imgEl = wrapper.querySelector('img');
-        fetchImage(prompt, function(url){
-          imgEl.onload = function(){ imgEl.classList.add('loaded'); chat.scrollTop=chat.scrollHeight; };
-          imgEl.src = url;
-        }, function(){
-          wrapper.innerHTML='<div class="img-caption" style="padding:16px;color:#585450">'+esc(_imgBlockedMsg||'Could not generate image.')+'</div>';
-        });
-        // update star
-        var star = d.querySelector('.lume-star');
-        if(star){ star.classList.remove('thinking','active'); }
-      }
-    },
-    function(){
-      busy=false; setStarActive(false);
-      var genEl2=document.getElementById(imgId+'-gen');
-      if(genEl2) genEl2.querySelector('.img-gen-label').textContent='Could not generate image.';
-    }
-  );
-};
-
+// Image requests use the direct generator above; no text-model prompt intermediary.
 // Music: immediate player card with progress pulse, then snap to controls
 var _origDoMusicRequest = _doMusicRequest;
 _doMusicRequest = function(txt, hint){
@@ -10781,6 +10707,44 @@ var _sendCount = 0;
   }
 })();
 </script>
+<style id="lume-tool-status-css">
+.lts-item{display:flex;gap:11px;align-items:flex-start;max-width:570px;margin:7px 0 15px 0;padding:5px 1px;color:#96918a;font-family:'Figtree',sans-serif;font-size:12px;line-height:1.5}
+.lts-star{font-size:17px;line-height:20px;flex-shrink:0;background:linear-gradient(100deg,#a78bfa,#38bdf8,#4ade80,#f472b6,#a78bfa);background-size:250% auto;-webkit-background-clip:text;background-clip:text;color:transparent}
+.lts-item[data-state="running"] .lts-star{animation:ltsShimmer 2s linear infinite}
+.lts-body{min-width:0;flex:1}.lts-title{color:#e8e6e2;font-size:11px;font-weight:500}.lts-action{display:flex;gap:8px;align-items:center;color:#a8c4d4;margin-top:2px}.lts-action span{min-width:0;overflow-wrap:anywhere}.lts-item[data-state="done"] .lts-action{color:#96918a}.lts-item[data-state="failed"] .lts-action{color:#d6a19c}.lts-item[data-state="cancelled"] .lts-action{color:#585450}
+.lts-dots{display:inline-flex;gap:3px;align-items:center}.lts-dots i{height:3px;width:3px;background:#a78bfa;border-radius:50%;animation:ltsPulse 1.1s ease-in-out infinite}.lts-dots i:nth-child(2){background:#38bdf8;animation-delay:.16s}.lts-dots i:nth-child(3){background:#f472b6;animation-delay:.32s}
+.lts-item:not([data-state="running"]) .lts-dots{display:none}
+@keyframes ltsPulse{0%,80%,100%{opacity:.3}40%{opacity:1}}@keyframes ltsShimmer{to{background-position:250% center}}
+@media(prefers-reduced-motion:reduce){.lts-item .lts-star,.lts-dots i{animation:none!important}}
+</style>
+<script id="lume-tool-status-js">
+(function(){
+  'use strict';
+  var active=new Map(),serial=0;
+  var labels={search:['Searching the web…','Search finished'],remember:['Preparing memory…','Memory request handled'],weather:['Checking the forecast…','Weather checked'],wiki:['Exploring Wikipedia…','Wikipedia checked'],define:['Looking up a definition…','Definition checked'],currency:['Fetching exchange rates…','Rates checked'],country:['Exploring country information…','Country checked'],book:['Finding book details…','Books checked'],sports:['Checking sports results…','Sports checked'],place:['Looking up a location…','Location checked'],read_url:['Reading a page…','Page checked'],calculate:['Calculating…','Calculation complete'],convert:['Converting units…','Conversion complete'],set_timer:['Setting your timer…','Timer set'],image:['Creating your image…','Image created'],music:['Creating music…','Music created'],comparison:['Comparing options…','Comparison ready'],flashcards:['Preparing flashcards…','Flashcards ready'],recipe:['Preparing a recipe…','Recipe ready'],draft:['Composing a draft…','Draft ready']};
+  function mount(){return document.getElementById('chat-inner')||document.getElementById('chat');}
+  function label(name,part){var x=labels[name];return x?x[part]:part?'Tool finished':'Using '+String(name||'tool').replace(/_/g,' ')+'…';}
+  function start(name){var id='lts-'+(++serial),host=mount();if(!host)return null;
+    var row=document.createElement('div');row.className='lts-item';row.dataset.state='running';row.dataset.toolId=id;row.setAttribute('role','status');
+    var star=document.createElement('span');star.className='lts-star';star.textContent='✦';star.setAttribute('aria-hidden','true');
+    var body=document.createElement('div');body.className='lts-body';
+    var title=document.createElement('div');title.className='lts-title';title.textContent='Lume · Using a tool';
+    var action=document.createElement('div');action.className='lts-action';var msg=document.createElement('span');msg.textContent=label(name,0);
+    var dots=document.createElement('div');dots.className='lts-dots';dots.setAttribute('aria-hidden','true');for(var j=0;j<3;j++)dots.appendChild(document.createElement('i'));
+    action.appendChild(msg);action.appendChild(dots);body.appendChild(title);body.appendChild(action);row.appendChild(star);row.appendChild(body);host.appendChild(row);
+    active.set(id,{node:row,msg:msg,title:title,name:name,at:Date.now()});
+    var chat=document.getElementById('chat');if(chat&&chat.scrollHeight-chat.scrollTop-chat.clientHeight<220)chat.scrollTop=chat.scrollHeight;
+    return id;
+  }
+  function finish(id,state){var o=active.get(id);if(!o)return;active.delete(id);o.node.dataset.state=state;
+    var ms=(Date.now()-o.at)/1000;var elapsed=ms>=1?' · '+ms.toFixed(1)+'s':'';
+    o.title.textContent='Lume · '+(state==='done'?'Tool completed':state==='failed'?'Tool unavailable':'Tool cancelled');
+    o.msg.textContent=(state==='done'?'✓ '+label(o.name,1):state==='failed'?'! '+o.name.replace(/_/g,' ')+' unavailable':'Cancelled')+elapsed;
+  }
+  function cancelAll(){Array.from(active.keys()).forEach(function(id){finish(id,'cancelled');});}
+  window.lumeToolStatus={start:start,complete:function(id){finish(id,'done');},fail:function(id){finish(id,'failed');},cancel:function(id){finish(id,'cancelled');},cancelAll:cancelAll};
+})();
+</script>
 <script id="lume-web-js">
 (function(){
   var L=window.lumeCards; if(!L||typeof callLume!=='function') return;
@@ -11644,7 +11608,16 @@ var _sendCount = 0;
       if(cs.length&&round<1){
         if(live){live.remove();live=null;}
         var asst={role:'assistant',content:'',tool_calls:cs.map(function(c,i){return {id:c.id||('call_'+i),type:'function',function:{name:c.name,arguments:c.args||'{}'}};})};
-        Promise.all(cs.map(function(c){var t0=Date.now();return runTool(c).then(function(x){if(T)T.tool(c,x,Date.now()-t0);return x;});})).then(function(rs){
+        Promise.all(cs.map(function(c){
+          var t0=Date.now(),status=window.lumeToolStatus;
+          var sid=status?status.start(c.name):null;
+          return Promise.resolve().then(function(){return runTool(c);}).then(function(x){
+            if(T)T.tool(c,x,Date.now()-t0);
+            var bad=/^(?:unknown tool|that did not work|search failed|search limit reached|no results found|.*(?:unavailable|could not be reached|could not be found|lookup could not|not configured))/i.test(String(x||''));
+            if(sid&&status)(bad?status.fail:status.complete)(sid);
+            return x;
+          },function(e){if(sid&&status)status.fail(sid);return 'That did not work.';});
+        })).then(function(rs){
           var m2=messages.slice();m2[0]={role:'system',content:messages[0].content+AFTER};m2.push(asst);
           cs.forEach(function(c,i){m2.push({role:'tool',tool_call_id:asst.tool_calls[i].id,content:String(rs[i]).slice(0,3000)});});
           go(m2,[],round+1,SYS,onReply,onError);
@@ -11672,6 +11645,7 @@ var _sendCount = 0;
     }
     fetch(WORKER+'/lume',{method:'POST',headers:headers,body:JSON.stringify({stream:true,reasoning_effort:window._lumeEffort||'medium',include_reasoning:window._lumeEffort==='high'||window._lumeEffort==='medium',tools:tools.length?tools:undefined,messages:messages})})
     .then(function(r){
+      if(typeof window.lumeModelStatus==='function')window.lumeModelStatus(r.headers,(function(){try{return localStorage.getItem('lume_model')||'auto';}catch(e){return 'auto';}})());
       if(T)T.meta(r.headers.get('x-lume-tier'),r.headers.get('x-lume-downgraded'));
       if(r.status===403||!r.body||!/event-stream/.test(r.headers.get('content-type')||'')){
         finished=true;
@@ -12822,13 +12796,21 @@ body.light .msg-action-btn{color:#6e6a64}
   function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
   var tts=null,engine=null,ctx=null,turn=0,hist=[],srcs=[],nextEnd=0,inflight=0,chain=Promise.resolve(),streamDone=true,ctl=null,loading=false,warmed=false,vp=null,wk=null,wid=0,wp={},tm=null;
   var TM=window.__lumeVoiceTimings=window.__lumeVoiceTimings||[];
-  var el=document.createElement('div');el.id='lcv';el.dataset.s='idle';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Conversation with Lume');
-  el.innerHTML='<div class="top"><span class="wm">Lume</span><span class="ct">Conversation</span><button class="cs" type="button" aria-label="Voice settings" aria-expanded="false" aria-controls="lcv-vs"><span class="ms" aria-hidden="true">tune</span></button><button class="cl" type="button" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button></div>'
+  var el=document.createElement('div');el.id='lcv';el.dataset.s='idle';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Lume Live');
+  el.innerHTML='<div class="top"><span class="wm">Lume</span><span class="ct">Live</span><span class="lcv-route" aria-live="polite" title="Actual routing information">Ready</span><button class="cs" type="button" aria-label="Voice settings" aria-expanded="false" aria-controls="lcv-vs"><span class="ms" aria-hidden="true">tune</span></button><button class="cl" type="button" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button></div>'
    +'<div class="gate"></div>'
    +'<div class="live"><div class="stage"><span class="star" role="button" tabindex="0" aria-label="Lume"><i class="o1"></i><i class="o2"></i><i class="o3"></i><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3.2l1.9 5.1 5.1 1.9-5.1 1.9L10 17.2l-1.9-5.1L3 10.2l5.1-1.9z"/><path d="M18.4 2.6l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/><path d="M18.4 15.6l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/></svg></span><div class="stat" role="status" aria-live="polite">ready</div><div class="sub" aria-hidden="true"></div></div><div class="tx" role="log" aria-live="off" aria-label="Conversation transcript"></div><div class="lume-sr al" role="status" aria-live="polite"></div>'
    +'<div class="in"><textarea rows="1" placeholder="Or type to Lume\u2026" aria-label="Message"></textarea><button class="mic" type="button" aria-label="Hands-free voice" aria-pressed="false"><span class="ms" aria-hidden="true">mic</span></button><button class="snd">Send</button></div></div>';
   document.body.appendChild(el);
   function $(s){return el.querySelector(s);}
+  function routeStatus(headers,requested){
+    if(!headers)return;var tier=headers.get('x-lume-tier')||'',provider=headers.get('x-lume-provider')||'',model=headers.get('x-lume-model')||'',downgrade=headers.get('x-lume-downgraded')||'';
+    var names={fast:'Spark',balanced:'Lens',deep:'Aperture',auto:'Lumen',code:'Diode'};var name=names[tier]||'';
+    var e=$('.lcv-route');if(!e)return;
+    if(!name){e.textContent='Model unavailable';e.title='No routing information was supplied by the server';return;}
+    e.textContent=name;e.title='Answered using '+name+(model?' ('+model+')':'')+(provider?' via '+provider:'')+(downgrade?'; allowance fallback '+downgrade:'')+(requested==='auto'?'; selected automatically':'');
+    if(typeof window.lumeModelStatus==='function')window.lumeModelStatus(headers,requested);
+  }
   function setS(s){
     el.dataset.s=s;var st=s==='idle'?'ready':s,se=$('.stat');st=({ready:hf?'Tap to talk':'Ready',thinking:'Thinking',speaking:'Speaking'})[st]||st;if(se.textContent!==st)se.textContent=st;   /* only touch the live region when the state really changes */
     var b=$('.snd');b.textContent=s==='idle'?'Send':'Stop';b.classList.toggle('stop',s!=='idle');
@@ -13116,8 +13098,8 @@ body.light .msg-action-btn{color:#6e6a64}
     var l=document.createElement('div');l.className='l lora-prose';$('.tx').appendChild(l);scroll();
     $('textarea').value='';setS('thinking');streamDone=false;fillerArm(my);if(hf)startVad();
     var acc='',buf='',model=ls('lume_model','auto');if(['auto','balanced','fast','deep'].indexOf(model)<0)model='auto';
-    if(model==='auto')model='fast';
-    var eff=model==='deep'?((window.lumePersonaEffort&&window.lumePersonaEffort())||'low'):'low';
+    // Let the server choose the actual model tier for Auto, rather than silently forcing Spark.
+    var eff=model==='deep'?((window.lumePersonaEffort&&window.lumePersonaEffort())||'high'):(model==='fast'?'low':'medium');
     var sys=(typeof window.lumeSystemPrompt==='function'?window.lumeSystemPrompt():'')+'\n\nThis is a spoken voice conversation. Answer the way a person talks: one to three short sentences, plain words, no lists, no markdown, no emoji unless asked.'+VM();
     var hd=typeof getDeviceHeaders==='function'?getDeviceHeaders():{'Content-Type':'application/json'};
     ctl=typeof AbortController!=='undefined'?new AbortController():null;
@@ -13136,6 +13118,7 @@ body.light .msg-action-btn{color:#6e6a64}
     fetch(WK+'/lume',{method:'POST',headers:hd,signal:ctl?ctl.signal:undefined,body:JSON.stringify({stream:true,model:model,persona:'assistant',uid:ls('lume_uid',''),reasoning_effort:eff,include_reasoning:false,max_tokens:300,messages:[{role:'system',content:sys}].concat(hist.slice(-8))})})
     .then(function(r){
       if(my!==turn)return;
+      routeStatus(r.headers,model);
       if(!r.ok)return fail(r.status===429?'You\u2019ve used up today\u2019s allowance for this model.':'Lume couldn\u2019t be reached (error '+r.status+').','I couldn\u2019t get a reply. Please try again.');
       if(!r.body||!/event-stream/.test(r.headers.get('content-type')||'')){return r.json().then(function(j){if(tm&&!tm.tok)tm.tok=performance.now();var m=j&&j.choices&&j.choices[0]&&j.choices[0].message;acc=(m&&m.content)||'';buf=acc;l.innerHTML=renderMarkdown(acc);fin();});}
       var rd=r.body.getReader(),dec=new TextDecoder(),lb='';
@@ -13154,11 +13137,11 @@ body.light .msg-action-btn{color:#6e6a64}
   $('.cl').onclick=close;
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('show')){if(!vs.hidden){vsOpen(false);return;}close();}});
   $('.star').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('.star').onclick();}});
-  window.lumeConversation=open;
+  window.lumeConversation=open;window.lumeLive=open;
   window.lumeVoiceId=V;window.lumeVoiceName=function(){return VN();};
   try{var cn=navigator.connection;if(ls('lume_voice_ok','')==='1'&&!(cn&&cn.saveData))setTimeout(function(){if(!tts&&!window.__kokoroPipeline)loadVoice().then(warm,function(){});},6000);}catch(e){}
   var anchor=document.querySelector('#sidebar .sb-nav-item.sb-secondary');
-  if(anchor){var d=document.createElement('div');d.className='sb-nav-item sb-secondary';d.textContent='Conversation';d.onclick=open;anchor.parentNode.insertBefore(d,anchor);}
+  if(anchor){var d=document.createElement('div');d.className='sb-nav-item sb-secondary';d.textContent='Lume Live';d.onclick=open;anchor.parentNode.insertBefore(d,anchor);}
 })();
 </script>
 <style id="lume-conv-v2">
@@ -16192,5 +16175,38 @@ body.light #inp-ghost{color:#6b655c}
 .chat-input-area>div>p span{color:#a8c4d4!important;text-decoration:underline;text-decoration-color:rgba(168,196,212,.4);text-underline-offset:2px}
 @media (max-width:640px){#inp-ghost{font-size:16px}}
 </style>
+
+<style id="lume-live-phase1">
+#listen-overlay{display:none!important}
+#listen-btn{border:1px solid rgba(167,139,250,.27)!important;background:rgba(167,139,250,.09)!important}
+#listen-btn .btn-label{color:#d5c2fa!important}
+#lcv .lcv-route{font:500 10px Figtree,sans-serif;letter-spacing:.04em;color:#b6a8d6;padding:5px 9px;border-radius:999px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.18);max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lcv .ct{letter-spacing:.18em}
+#lcv .tx{scrollbar-width:thin}
+#lume-route-tag{display:none;align-items:center;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:4px 8px;border-radius:99px;border:1px solid rgba(167,139,250,.16);background:rgba(167,139,250,.05);color:#a99abd;font:500 10px Figtree,sans-serif;cursor:help}
+#lume-route-tag.on{display:inline-flex}
+@media(max-width:600px){#lcv .lcv-route{max-width:90px;font-size:9px}#lcv .top{gap:8px}#lume-route-tag{max-width:84px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){#lcv .star *,#lcv .star{animation:none!important;transition:none!important}}
+</style>
+<script id="lume-live-phase1-js">
+(function(){
+  function labelFromHeaders(h,requested){
+    if(!h)return;var tier=h.get('x-lume-tier'),provider=h.get('x-lume-provider'),model=h.get('x-lume-model'),down=h.get('x-lume-downgraded');
+    var names={fast:'Spark',balanced:'Lens',deep:'Aperture',auto:'Lumen',code:'Diode'};
+    var label=names[tier];if(!label)return;
+    var tag=document.getElementById('lume-route-tag');if(!tag)return;
+    tag.textContent='✦ '+label;tag.classList.add('on');
+    tag.title=label+' answered'+(model?' using '+model:'')+(provider?' through '+provider:'')+(requested==='auto'?' · Automatically selected':'')+(down?' · Fallback: '+down:'');
+  }
+  window.lumeModelStatus=labelFromHeaders;
+  var top=document.getElementById('listen-btn');
+  if(top){var tag=document.createElement('span');tag.id='lume-route-tag';tag.setAttribute('aria-label','Model used for most recent reply');top.parentNode.insertBefore(tag,top);}
+  // Disable only the old Listen launcher; the new Live launcher uses the existing Conversation voice engine.
+  window.enterListenMode=function(){if(typeof window.lumeLive==='function')window.lumeLive();};
+  // Stop an old Listen session before opening Live if it was already running.
+  var orig=null;function wrap(){if(typeof window.lumeLive!=='function'||window.lumeLive===orig)return;orig=window.lumeLive;window.lumeLive=function(){try{if(typeof window.exitListenMode==='function')window.exitListenMode();}catch(e){}return orig.apply(this,arguments);};window.lumeConversation=window.lumeLive;}
+  wrap();
+})();
+</script>
 </body>
 </html>
