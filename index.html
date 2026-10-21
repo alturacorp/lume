@@ -3721,7 +3721,7 @@ function init(){
   updateSearchConnectionBadge();
   applyPrivPrefToggles();
   checkAccountStatus();
-  setInterval(checkAccountStatus, 10000);
+  scheduleStatusPoll();
 
   // Poll immediately when tab becomes visible
   document.addEventListener('visibilitychange', function(){
@@ -4758,6 +4758,15 @@ function confirmReport(){
 }
 // ─────────────────────────────────────────────────────────────
 
+// Status poll: every 30s while the tab is visible, every 10s during a live support session, and not at all while the tab is hidden
+// (the visibilitychange handler in init() polls straight away when the tab comes back).
+var _statusFast = false;
+function scheduleStatusPoll(){
+  setTimeout(function(){
+    if(!document.hidden) checkAccountStatus();
+    scheduleStatusPoll();
+  }, _statusFast ? 10000 : 30000);
+}
 function checkAccountStatus(){
   if(!_deviceToken) return;
   fetch(WORKER + '/auth/status', {
@@ -4774,6 +4783,7 @@ function checkAccountStatus(){
     if(d.adminCard)            handleAdminCard(d.adminCard);
     if(d.forceReload)          handleForceReload(d.forceReload);
     if(typeof d.lumeDisabled !== 'undefined') handleLumeDisabled(d.lumeDisabled);
+    _statusFast = !!(d.support && d.support.active);
     if(d.support && d.support.active) handleSupportConnect(d.support);
     else if(_supportActive)  { handleSupportDisconnect({ agentName: _supportAgentName }); _supportActive = false; }
     if(d.supportDisconnected)  handleSupportDisconnect(d.supportDisconnected);
