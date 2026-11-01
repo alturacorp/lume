@@ -1,6 +1,6 @@
 {
-  "name": "Lume",
-  "short_name": "Lume",
+  "name": "Cleo",
+  "short_name": "Cleo",
   "description": "An AI assistant for questions, writing, research and code",
   "start_url": "./",
   "scope": "./",
